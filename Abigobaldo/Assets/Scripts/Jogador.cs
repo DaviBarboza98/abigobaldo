@@ -1,29 +1,30 @@
-using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Jogador : MonoBehaviour
 {
-    public float speed = 8f;
-    public float runSpeed = 11f;
-    public float rotationSpeed = 720f; // velocidade de rotação (graus por segundo)
+    [Header("Movimento")]
+    [SerializeField] private float movSpeed = 8f;
+    [SerializeField] private float runSpeed = 11f;
+    [SerializeField] private float rotationSpeed = 720f;
 
-    public GroundCheck gc;
+    [Header("Chão")]
+    [SerializeField] private GroundCheck groundCheck;
     private bool isGrounded;
 
     private CharacterController controller;
 
+    [Header("Interação (Cutting Bar)")]
     public float tempoParaCompletar = 2f;
     private float progresso = 0f;
 
-    // STAMINA
+    [Header("Stamina")]
     public float maxStamina = 100f;
     public float stamina;
     public float staminaDrain = 20f;
     public float staminaRegen = 10f;
 
+    [Header("UI")]
     public Slider staminaBar;
 
     void Start()
@@ -34,27 +35,35 @@ public class Jogador : MonoBehaviour
 
     void Update()
     {
-        isGrounded = gc.isGrounded;
+        CheckGround();
+        HandleMovement();
+        HandleStamina();
+        HandleUI();
+        HandleInteraction();
+    }
 
+    // =========================
+    // CHÃO
+    // =========================
+    void CheckGround()
+    {
+        isGrounded = groundCheck.isGrounded;
+    }
+
+    // =========================
+    // MOVIMENTO + ROTAÇÃO
+    // =========================
+    void HandleMovement()
+    {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
         Vector3 inputDir = new Vector3(x, 0f, z).normalized;
 
-        // CORRIDA
         bool isRunning = Input.GetKey(KeyCode.LeftShift) && stamina > 0;
-        float currentSpeed = isRunning ? runSpeed : speed;
+        float currentSpeed = isRunning ? runSpeed : movSpeed;
 
-        if (isRunning && inputDir != Vector3.zero)
-            stamina -= staminaDrain * Time.deltaTime;
-        else
-            stamina += staminaRegen * Time.deltaTime;
-
-        stamina = Mathf.Clamp(stamina, 0, maxStamina);
-
-        // =========================
-        // ROTAÇÃO SUAVE (CORRIGIDO)
-        // =========================
+        // Rotação suave
         if (inputDir != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(inputDir);
@@ -65,35 +74,59 @@ public class Jogador : MonoBehaviour
             );
         }
 
-        // =========================
-        // MOVIMENTO BASEADO NA DIREÇÃO
-        // =========================
+        // Movimento
         Vector3 move = inputDir * currentSpeed;
-
         controller.Move(move * Time.deltaTime);
 
-        // GRUDAR NO CHÃO (sem bug de pulo)
         if (!controller.isGrounded)
         {
             controller.Move(Vector3.down * 20f * Time.deltaTime);
         }
+    }
 
-        // UI
+    // =========================
+    // STAMINA
+    // =========================
+    void HandleStamina()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+
+        Vector3 inputDir = new Vector3(x, 0f, z).normalized;
+        bool isRunning = Input.GetKey(KeyCode.LeftShift) && stamina > 0;
+
+        if (isRunning && inputDir != Vector3.zero)
+            stamina -= staminaDrain * Time.deltaTime;
+        else
+            stamina += staminaRegen * Time.deltaTime;
+
+        stamina = Mathf.Clamp(stamina, 0, maxStamina);
+    }
+
+    // =========================
+    // UI
+    // =========================
+    void HandleUI()
+    {
         staminaBar.value = stamina;
+    }
 
-        // CUTTING BAR (ARRUMADO)
-        if (Input.GetKey(KeyCode.E)){
+    // =========================
+    // INTERAÇÃO (CUTTING BAR)
+    // =========================
+    void HandleInteraction()
+    {
+        if (Input.GetKey(KeyCode.E))
             progresso += Time.deltaTime;
-        }
-        else{
+        else
             progresso -= Time.deltaTime;
-        }
 
         progresso = Mathf.Clamp(progresso, 0f, tempoParaCompletar);
 
         if (progresso >= tempoParaCompletar)
         {
-            // AÇÃO
+            // AÇÃO AQUI
+            Debug.Log("Ação completa!");
             progresso = 0f;
         }
     }
