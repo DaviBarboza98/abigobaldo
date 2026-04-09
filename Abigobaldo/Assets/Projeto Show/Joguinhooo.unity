@@ -183,7 +183,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   runSpeed: 10
-  gravidade: -9.81
   gc: {fileID: 1793554973}
   tempoParaCompletar: 2
   maxStamina: 100
@@ -191,6 +190,7 @@ MonoBehaviour:
   staminaDrain: 40
   staminaRegen: 10
   staminaBar: {fileID: 1157033186}
+  encostandoKitchenTable: 0
 --- !u!23 &152070405
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1821,7 +1821,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9eca3a816a32c2e438f9774ddf100fcc, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.027370453
+      value: -5.65
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9eca3a816a32c2e438f9774ddf100fcc, type: 3}
       propertyPath: m_LocalRotation.w
