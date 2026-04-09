@@ -183,14 +183,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   runSpeed: 10
+  rotationSpeed: 720
   gc: {fileID: 1793554973}
-  tempoParaCompletar: 2
+  tempoParaCompletar: 5
   maxStamina: 100
   stamina: 0
   staminaDrain: 40
   staminaRegen: 10
   staminaBar: {fileID: 1157033186}
-  encostandoKitchenTable: 0
 --- !u!23 &152070405
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -250,7 +250,7 @@ Transform:
   m_GameObject: {fileID: 152070401}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 38.568, y: 5.296, z: 42.91}
+  m_LocalPosition: {x: 36.48, y: 5.296, z: 39.39}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1813,15 +1813,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9eca3a816a32c2e438f9774ddf100fcc, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.031848907
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9eca3a816a32c2e438f9774ddf100fcc, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.96279955
+      value: -1.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9eca3a816a32c2e438f9774ddf100fcc, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.65
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9eca3a816a32c2e438f9774ddf100fcc, type: 3}
       propertyPath: m_LocalRotation.w

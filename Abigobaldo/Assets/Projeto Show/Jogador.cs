@@ -26,8 +26,6 @@ public class Jogador : MonoBehaviour
 
     public Slider staminaBar;
 
-    public bool encostandoKitchenTable;
-
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -84,18 +82,11 @@ public class Jogador : MonoBehaviour
         staminaBar.value = stamina;
 
         // CUTTING BAR (ARRUMADO)
-        bool podeInteragir = encostandoKitchenTable;
-
-        if (podeInteragir)
-        {
-            if (Input.GetKey(KeyCode.E))
-                progresso += Time.deltaTime;
-            else
-                progresso -= Time.deltaTime;
+        if (Input.GetKey(KeyCode.E)){
+            progresso += Time.deltaTime;
         }
-        else
-        {
-            progresso -= Time.deltaTime * 2f;
+        else{
+            progresso -= Time.deltaTime;
         }
 
         progresso = Mathf.Clamp(progresso, 0f, tempoParaCompletar);
