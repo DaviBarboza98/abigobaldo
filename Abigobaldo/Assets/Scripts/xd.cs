@@ -11,6 +11,7 @@ public class xd : MonoBehaviour
 
     private float currentTime = 0f;
     public bool isInside = false;
+    private float alphaAlvo = 0f;
 
     void Update()
     {
@@ -28,6 +29,13 @@ public class xd : MonoBehaviour
         {
             ResetSlider();
         }
+
+        // Fade suave
+        canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, alphaAlvo, Time.deltaTime * velocidadeFade);
+
+        // Desativa interação quando invisível
+        canvasGroup.interactable = canvasGroup.alpha > 0.1f;
+        canvasGroup.blocksRaycasts = canvasGroup.alpha > 0.1f;
     }
 
     void Activate()
