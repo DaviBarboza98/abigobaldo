@@ -2673,6 +2673,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8d16f3636aff1140b0eabb9c121164e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  teclaMostrar: 101
 --- !u!1 &2098102457
 GameObject:
   m_ObjectHideFlags: 0
