@@ -11,8 +11,6 @@ public class xd : MonoBehaviour
 
     private float currentTime = 0f;
     public bool isInside = false;
-    private float alphaAlvo = 0f;
-
     void Update()
     {
         if (isInside && Input.GetKey(KeyCode.E))
