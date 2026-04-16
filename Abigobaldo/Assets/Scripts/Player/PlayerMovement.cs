@@ -6,8 +6,14 @@ public class PlayerMovement : MonoBehaviour
     [Header("==== CONFIGURAÇÕES ====")]
     [Range(1f, 20f)] public float walkSpeed = 7.5f;
     [Range(5f, 20f)] public float dashSpeed = 15f;
+    [Range(5f, 20f)] public float dashDuration = 0.2f;
+    [Range(5f, 20f)] public float dashCooldown = 0.5f;
     [Range(1f, 360f)] public float rotationSpeed = 7.5f;
     public float gravity = -1f;
+    private bool isDashing;
+    private float dashTime;
+    private float dashCooldownTimer;
+    private Vector3 dashDirection;
 
     private CharacterController controller;
     private Vector3 velocity;
@@ -21,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         Inputs();
+        Dash();
         Movement();
         Rotation();
     }
@@ -36,11 +43,44 @@ public class PlayerMovement : MonoBehaviour
             inputDirection.Normalize();
     }
 
+        void Dash()
+    {
+        dashCooldownTimer -= Time.deltaTime;
+
+        // Apertou Shift (uma vez)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer <= 0f)
+        {
+            isDashing = true;
+            dashTime = dashDuration;
+            dashCooldownTimer = dashCooldown;
+
+            // Dash vai pra frente do player
+            dashDirection = transform.forward;
+        }
+
+        if (isDashing)
+        {
+            dashTime -= Time.deltaTime;
+
+            if (dashTime <= 0f)
+            {
+                isDashing = false;
+            }
+        }
+    }
+
     void Movement()
     {
-        float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? dashSpeed : walkSpeed;
+        Vector3 move;
 
-        Vector3 move = inputDirection * currentSpeed;
+        if (isDashing)
+        {
+            move = dashDirection * dashSpeed;
+        }
+        else
+        {
+            move = inputDirection * walkSpeed;
+        }
 
         velocity.y = gravity;
 
