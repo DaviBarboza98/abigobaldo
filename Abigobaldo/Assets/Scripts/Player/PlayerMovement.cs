@@ -8,27 +8,35 @@ public class PlayerMovement : MonoBehaviour
     [Range(1f, 360f)] public float rotationSpeed = 10f;
 
     [Header("==== DASH ====")]
-    [Range(5f, 30f)] public float dashSpeed = 18f;
-    [Range(0.1f, 1f)] public float dashDuration = 0.25f;
-    [Range(0f, 1f)] public float dashControl = 0.5f;
-    [Range(0.1f, 2f)] public float dashCooldown = 0.6f;
+    [Range(5f, 30f)]  public float dashSpeed     = 18f;
+    [Range(0.1f, 1f)] public float dashDuration  = 0.25f;
+    [Range(0.1f, 2f)] public float dashCooldown  = 0.6f;
+
+    [Tooltip("Quão rápido o jogador RETOMA controle após o pico do dash (menor = mais tempo preso)")]
+    [Range(1f, 20f)]  public float dashReturnControl = 8f;
+
+    [Tooltip("Quanto o input atual desvia a trajetória DO dash (0 = nenhum, 1 = total)")]
+    [Range(0f, 1f)]   public float dashSteering = 0.35f;
 
     [Header("==== FÍSICA FAKE ====")]
-    public float gravity = -2f;
-    public float groundStickForce = -5f; // ajuda a não "flutuar"
+    public float gravity         = -20f;
+    public float groundStickForce = -5f;
 
-    // DASH
-    private bool isDashing;
-    private float dashTimer;
-    private float dashCooldownTimer;
-    private Vector3 dashDirection;
-
-    // COMPONENTES
+    // ── Componentes ──────────────────────────────────────────────────
     private CharacterController controller;
 
-    // MOVIMENTO
-    private Vector3 inputDirection;
-    private Vector3 velocity;
+    // ── Movimento ────────────────────────────────────────────────────
+    private Vector3 inputDirection;   // direção bruta do jogador
+    private Vector3 velocity;         // componente vertical (gravidade)
+
+    // ── Dash ─────────────────────────────────────────────────────────
+    private bool    isDashing;
+    private float   dashTimer;
+    private float   dashCooldownTimer;
+    private Vector3 dashDirection;    // direção travada no momento do dash
+    private float   currentDashSpeed; // velocidade interpolada durante o dash
+
+    // ─────────────────────────────────────────────────────────────────
 
     void Awake()
     {
@@ -37,72 +45,95 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        Inputs();
-        HandleDash();
+        ReadInput();
+        TryActivateDash();
         HandleMovement();
         HandleRotation();
     }
 
-    void Inputs()
-    {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+    // ─── INPUT ───────────────────────────────────────────────────────
 
-        inputDirection = new Vector3(horizontal, 0f, vertical);
+    void ReadInput()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+
+        inputDirection = new Vector3(h, 0f, v);
 
         if (inputDirection.magnitude > 1f)
             inputDirection.Normalize();
     }
 
-    void HandleDash()
+    // ─── DASH ────────────────────────────────────────────────────────
+
+    void TryActivateDash()
     {
         dashCooldownTimer -= Time.deltaTime;
 
-        // Ativar dash
-        if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer <= 0f && inputDirection.sqrMagnitude > 0.01f)
-        {
-            isDashing = true;
-            dashTimer = dashDuration;
-            dashCooldownTimer = dashCooldown;
+        if (!Input.GetKeyDown(KeyCode.LeftShift)) return;
+        if (dashCooldownTimer > 0f)               return;
+        if (isDashing)                            return;
 
-            // 🔥 IMPORTANTE: trava direção do dash no INPUT, não no forward
-            dashDirection = inputDirection.normalized;
-        }
+        isDashing         = true;
+        dashTimer         = dashDuration;
+        dashCooldownTimer = dashCooldown;
+        currentDashSpeed  = dashSpeed;
+
+        // ✅ Usa o input atual; se parado, usa o forward do player
+        dashDirection = inputDirection.sqrMagnitude > 0.01f
+            ? inputDirection.normalized
+            : transform.forward;
+    }
+
+    // ─── MOVIMENTO ───────────────────────────────────────────────────
+
+    void HandleMovement()
+    {
+        Vector3 horizontalMove;
 
         if (isDashing)
         {
             dashTimer -= Time.deltaTime;
 
+            // ── Curva suave de desaceleração usando Lerp ──
+            // No início do dash: currentDashSpeed ≈ dashSpeed
+            // No fim do dash:    currentDashSpeed ≈ walkSpeed
+            currentDashSpeed = Mathf.Lerp(
+                currentDashSpeed,
+                walkSpeed,
+                dashReturnControl * Time.deltaTime
+            );
+
+            // ── Steering: permite desviar levemente durante o dash ──
+            Vector3 steeredDirection = dashDirection;
+
+            if (inputDirection.sqrMagnitude > 0.01f)
+            {
+                steeredDirection = Vector3.Lerp(
+                    dashDirection,
+                    inputDirection.normalized,
+                    dashSteering * Time.deltaTime * 10f   // *10 pra ter "peso"
+                );
+
+                // Atualiza dashDirection gradualmente (steering persistente)
+                dashDirection = steeredDirection.normalized;
+            }
+
+            horizontalMove = steeredDirection * currentDashSpeed;
+
+            // ── Encerra o dash quando o timer zera ──
             if (dashTimer <= 0f)
             {
                 isDashing = false;
             }
         }
-    }
-
-    void HandleMovement()
-    {
-        Vector3 move;
-
-        if (isDashing)
-        {
-            // 🔥 mistura direção original + input atual
-            Vector3 controlledDirection = 
-                (dashDirection * (1f - dashControl)) + 
-                (inputDirection * dashControl);
-
-            if (controlledDirection.sqrMagnitude > 0.01f)
-                controlledDirection.Normalize();
-
-            move = controlledDirection * dashSpeed;
-        }
         else
         {
-            move = inputDirection * walkSpeed;
+            horizontalMove = inputDirection * walkSpeed;
         }
 
-        // Gravidade arcade
-        if (controller.isGrounded && velocity.y < 0)
+        // ── Gravidade arcade ──────────────────────────────────────────
+        if (controller.isGrounded && velocity.y < 0f)
         {
             velocity.y = groundStickForce;
         }
@@ -111,36 +142,30 @@ public class PlayerMovement : MonoBehaviour
             velocity.y += gravity * Time.deltaTime;
         }
 
-        Vector3 finalMove = move + velocity;
-
+        // ── Move ──────────────────────────────────────────────────────
+        Vector3 finalMove = horizontalMove + Vector3.up * velocity.y;
         controller.Move(finalMove * Time.deltaTime);
     }
 
+    // ─── ROTAÇÃO ─────────────────────────────────────────────────────
+
     void HandleRotation()
     {
-        Vector3 lookDirection;
+        // Durante o dash: gira suavemente pra direção do DASH
+        // Fora do dash:   gira pra direção do input
+        Vector3 lookDirection = isDashing ? dashDirection : inputDirection;
 
-        if (isDashing)
-        {
-            // usa o input pra virar DURANTE o dash
-            lookDirection = inputDirection.sqrMagnitude > 0.01f 
-                ? inputDirection 
-                : dashDirection;
-        }
-        else
-        {
-            lookDirection = inputDirection;
-        }
+        if (lookDirection.sqrMagnitude < 0.01f) return;
 
-        if (lookDirection.sqrMagnitude > 0.01f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
 
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                rotationSpeed * Time.deltaTime
-            );
-        }
+        // Rotação mais rápida durante o dash pra parecer responsiva
+        float currentRotSpeed = isDashing ? rotationSpeed * 2f : rotationSpeed;
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            currentRotSpeed * Time.deltaTime
+        );
     }
 }
