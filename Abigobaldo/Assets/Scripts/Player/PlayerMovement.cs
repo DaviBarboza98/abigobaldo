@@ -4,22 +4,22 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [Header("==== MOVIMENTO ====")]
-    [Range(1f, 20f)] public float walkSpeed = 7.5f;
-    [Range(1f, 360f)] public float rotationSpeed = 10f;
+    [Range(1f, 20f)] public float walkSpeed = 6.7f;
+    [Range(1f, 360f)] public float rotationSpeed = 20f;
 
     [Header("==== DASH ====")]
-    [Range(5f, 30f)]  public float dashSpeed     = 18f;
-    [Range(0.1f, 1f)] public float dashDuration  = 0.25f;
-    [Range(0.1f, 2f)] public float dashCooldown  = 0.6f;
+    [Range(5f, 30f)]  public float dashSpeed     = 21.2f;
+    [Range(0.1f, 1f)] public float dashDuration  = 0.324f;
+    [Range(0.1f, 2f)] public float dashCooldown  = 0.15f;
 
     [Tooltip("Quão rápido o jogador RETOMA controle após o pico do dash (menor = mais tempo preso)")]
-    [Range(1f, 20f)]  public float dashReturnControl = 8f;
+    [Range(1f, 20f)]  public float dashReturnControl = 2.03f;
 
     [Tooltip("Quanto o input atual desvia a trajetória DO dash (0 = nenhum, 1 = total)")]
-    [Range(0f, 1f)]   public float dashSteering = 0.35f;
+    [Range(0f, 1f)]   public float dashSteering = 0.926f;
 
     [Header("==== FÍSICA FAKE ====")]
-    public float gravity         = -20f;
+    public float gravity         = -1f;
     public float groundStickForce = -5f;
 
     // ── Componentes ──────────────────────────────────────────────────
