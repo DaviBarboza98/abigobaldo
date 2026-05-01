@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
@@ -6,11 +5,14 @@ using UnityEngine.Events;
 public class xd : MonoBehaviour
 {
     public Slider slider;
+    public CanvasGroup canvasGroup;
     public float maxTime = 4f;
     public UnityEvent onComplete;
 
     private float currentTime = 0f;
     public bool isInside = false;
+    private float alphaAlvo = 0f;
+
     void Update()
     {
         if (isInside && Input.GetKey(KeyCode.E))
@@ -23,7 +25,7 @@ public class xd : MonoBehaviour
                 Activate();
             }
         }
-        else if(Input.GetKeyUp(KeyCode.E))
+        else if (Input.GetKeyUp(KeyCode.E))
         {
             ResetSlider();
         }
@@ -31,7 +33,7 @@ public class xd : MonoBehaviour
 
     void Activate()
     {
-        
+
         onComplete.Invoke();
         ResetSlider();
     }
@@ -48,6 +50,10 @@ public class xd : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isInside = true;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 1f;
+            }
         }
     }
 
@@ -57,6 +63,10 @@ public class xd : MonoBehaviour
         {
             isInside = false;
             ResetSlider();
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+            }
         }
     }
 }
