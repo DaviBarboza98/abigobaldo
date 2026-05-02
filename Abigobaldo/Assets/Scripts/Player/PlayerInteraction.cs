@@ -6,12 +6,9 @@ public class PlayerInteraction : MonoBehaviour
     public float interactRange = 1.5f;
     public Transform holdPoint;
     public Item heldItem;
-    [Range(1f, 20f)] public float throwForce = 10f;
-    [Range(1f, 20f)] public float maxThrowForce = 20f;
-    [Range(1f, 20f)] public float chargeSpeed = 15f;
 
-    private float currentThrowForce;
-    private bool isChargingThrow;
+    [Header("=== ARREMESSO ===")]
+    public float throwForce = 10f;
 
     void Update()
     {
@@ -24,8 +21,11 @@ public class PlayerInteraction : MonoBehaviour
                 DropItem();
         }
 
-        // THROW
-        HandleThrow();
+        // ARREMESSO (clique direito → lança na hora)
+        if (Input.GetMouseButtonDown(1) && heldItem != null)
+        {
+            ThrowItem();
+        }
     }
 
     void EnablePhysics(Item item)
@@ -56,7 +56,6 @@ public class PlayerInteraction : MonoBehaviour
         item.followTarget = null;
         item.transform.SetParent(null);
     }
-
 
     void TryPickup()
     {
@@ -100,36 +99,6 @@ public class PlayerInteraction : MonoBehaviour
         heldItem = null;
     }
 
-    void HandleThrow()
-    {
-        if (heldItem == null) return;
-
-        // Começa a carregar
-        if (Input.GetMouseButtonDown(1))
-        {
-            isChargingThrow = true;
-            currentThrowForce = throwForce;
-        }
-
-        // Carregando
-        if (Input.GetMouseButton(1) && isChargingThrow)
-        {
-            currentThrowForce += chargeSpeed * Time.deltaTime;
-            currentThrowForce = Mathf.Clamp(currentThrowForce, throwForce, maxThrowForce);
-
-            Debug.Log($"[ARREMESSO] Força atual: {currentThrowForce:F2}");
-        }
-
-        // Soltou → joga
-        if (Input.GetMouseButtonUp(1) && isChargingThrow)
-        {
-            Debug.Log($"[ARREMESSO] Arremessado, Força final: {currentThrowForce:F2}");
-
-            ThrowItem();
-            isChargingThrow = false;
-        }
-    }
-
     void ThrowItem()
     {
         Item item = heldItem;
@@ -140,7 +109,9 @@ public class PlayerInteraction : MonoBehaviour
         Vector3 throwDirection = transform.forward;
         throwDirection.y = 0.3f;
 
-        item.rb.AddForce(throwDirection.normalized * currentThrowForce, ForceMode.Impulse);
+        item.rb.AddForce(throwDirection.normalized * throwForce, ForceMode.Impulse);
+
+        Debug.Log($"[ARREMESSO] Arremessado com força: {throwForce}");
 
         heldItem = null;
     }
