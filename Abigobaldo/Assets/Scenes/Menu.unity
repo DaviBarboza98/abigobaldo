@@ -1626,7 +1626,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: "KbumAltera\xE7\xF5es"
+          m_StringArgument: Tutorials
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &890023003
@@ -4586,8 +4586,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   painelFade: {fileID: 621002929}
   audioSource: {fileID: 1986701416}
+  musicSource: {fileID: 0}
   somDeClique: {fileID: 8300000, guid: 84b91acd789a31c4aa20e1e136d4be80, type: 3}
   velocidadeFade: 3
+  fadeMusic: 1
+  fadeDuration: 2
 --- !u!1 &2038349626
 GameObject:
   m_ObjectHideFlags: 0
