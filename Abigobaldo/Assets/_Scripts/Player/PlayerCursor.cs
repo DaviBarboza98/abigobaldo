@@ -5,11 +5,14 @@ public class PlayerCursor : MonoBehaviour
 {
     private PlayerInputHandler input;
 
+
     private bool cursorUnlocked;
 
     private void Awake()
     {
         input = GetComponent<PlayerInputHandler>();
+
+
     }
 
     private void Start()
@@ -30,13 +33,13 @@ public class PlayerCursor : MonoBehaviour
             LockCursor();
     }
 
-    private void LockCursor()
+    public void LockCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    private void UnlockCursor()
+    public void UnlockCursor()
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;

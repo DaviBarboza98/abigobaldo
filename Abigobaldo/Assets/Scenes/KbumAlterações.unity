@@ -490,9 +490,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraPivot: {fileID: 1172203957}
+  playerCamera: {fileID: 191439286}
   sensitivity: 2
   minPitch: -80
   maxPitch: 80
+  defaultFov: 60
+  runningFov: 80
+  fovSmoothSpeed: 8
 --- !u!1 &925475918
 GameObject:
   m_ObjectHideFlags: 0
@@ -967,6 +971,10 @@ PrefabInstance:
     - target: {fileID: 3163091449158347215, guid: 520ad0726e889794aa2d68d1d5b44925, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 3991959858286648902, guid: 520ad0726e889794aa2d68d1d5b44925, type: 3}
+      propertyPath: runSpeed
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3991959858286648902, guid: 520ad0726e889794aa2d68d1d5b44925, type: 3}
       propertyPath: dashSpeed
