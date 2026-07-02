@@ -8,13 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8234198600485533909}
-  - component: {fileID: 1792493261580440349}
-  - component: {fileID: 743388628014001739}
-  - component: {fileID: 2816841320446116293}
-  - component: {fileID: 4091288581746355577}
-  - component: {fileID: 2464131695632645202}
-  - component: {fileID: 3991959858286648902}
+  - component: {fileID: 7212591599591013443}
   m_Layer: 0
   m_Name: CameraPivot
   m_TagString: Untagged
