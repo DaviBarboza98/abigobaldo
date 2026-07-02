@@ -4,19 +4,41 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement")]
+    // ==========================================
+    // MOVEMENT
+    // ==========================================
+
+    [Header("=== MOVEMENT ===")]
+
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float runSpeed = 8f;
 
-    [Header("Gravity")]
+    // ==========================================
+    // GRAVITY
+    // ==========================================
+
+    [Header("=== GRAVITY ===")]
+
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundStickForce = -2f;
+
+    // ==========================================
+    // COMPONENTS
+    // ==========================================
 
     private CharacterController controller;
     private PlayerInputHandler input;
     private PlayerCursor playerCursor;
 
+    // ==========================================
+    // RUNTIME
+    // ==========================================
+
     private Vector3 verticalVelocity;
+
+    // ==========================================
+    // STATE
+    // ==========================================
 
     public bool IsRunning { get; private set; }
 
@@ -41,13 +63,19 @@ public class PlayerMovement : MonoBehaviour
 
         IsRunning = Input.GetKey(KeyCode.LeftShift);
 
-        float currentSpeed = IsRunning ? runSpeed : moveSpeed;
+        float currentSpeed = IsRunning
+            ? runSpeed
+            : moveSpeed;
 
         Vector3 moveDirection =
             transform.right * moveInput.x +
             transform.forward * moveInput.y;
 
-        controller.Move(moveDirection * currentSpeed * Time.deltaTime);
+        controller.Move(
+            moveDirection *
+            currentSpeed *
+            Time.deltaTime
+        );
     }
 
     private void HandleGravity()
@@ -61,6 +89,9 @@ public class PlayerMovement : MonoBehaviour
             verticalVelocity.y += gravity * Time.deltaTime;
         }
 
-        controller.Move(verticalVelocity * Time.deltaTime);
+        controller.Move(
+            verticalVelocity *
+            Time.deltaTime
+        );
     }
 }

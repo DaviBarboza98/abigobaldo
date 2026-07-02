@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: 442fa254c46b30f4c8c69db4e0c54b36
   - enabled: 1
-    path: "Assets/Scenes/KbumAltera\xE7\xF5es.unity"
+    path: Assets/Scenes/MainGame.unity
     guid: 679e28dd92e786342b7944447228f70c
   - enabled: 1
     path: Assets/Scenes/Tutorials.unity

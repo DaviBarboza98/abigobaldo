@@ -1,52 +1,78 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerCamera : MonoBehaviour
 {
-    [Header("References")]
+    // ==========================================
+    // REFERENCES
+    // ==========================================
+
+    [Header("=== REFERENCES ===")]
+
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private Camera playerCamera;
 
-    [Header("Mouse")]
+    // ==========================================
+    // MODEL
+    // ==========================================
+
+    [Header("=== MODEL ===")]
+
+    [SerializeField] private Transform model;
+
+    // ==========================================
+    // LOOK
+    // ==========================================
+
+    [Header("=== LOOK ===")]
+
     [SerializeField] private float sensitivity = 2f;
 
-    [Header("Pitch Limits")]
+    // ==========================================
+    // PITCH
+    // ==========================================
+
+    [Header("=== PITCH LIMITS ===")]
+
     [SerializeField] private float minPitch = -80f;
     [SerializeField] private float maxPitch = 80f;
 
-    [Header("FOV")]
+    // ==========================================
+    // FIELD OF VIEW
+    // ==========================================
+
+    [Header("=== FIELD OF VIEW ===")]
+
     [SerializeField] private float defaultFov = 70f;
     [SerializeField] private float runningFov = 80f;
     [SerializeField] private float fovSmoothSpeed = 8f;
 
-    [Header("Head Bob")]
-    [SerializeField] private float walkBobSpeed = 10f;
-    [SerializeField] private float runBobSpeed = 14f;
-    [SerializeField] private float bobAmountY = 0.05f;
-    [SerializeField] private float bobAmountX = 0.025f;
-    [SerializeField] private float bobReturnSpeed = 8f;
+    // ==========================================
+    // COMPONENTS
+    // ==========================================
 
     private PlayerInputHandler input;
     private PlayerMovement movement;
 
+    // ==========================================
+    // RUNTIME
+    // ==========================================
     private float pitch;
-    private float bobTimer;
-    private Vector3 originalPivotPosition;
 
     private void Awake()
     {
         input = GetComponent<PlayerInputHandler>();
         movement = GetComponent<PlayerMovement>();
 
-        originalPivotPosition = cameraPivot.localPosition;
+        HideHead();
     }
 
     private void Update()
     {
         HandleLook();
         HandleFov();
-        HandleHeadBob();
     }
 
     private void HandleLook()
@@ -84,36 +110,34 @@ public class PlayerCamera : MonoBehaviour
         );
     }
 
-    private void HandleHeadBob()
+    private void HideHead()
     {
-        bool isMoving = input.Movement.sqrMagnitude > 0.01f;
+        if (model == null)
+            return;
 
-        if (isMoving)
+        string[] partsToHide =
         {
-            float currentBobSpeed = movement.IsRunning
-                ? runBobSpeed
-                : walkBobSpeed;
+            "OlhoE",
+            "OlhoD",
+            "SombrancelhaE",
+            "SombrancelhaD",
+            "Nariz",
+            "Cabeça",
+            "Cabelin",
+            "Bigode"
+        };
 
-            bobTimer += Time.deltaTime * currentBobSpeed;
-
-            float bobY = Mathf.Sin(bobTimer) * bobAmountY;
-            float bobX = Mathf.Cos(bobTimer * 0.5f) * bobAmountX;
-
-            cameraPivot.localPosition = originalPivotPosition + new Vector3(
-                bobX,
-                bobY,
-                0f
-            );
-        }
-        else
+        foreach (string partName in partsToHide)
         {
-            bobTimer = 0f;
+            Transform part = model.Find(partName);
 
-            cameraPivot.localPosition = Vector3.Lerp(
-                cameraPivot.localPosition,
-                originalPivotPosition,
-                bobReturnSpeed * Time.deltaTime
-            );
+            if (part == null)
+                continue;
+
+            MeshRenderer renderer = part.GetComponent<MeshRenderer>();
+
+            if (renderer != null)
+                renderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
         }
     }
 }
