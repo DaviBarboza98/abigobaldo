@@ -4,83 +4,56 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class Item : MonoBehaviour
 {
-    // ==========================================
-    // INFO
-    // ==========================================
+    [SerializeField]
+    private ItemData itemData;
 
-    [Header("=== INFO ===")]
+    public ItemData Data => itemData;
 
-    [SerializeField] private ItemType itemType;
-    [SerializeField] private ItemState itemState = ItemState.Raw;
+    public ItemState State { get; private set; } = ItemState.Raw;
 
-    // ==========================================
-    // REFERENCES
-    // ==========================================
+    public bool IsHeld { get; private set; }
 
-    [Header("=== REFERENCES ===")]
-
-    [SerializeField] private Transform holdPoint;
-
-    // ==========================================
-    // COMPONENTS
-    // ==========================================
+    public bool IsInsideContainer { get; private set; }
 
     private Rigidbody rb;
-    private Collider itemCollider;
-
-    // ==========================================
-    // PROPERTIES
-    // ==========================================
-
-    public ItemType Type => itemType;
-
-    public ItemState State
-    {
-        get => itemState;
-        set => itemState = value;
-    }
-
-    public Transform HoldPoint => holdPoint;
-
-    // ==========================================
-    // UNITY
-    // ==========================================
+    private Collider col;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        itemCollider = GetComponent<Collider>();
+        col = GetComponent<Collider>();
     }
 
-    // ==========================================
-    // PUBLIC
-    // ==========================================
-
-    public void PickUp(Transform holdAnchor)
+    public void SetState(ItemState newState)
     {
-        transform.SetParent(holdAnchor);
+        State = newState;
+    }
 
-        if (holdPoint != null)
-        {
-            transform.localPosition = -holdPoint.localPosition;
-            transform.localRotation = Quaternion.identity;
-        }
-        else
-        {
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-        }
+    public void PickUp(Transform holder)
+    {
+        IsHeld = true;
+
+        transform.SetParent(holder);
+
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
 
         rb.isKinematic = true;
-        itemCollider.enabled = false;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        col.enabled = false;
     }
 
     public void Drop()
     {
+        IsHeld = false;
+
         transform.SetParent(null);
 
         rb.isKinematic = false;
-        itemCollider.enabled = true;
+
+        col.enabled = true;
     }
 
     public void Throw(Vector3 force)
@@ -90,8 +63,8 @@ public class Item : MonoBehaviour
         rb.AddForce(force, ForceMode.Impulse);
     }
 
-    public void ChangeState(ItemState newState)
+    public void SetInsideContainer(bool value)
     {
-        itemState = newState;
+        IsInsideContainer = value;
     }
 }

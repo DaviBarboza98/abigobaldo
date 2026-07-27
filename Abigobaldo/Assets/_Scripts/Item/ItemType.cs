@@ -1,8 +1,9 @@
 public enum ItemType
 {
-    Nada,
-    Ovo,
-    Cuscuz,
-    Milho,
-    Prato
+    Ingredient,
+    Tool,
+    Plate,
+    Drink,
+    Container,
+    Misc
 }
