@@ -1,18 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerThrow : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [Header("Throw")]
+
+    [SerializeField]
+    private float throwForce = 8f;
+
+    private PlayerInventory inventory;
+    private PlayerInputHandler input;
+
+    private void Awake()
     {
-        
+        inventory = GetComponent<PlayerInventory>();
+        input = GetComponent<PlayerInputHandler>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+        if (input.DropPressed)
+        {
+            inventory.Drop();
+        }
+
+        if (input.ThrowPressed)
+        {
+            inventory.Throw(throwForce);
+        }
     }
 }

@@ -2,7 +2,12 @@ using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
-    public Transform ItemHolder;
+    [Header("References")]
+
+    [SerializeField]
+    private Transform itemHolder;
+
+    public Transform ItemHolder => itemHolder;
 
     public Item CurrentItem { get; private set; }
 
@@ -13,14 +18,14 @@ public class PlayerInventory : MonoBehaviour
         if (item == null)
             return;
 
-        CurrentItem = item;
-        item.transform.SetParent(ItemHolder);
-        item.transform.localPosition = Vector3.zero;
-        item.transform.localRotation = Quaternion.identity;
+        if (HasItem)
+            return;
 
-        var rb = item.GetComponent<Rigidbody>();
-        if (rb != null)
-            rb.isKinematic = true;
+        if (!item.IsHoldable)
+            return;
+
+        CurrentItem = item;
+        item.PickUp(itemHolder);
     }
 
     public void Drop()
@@ -28,7 +33,7 @@ public class PlayerInventory : MonoBehaviour
         if (!HasItem)
             return;
 
-        CurrentItem.transform.SetParent(null);
+        CurrentItem.Drop(transform.forward);
         CurrentItem = null;
     }
 
@@ -37,14 +42,42 @@ public class PlayerInventory : MonoBehaviour
         if (!HasItem)
             return;
 
-        var rb = CurrentItem.GetComponent<Rigidbody>();
-        CurrentItem.transform.SetParent(null);
-        if (rb != null)
-        {
-            rb.isKinematic = false;
-            rb.AddForce(transform.forward * force, ForceMode.Impulse);
-        }
+        Vector3 throwDirection = transform.forward * force;
 
+        CurrentItem.Throw(throwDirection);
+        CurrentItem = null;
+    }
+
+    public Item Peek()
+    {
+        return CurrentItem;
+    }
+
+    public Item Remove()
+    {
+        if (!HasItem)
+            return null;
+
+        Item item = CurrentItem;
+        CurrentItem = null;
+
+        return item;
+    }
+
+    public bool IsHolding(ItemData itemData)
+    {
+        if (!HasItem)
+            return false;
+
+        return CurrentItem.Data == itemData;
+    }
+
+    public void DestroyHeldItem()
+    {
+        if (!HasItem)
+            return;
+
+        Destroy(CurrentItem.gameObject);
         CurrentItem = null;
     }
 

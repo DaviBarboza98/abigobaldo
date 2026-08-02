@@ -28,7 +28,6 @@ public class PlayerMovement : MonoBehaviour
 
     private CharacterController controller;
     private PlayerInputHandler input;
-    private PlayerCursor playerCursor;
 
     // ==========================================
     // RUNTIME
@@ -46,7 +45,6 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInputHandler>();
-        playerCursor = GetComponent<PlayerCursor>();
 
         Cursor.visible = false;
     }
@@ -60,22 +58,16 @@ public class PlayerMovement : MonoBehaviour
     private void HandleMovement()
     {
         Vector2 moveInput = input.Movement;
+        IsRunning = input.RunPressed;
 
-        IsRunning = Input.GetKey(KeyCode.LeftShift);
+        float currentSpeed = IsRunning ? runSpeed : moveSpeed;
 
-        float currentSpeed = IsRunning
-            ? runSpeed
-            : moveSpeed;
+        Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
 
-        Vector3 moveDirection =
-            transform.right * moveInput.x +
-            transform.forward * moveInput.y;
+        if (moveDirection.sqrMagnitude > 1f)
+            moveDirection.Normalize();
 
-        controller.Move(
-            moveDirection *
-            currentSpeed *
-            Time.deltaTime
-        );
+        controller.Move(moveDirection * currentSpeed * Time.deltaTime);
     }
 
     private void HandleGravity()
