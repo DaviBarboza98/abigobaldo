@@ -13,6 +13,8 @@ public class PlayerInteraction : MonoBehaviour
 
     private PlayerInputHandler input;
 
+    public ItemHolder ItemHolder => itemHolder;
+
     private void Awake()
     {
         input = GetComponent<PlayerInputHandler>();
@@ -43,6 +45,10 @@ public class PlayerInteraction : MonoBehaviour
         ))
             return;
 
+        // ==========================================
+        // 1. ITEM SPAWNER
+        // ==========================================
+
         ItemSpawner spawner =
             hit.collider.GetComponentInParent<ItemSpawner>();
 
@@ -52,12 +58,29 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
+        // ==========================================
+        // 2. ITEM
+        // ==========================================
+
         Item item =
             hit.collider.GetComponentInParent<Item>();
 
         if (item != null)
         {
             HandleItem(item);
+            return;
+        }
+
+        // ==========================================
+        // 3. INTERACTABLE
+        // ==========================================
+
+        IInteractable interactable =
+            hit.collider.GetComponentInParent<IInteractable>();
+
+        if (interactable != null)
+        {
+            interactable.Interact(this);
         }
     }
 
@@ -98,4 +121,4 @@ public class PlayerInteraction : MonoBehaviour
 
         itemHolder.ThrowItem();
     }
-}
+}   

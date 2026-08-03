@@ -33,13 +33,24 @@ public class ItemHolder : MonoBehaviour
         return true;
     }
 
+    public Item RemoveItem()
+    {
+        if (currentItem == null)
+            return null;
+
+        Item item = currentItem;
+
+        currentItem = null;
+
+        return item;
+    }
+
     public bool DropItem()
     {
         if (currentItem == null)
             return false;
 
-        Item item = currentItem;
-        currentItem = null;
+        Item item = RemoveItem();
 
         Vector3 position =
             transform.position +
@@ -58,8 +69,7 @@ public class ItemHolder : MonoBehaviour
         if (!currentItem.CanBeThrown)
             return false;
 
-        Item item = currentItem;
-        currentItem = null;
+        Item item = RemoveItem();
 
         Vector3 position =
             transform.position +
