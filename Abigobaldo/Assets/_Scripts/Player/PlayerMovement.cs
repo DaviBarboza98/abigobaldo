@@ -4,40 +4,19 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerMovement : MonoBehaviour
 {
-    // ==========================================
-    // MOVEMENT
-    // ==========================================
-
     [Header("=== MOVEMENT ===")]
 
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float runSpeed = 8f;
-
-    // ==========================================
-    // GRAVITY
-    // ==========================================
 
     [Header("=== GRAVITY ===")]
 
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundStickForce = -2f;
 
-    // ==========================================
-    // COMPONENTS
-    // ==========================================
-
     private CharacterController controller;
     private PlayerInputHandler input;
-
-    // ==========================================
-    // RUNTIME
-    // ==========================================
-
     private Vector3 verticalVelocity;
-
-    // ==========================================
-    // STATE
-    // ==========================================
 
     public bool IsRunning { get; private set; }
 

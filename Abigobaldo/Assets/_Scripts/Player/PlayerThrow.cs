@@ -1,20 +1,12 @@
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerInventory))]
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerThrow : MonoBehaviour
 {
-    [Header("Throw")]
-
-    [SerializeField]
-    private float throwForce = 8f;
-
-    private PlayerInventory inventory;
     private PlayerInputHandler input;
 
     private void Awake()
     {
-        inventory = GetComponent<PlayerInventory>();
         input = GetComponent<PlayerInputHandler>();
     }
 
@@ -22,12 +14,12 @@ public class PlayerThrow : MonoBehaviour
     {
         if (input.DropPressed)
         {
-            inventory.Drop();
+            // Drop input detected. Item logic is disabled.
         }
 
         if (input.ThrowPressed)
         {
-            inventory.Throw(throwForce);
+            // Throw input detected. Item logic is disabled.
         }
     }
 }

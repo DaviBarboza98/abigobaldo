@@ -2,22 +2,13 @@ using UnityEngine;
 
 public class PlayerInputHandler : MonoBehaviour
 {
-    // ==========================================
-    // INPUT
-    // ==========================================
-
     public Vector2 Movement { get; private set; }
     public Vector2 Look { get; private set; }
-
     public bool RunPressed { get; private set; }
     public bool InteractPressed { get; private set; }
     public bool DropPressed { get; private set; }
     public bool ThrowPressed { get; private set; }
     public bool ToggleCursorPressed { get; private set; }
-
-    // ==========================================
-    // STATE
-    // ==========================================
 
     private bool isPaused;
 
