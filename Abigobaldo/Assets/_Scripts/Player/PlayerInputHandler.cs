@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[DefaultExecutionOrder(-100)]
 public class PlayerInputHandler : MonoBehaviour
 {
     public Vector2 Movement { get; private set; }

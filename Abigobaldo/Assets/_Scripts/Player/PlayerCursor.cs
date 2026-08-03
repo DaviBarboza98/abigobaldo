@@ -3,16 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerCursor : MonoBehaviour
 {
-    // ==========================================
-    // COMPONENTS
-    // ==========================================
-
     private PlayerInputHandler input;
-
-    // ==========================================
-    // STATE
-    // ==========================================
-
     private bool cursorUnlocked;
 
     private void Awake()

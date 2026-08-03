@@ -5,60 +5,36 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerCamera : MonoBehaviour
 {
-    // ==========================================
-    // REFERENCES
-    // ==========================================
-
-    [Header("=== REFERENCES ===")]
+    [Header("-- REFERÊNCIAS --")]
 
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private Transform itemHolder;
 
-    // ==========================================
-    // MODEL
-    // ==========================================
-
-    [Header("=== MODEL ===")]
+    [Header("-- MODELO --")]
 
     [SerializeField] private Transform model;
 
-    // ==========================================
-    // LOOK
-    // ==========================================
-
-    [Header("=== LOOK ===")]
+    [Header("-- VALORES --")]
 
     [SerializeField] private float sensitivity = 2f;
-
-    // ==========================================
-    // PITCH
-    // ==========================================
-
-    [Header("=== PITCH LIMITS ===")]
-
     [SerializeField] private float minPitch = -80f;
     [SerializeField] private float maxPitch = 80f;
 
-    // ==========================================
-    // FIELD OF VIEW
-    // ==========================================
-
-    [Header("=== FIELD OF VIEW ===")]
+    [Header("-- FOV --")]
 
     [SerializeField] private float defaultFov = 70f;
     [SerializeField] private float runningFov = 80f;
     [SerializeField] private float fovSmoothSpeed = 8f;
 
-    // ==========================================
-    // COMPONENTS
-    // ==========================================
+    [Header("-- COLISÃO DO ITEM --")]
+
+    [SerializeField] private float collisionCheckRadius = 0.03f;
+    [SerializeField] private LayerMask itemCollisionLayers = ~0;
 
     private PlayerInputHandler input;
     private PlayerMovement movement;
 
-    // ==========================================
-    // RUNTIME
-    // ==========================================
     private float pitch;
 
     private void Awake()
@@ -85,15 +61,169 @@ public class PlayerCamera : MonoBehaviour
         float mouseX = lookInput.x * sensitivity;
         float mouseY = lookInput.y * sensitivity;
 
-        transform.Rotate(Vector3.up * mouseX);
+        // ==========================================
+        // ROTAÇÃO HORIZONTAL
+        // ==========================================
 
-        pitch -= mouseY;
-        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        Quaternion horizontalRotation =
+            transform.rotation *
+            Quaternion.Euler(0f, mouseX, 0f);
 
-        cameraPivot.localRotation = Quaternion.Euler(
-            pitch,
-            0f,
-            0f
+        if (CanRotateCamera(horizontalRotation, pitch))
+        {
+            transform.rotation = horizontalRotation;
+        }
+
+        // ==========================================
+        // ROTAÇÃO VERTICAL
+        // ==========================================
+
+        float newPitch = pitch - mouseY;
+
+        newPitch = Mathf.Clamp(
+            newPitch,
+            minPitch,
+            maxPitch
+        );
+
+        if (CanRotateCamera(transform.rotation, newPitch))
+        {
+            pitch = newPitch;
+
+            cameraPivot.localRotation =
+                Quaternion.Euler(
+                    pitch,
+                    0f,
+                    0f
+                );
+        }
+    }
+
+    private bool CanRotateCamera(
+        Quaternion playerRotation,
+        float targetPitch
+    )
+    {
+        if (itemHolder == null)
+            return true;
+
+        Item item =
+            itemHolder.GetComponentInChildren<Item>();
+
+        if (item == null)
+            return true;
+
+        Collider[] itemColliders =
+            item.GetComponentsInChildren<Collider>();
+
+        if (itemColliders.Length == 0)
+            return true;
+
+        // Guardamos as rotações atuais.
+        Quaternion oldPlayerRotation =
+            transform.rotation;
+
+        Quaternion oldPivotRotation =
+            cameraPivot.localRotation;
+
+        // Aplicamos temporariamente a rotação desejada.
+        transform.rotation = playerRotation;
+
+        cameraPivot.localRotation =
+            Quaternion.Euler(
+                targetPitch,
+                0f,
+                0f
+            );
+
+        Physics.SyncTransforms();
+
+        bool collisionDetected = false;
+
+        foreach (Collider itemCollider in itemColliders)
+        {
+            if (itemCollider == null)
+                continue;
+
+            if (!itemCollider.enabled)
+                continue;
+
+            Vector3 center =
+                itemCollider.bounds.center;
+
+            float radius =
+                GetColliderRadius(itemCollider);
+
+            Collider[] overlaps =
+                Physics.OverlapSphere(
+                    center,
+                    radius + collisionCheckRadius,
+                    itemCollisionLayers,
+                    QueryTriggerInteraction.Ignore
+                );
+
+            foreach (Collider other in overlaps)
+            {
+                if (other == itemCollider)
+                    continue;
+
+                if (other.transform.IsChildOf(itemHolder))
+                    continue;
+
+                if (other.transform.IsChildOf(transform))
+                    continue;
+
+                collisionDetected = true;
+                break;
+            }
+
+            if (collisionDetected)
+                break;
+        }
+
+        // Restauramos imediatamente.
+        transform.rotation = oldPlayerRotation;
+
+        cameraPivot.localRotation =
+            oldPivotRotation;
+
+        Physics.SyncTransforms();
+
+        return !collisionDetected;
+    }
+
+    private float GetColliderRadius(Collider collider)
+    {
+        if (collider is SphereCollider sphere)
+        {
+            float scale =
+                Mathf.Max(
+                    collider.transform.lossyScale.x,
+                    collider.transform.lossyScale.y,
+                    collider.transform.lossyScale.z
+                );
+
+            return sphere.radius * scale;
+        }
+
+        if (collider is CapsuleCollider capsule)
+        {
+            float scale =
+                Mathf.Max(
+                    collider.transform.lossyScale.x,
+                    collider.transform.lossyScale.y,
+                    collider.transform.lossyScale.z
+                );
+
+            return capsule.radius * scale;
+        }
+
+        Bounds bounds = collider.bounds;
+
+        return Mathf.Max(
+            bounds.extents.x,
+            bounds.extents.y,
+            bounds.extents.z
         );
     }
 
@@ -134,10 +264,14 @@ public class PlayerCamera : MonoBehaviour
             if (part == null)
                 continue;
 
-            MeshRenderer renderer = part.GetComponent<MeshRenderer>();
+            MeshRenderer renderer =
+                part.GetComponent<MeshRenderer>();
 
             if (renderer != null)
-                renderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            {
+                renderer.shadowCastingMode =
+                    ShadowCastingMode.ShadowsOnly;
+            }
         }
     }
 }

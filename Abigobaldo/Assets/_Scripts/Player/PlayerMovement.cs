@@ -4,13 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("=== MOVEMENT ===")]
+    [Header("-- VALORES --")]
 
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float runSpeed = 8f;
-
-    [Header("=== GRAVITY ===")]
-
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundStickForce = -2f;
 
