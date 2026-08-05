@@ -18,6 +18,12 @@ public class PlayerInteraction : MonoBehaviour
     private void Awake()
     {
         input = GetComponent<PlayerInputHandler>();
+
+        if (playerCamera == null)
+            playerCamera = GetComponentInChildren<Camera>();
+
+        if (itemHolder == null)
+            itemHolder = GetComponentInChildren<ItemHolder>();
     }
 
     private void Update()
@@ -32,6 +38,12 @@ public class PlayerInteraction : MonoBehaviour
         if (!input.InteractPressed)
             return;
 
+        if (playerCamera == null)
+            return;
+
+        if (itemHolder == null)
+            return;
+
         Ray ray = new Ray(
             playerCamera.transform.position,
             playerCamera.transform.forward
@@ -43,7 +55,9 @@ public class PlayerInteraction : MonoBehaviour
             interactionDistance,
             interactionLayers
         ))
+        {
             return;
+        }
 
         // ==========================================
         // 1. ITEM SPAWNER
@@ -95,7 +109,9 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         if (!itemHolder.TryPickUp(item))
+        {
             Destroy(item.gameObject);
+        }
     }
 
     private void HandleItem(Item item)
@@ -111,6 +127,9 @@ public class PlayerInteraction : MonoBehaviour
         if (!input.DropPressed)
             return;
 
+        if (itemHolder == null)
+            return;
+
         itemHolder.DropItem();
     }
 
@@ -119,6 +138,9 @@ public class PlayerInteraction : MonoBehaviour
         if (!input.ThrowPressed)
             return;
 
+        if (itemHolder == null)
+            return;
+
         itemHolder.ThrowItem();
     }
-}   
+}
