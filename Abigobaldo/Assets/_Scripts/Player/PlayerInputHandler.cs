@@ -12,6 +12,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool DropPressed { get; private set; }
     public bool ThrowPressed { get; private set; }
     public bool ToggleCursorPressed { get; private set; }
+    public bool RotatePressed { get; private set; } //star adicionou isso
+
 
     private bool isPaused;
 
@@ -27,7 +29,7 @@ public class PlayerInputHandler : MonoBehaviour
 
         ReadMovement();
         ReadLook();
-        ReadActions();
+        ReadActions() ; 
     }
 
     private void ReadMovement()
@@ -85,6 +87,9 @@ public class PlayerInputHandler : MonoBehaviour
 
         ToggleCursorPressed =
             Keyboard.current.vKey.wasPressedThisFrame;
+
+        RotatePressed =
+            Keyboard.current.rKey.wasPressedThisFrame; //star adicionou isso
     }
 
     private void LateUpdate()
@@ -93,6 +98,7 @@ public class PlayerInputHandler : MonoBehaviour
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
+        RotatePressed = false; //star adicionou isso
     }
 
     private void HandlePause()
@@ -131,5 +137,9 @@ public class PlayerInputHandler : MonoBehaviour
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
+        RotatePressed = false; //star adicionou isso
     }
 }
+
+
+//star: criei um botão no R pra o jogo conseguir identificar quando o player clicar no R e assim puder criar um script pra rotacionar os itens. 04.08.2026 - 23:56

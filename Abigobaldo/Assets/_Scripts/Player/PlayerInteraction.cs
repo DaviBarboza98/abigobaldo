@@ -31,6 +31,8 @@ public class PlayerInteraction : MonoBehaviour
         HandleInteraction();
         HandleDrop();
         HandleThrow();
+        HandleRotation(); //star adicionou isso
+
     }
 
     private void HandleInteraction()
@@ -143,4 +145,20 @@ public class PlayerInteraction : MonoBehaviour
 
         itemHolder.ThrowItem();
     }
+
+    private void HandleRotation() //star adicionou isso
+{
+    // star: se não apertou R não faz nada
+    if (!input.RotatePressed)
+        return;
+
+    // star: se o holder não existir ou estiver vazio não faz nada
+    if (itemHolder == null || itemHolder.IsEmpty())
+        return;
+
+    // star:gira o "segurador de itens" e o item que está dentro em 90 graus no eixo Y
+    itemHolder.transform.Rotate(0f, 90f, 0f, Space.Self);
 }
+}
+
+//star: criei um private void novo pra criar o negócio q faz o item girar quando o player aperta R
