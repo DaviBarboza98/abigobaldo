@@ -12,8 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
   m_Name: Ovo
   m_EditorClassIdentifier: 
-  itemName: Ovo
-  description: ovo
-  prefab: {fileID: 6916805314579217537, guid: 20ab451a60a5959478a94095939ba31f, type: 3}
-  canBeHeld: 1
-  canBeThrown: 1
+  itemId: ovo
+  displayName: Ovo
+  prefab: {fileID: 3519601105581471706, guid: e54732e0445132a4d8ca0fcabe650d16, type: 3}

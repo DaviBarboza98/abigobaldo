@@ -216,9 +216,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraPivot: {fileID: 7212591599591013443}
   playerCamera: {fileID: 4774237957801032376}
-  itemHolder: {fileID: 0}
+  itemHolder: {fileID: 8687432313080562006}
   model: {fileID: 1776566871151326401}
-  sensitivity: 2
+  sensitivity: 0.2
   minPitch: -80
   maxPitch: 80
   defaultFov: 75
@@ -268,8 +268,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72552cf546ee64f42842592228452194, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 0}
-  itemHolder: {fileID: 0}
+  playerCamera: {fileID: 4774237957801032376}
+  itemHolder: {fileID: 6285104347786073}
   interactionDistance: 3
   interactionLayers:
     serializedVersion: 2
@@ -320,6 +320,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dropDistance: 0
   throwForce: 8
+  itemRotationSensitivity: 0.25
 --- !u!1001 &2246481842692608810
 PrefabInstance:
   m_ObjectHideFlags: 0

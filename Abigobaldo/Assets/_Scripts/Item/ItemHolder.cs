@@ -2,9 +2,12 @@ using UnityEngine;
 
 public class ItemHolder : MonoBehaviour
 {
-    [Header("Arremesso")]
+    [Header("Largar e arremessar")]
     [SerializeField] private float dropDistance = 1f;
     [SerializeField] private float throwForce = 8f;
+
+    [Header("Rotação do item")]
+    [SerializeField] private float itemRotationSensitivity = 0.25f;
 
     private Item currentItem;
 
@@ -27,7 +30,6 @@ public class ItemHolder : MonoBehaviour
             return false;
 
         currentItem = item;
-
         item.PickUp(transform);
 
         return true;
@@ -39,10 +41,41 @@ public class ItemHolder : MonoBehaviour
             return null;
 
         Item item = currentItem;
-
         currentItem = null;
 
         return item;
+    }
+
+    public bool RotateItem(
+        Vector2 mouseDelta,
+        Transform cameraTransform
+    )
+    {
+        if (currentItem == null)
+            return false;
+
+        if (cameraTransform == null)
+            return false;
+
+        float rotationX =
+            -mouseDelta.y * itemRotationSensitivity;
+
+        float rotationY =
+            mouseDelta.x * itemRotationSensitivity;
+
+        currentItem.transform.Rotate(
+            cameraTransform.up,
+            rotationY,
+            Space.World
+        );
+
+        currentItem.transform.Rotate(
+            cameraTransform.right,
+            rotationX,
+            Space.World
+        );
+
+        return true;
     }
 
     public bool DropItem()

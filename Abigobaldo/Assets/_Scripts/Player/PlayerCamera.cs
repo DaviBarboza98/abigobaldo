@@ -11,8 +11,6 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField] private Transform itemHolder;
 
-    [Header("-- MODELO --")]
-
     [SerializeField] private Transform model;
 
     [Header("-- VALORES --")]
@@ -21,13 +19,9 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private float minPitch = -80f;
     [SerializeField] private float maxPitch = 80f;
 
-    [Header("-- FOV --")]
-
     [SerializeField] private float defaultFov = 70f;
     [SerializeField] private float runningFov = 80f;
     [SerializeField] private float fovSmoothSpeed = 8f;
-
-    [Header("-- COLISÃO DO ITEM --")]
 
     [SerializeField] private float collisionCheckRadius = 0.03f;
     [SerializeField] private LayerMask itemCollisionLayers = ~0;
@@ -56,14 +50,13 @@ public class PlayerCamera : MonoBehaviour
         if (Cursor.lockState != CursorLockMode.Locked)
             return;
 
+        if (input.RotateHeld)
+            return;
+
         Vector2 lookInput = input.Look;
 
         float mouseX = lookInput.x * sensitivity;
         float mouseY = lookInput.y * sensitivity;
-
-        // ==========================================
-        // ROTAÇÃO HORIZONTAL
-        // ==========================================
 
         Quaternion horizontalRotation =
             transform.rotation *
@@ -73,10 +66,6 @@ public class PlayerCamera : MonoBehaviour
         {
             transform.rotation = horizontalRotation;
         }
-
-        // ==========================================
-        // ROTAÇÃO VERTICAL
-        // ==========================================
 
         float newPitch = pitch - mouseY;
 
@@ -119,14 +108,12 @@ public class PlayerCamera : MonoBehaviour
         if (itemColliders.Length == 0)
             return true;
 
-        // Guardamos as rotações atuais.
         Quaternion oldPlayerRotation =
             transform.rotation;
 
         Quaternion oldPivotRotation =
             cameraPivot.localRotation;
 
-        // Aplicamos temporariamente a rotação desejada.
         transform.rotation = playerRotation;
 
         cameraPivot.localRotation =
@@ -181,7 +168,6 @@ public class PlayerCamera : MonoBehaviour
                 break;
         }
 
-        // Restauramos imediatamente.
         transform.rotation = oldPlayerRotation;
 
         cameraPivot.localRotation =

@@ -12,7 +12,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool DropPressed { get; private set; }
     public bool ThrowPressed { get; private set; }
     public bool ToggleCursorPressed { get; private set; }
-    public bool RotatePressed { get; private set; } //star adicionou isso
+    public bool RotateHeld { get; private set; }
 
 
     private bool isPaused;
@@ -88,8 +88,8 @@ public class PlayerInputHandler : MonoBehaviour
         ToggleCursorPressed =
             Keyboard.current.vKey.wasPressedThisFrame;
 
-        RotatePressed =
-            Keyboard.current.rKey.wasPressedThisFrame; //star adicionou isso
+        RotateHeld =
+            Keyboard.current.rKey.isPressed;
     }
 
     private void LateUpdate()
@@ -98,7 +98,6 @@ public class PlayerInputHandler : MonoBehaviour
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
-        RotatePressed = false; //star adicionou isso
     }
 
     private void HandlePause()
@@ -137,7 +136,7 @@ public class PlayerInputHandler : MonoBehaviour
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
-        RotatePressed = false; //star adicionou isso
+        RotateHeld = false; //star adicionou isso
     }
 }
 

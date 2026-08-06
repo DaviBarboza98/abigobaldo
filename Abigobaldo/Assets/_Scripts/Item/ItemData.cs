@@ -1,20 +1,19 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewItemData", menuName = "Abigobaldo/Item Data")]
+[CreateAssetMenu(
+    fileName = "NovoItem",
+    menuName = "Abigobaldos/Item Data"
+)]
 public class ItemData : ScriptableObject
 {
-    [Header("Informações")]
-    public string itemName;
+    [Header("Identificação")]
+    [SerializeField] private string itemId;
+    [SerializeField] private string displayName;
 
-    [TextArea]
-    public string description;
-
-    [Header("Prefab do Item")]
+    [Header("Visual")]
     [SerializeField] private GameObject prefab;
 
-    [Header("Propriedades")]
-    public bool canBeHeld = true;
-    public bool canBeThrown = true;
-
+    public string ItemId => itemId;
+    public string DisplayName => displayName;
     public GameObject Prefab => prefab;
 }

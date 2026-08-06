@@ -3,8 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Item : MonoBehaviour
 {
-    [Header("Item")]
-    [SerializeField] private string itemName;
+    [Header("Dados")]
+    [SerializeField] private ItemData itemData;
 
     [Header("Propriedades")]
     [SerializeField] private bool canBeHeld = true;
@@ -12,7 +12,13 @@ public class Item : MonoBehaviour
 
     private Rigidbody rb;
 
-    public string ItemName => itemName;
+    public ItemData Data => itemData;
+
+    public string ItemName =>
+        itemData != null
+            ? itemData.DisplayName
+            : gameObject.name;
+
     public bool CanBeHeld => canBeHeld;
     public bool CanBeThrown => canBeThrown;
 
@@ -30,6 +36,7 @@ public class Item : MonoBehaviour
         rb.useGravity = false;
 
         transform.SetParent(holder);
+
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
     }
@@ -43,7 +50,11 @@ public class Item : MonoBehaviour
         rb.useGravity = true;
     }
 
-    public void Throw(Vector3 position, Vector3 direction, float force)
+    public void Throw(
+        Vector3 position,
+        Vector3 direction,
+        float force
+    )
     {
         transform.SetParent(null);
         transform.position = position;
@@ -54,6 +65,9 @@ public class Item : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        rb.AddForce(direction * force, ForceMode.Impulse);
+        rb.AddForce(
+            direction * force,
+            ForceMode.Impulse
+        );
     }
 }
