@@ -168,4 +168,7 @@ public class PlayerInteraction : MonoBehaviour
     }
 }
 
-//star: criei um private void novo pra criar o negócio q faz o item girar quando o player aperta R
+
+}
+
+//star: criei um private void novo pra criar o código q faz o item girar quando o player segura R e mexe o cursor na tela

@@ -47,6 +47,7 @@ public class PlayerCamera : MonoBehaviour
 
     private void HandleLook()
     {
+        
         if (Cursor.lockState != CursorLockMode.Locked)
             return;
 
