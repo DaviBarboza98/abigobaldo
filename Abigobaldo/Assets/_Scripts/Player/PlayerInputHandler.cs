@@ -89,7 +89,7 @@ public class PlayerInputHandler : MonoBehaviour
             Keyboard.current.vKey.wasPressedThisFrame;
 
         RotatePressed =
-            Keyboard.current.rKey.wasPressedThisFrame; //star adicionou isso
+           RotatePressed = Keyboard.current.rKey.isPressed; //star adicionou isso
     }
 
     private void LateUpdate()
@@ -98,7 +98,7 @@ public class PlayerInputHandler : MonoBehaviour
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
-        RotatePressed = false; //star adicionou isso
+        // RotatePressed = false; //star adicionou isso
     }
 
     private void HandlePause()

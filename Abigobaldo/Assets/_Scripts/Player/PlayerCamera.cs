@@ -53,8 +53,13 @@ public class PlayerCamera : MonoBehaviour
 
     private void HandleLook()
     {
+        
         if (Cursor.lockState != CursorLockMode.Locked)
             return;
+
+        // star: Se estiver segurando R, não mexe a câmera
+        if (input.RotatePressed)
+        return;
 
         Vector2 lookInput = input.Look;
 

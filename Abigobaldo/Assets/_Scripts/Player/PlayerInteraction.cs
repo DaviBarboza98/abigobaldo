@@ -146,19 +146,26 @@ public class PlayerInteraction : MonoBehaviour
         itemHolder.ThrowItem();
     }
 
-    private void HandleRotation() //star adicionou isso
+   private void HandleRotation() 
 {
-    // star: se não apertou R não faz nada
-    if (!input.RotatePressed)
+    // star: se não está segurando R, ou se não tem item, não faz nada
+    if (!input.RotatePressed || itemHolder == null || itemHolder.IsEmpty())
         return;
 
-    // star: se o holder não existir ou estiver vazio não faz nada
-    if (itemHolder == null || itemHolder.IsEmpty())
-        return;
+    // Pega o movimento do mouse que vem do InputHandler
+    Vector2 mouseDelta = input.Look;
+    
+    // Sensibilidade do giro (pode aumentar ou diminuir esse valor depois)
+    float rotationSpeed = 0.5f; 
 
-    // star:gira o "segurador de itens" e o item que está dentro em 90 graus no eixo Y
-    itemHolder.transform.Rotate(0f, 90f, 0f, Space.Self);
-}
+    Transform itemTransform = itemHolder.CurrentItem.transform;
+
+    // Gira o item usando os eixos da câmera para o movimento ficar natural
+    itemTransform.Rotate(playerCamera.transform.up, -mouseDelta.x * rotationSpeed, Space.World);
+    itemTransform.Rotate(playerCamera.transform.right, mouseDelta.y * rotationSpeed, Space.World);
 }
 
-//star: criei um private void novo pra criar o negócio q faz o item girar quando o player aperta R
+
+}
+
+//star: criei um private void novo pra criar o código q faz o item girar quando o player segura R e mexe o cursor na tela
