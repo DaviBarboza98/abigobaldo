@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
   m_Name: OvoFrito
   m_EditorClassIdentifier: 
-  itemId: ovo
-  displayName: Ovo
-  prefab: {fileID: 3519601105581471706, guid: e54732e0445132a4d8ca0fcabe650d16, type: 3}
+  itemId: ovo_frito
+  displayName: Ovo Frito
+  prefab: {fileID: 4529970947412144807, guid: 5a2145899b580db45968db37c7fe6c51, type: 3}
