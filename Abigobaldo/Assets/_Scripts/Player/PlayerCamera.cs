@@ -28,6 +28,9 @@ public class PlayerCamera : MonoBehaviour
         input = GetComponent<PlayerInputHandler>();
         movement = GetComponent<PlayerMovement>();
 
+        if (model == null)
+            model = FindDeepChild(transform, "Model");
+
         HideFirstPersonParts();
     }
 

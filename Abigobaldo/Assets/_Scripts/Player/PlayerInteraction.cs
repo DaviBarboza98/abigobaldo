@@ -10,10 +10,12 @@ public class PlayerInteraction : MonoBehaviour
     [Header("Interacao")]
     [SerializeField] private float interactionDistance = 3f;
     [SerializeField] private LayerMask interactionLayers = ~0;
+    [SerializeField] private float highlightRefreshInterval = 0.04f;
 
     private PlayerInputHandler input;
     private readonly RaycastHit[] interactionHits = new RaycastHit[16];
     private Highlightable currentHighlight;
+    private float nextHighlightRefreshTime;
 
     public ItemHolder ItemHolder => itemHolder;
 
@@ -123,6 +125,11 @@ public class PlayerInteraction : MonoBehaviour
 
     private void UpdateHighlight()
     {
+        if (Time.unscaledTime < nextHighlightRefreshTime)
+            return;
+
+        nextHighlightRefreshTime = Time.unscaledTime + highlightRefreshInterval;
+
         if (playerCamera == null)
         {
             ClearCurrentHighlight();
@@ -331,5 +338,11 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         itemHolder.ZoomHeldItem(input.HoldZoom);
+    }
+
+    private void OnValidate()
+    {
+        interactionDistance = Mathf.Max(0f, interactionDistance);
+        highlightRefreshInterval = Mathf.Max(0.01f, highlightRefreshInterval);
     }
 }
