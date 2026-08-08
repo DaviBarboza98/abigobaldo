@@ -17,7 +17,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: eda4a8b2bf953204793f0ba03cc9b882, type: 2}
   - {fileID: 11400000, guid: e642d9d3edb940b88df71252f7508d90, type: 2}
   resultItem: {fileID: 11400000, guid: 8f861095d31847098c8db9a47caa6a5a, type: 2}
+  slightlyBurnedResultItem: {fileID: 0}
+  burnedResultItem: {fileID: 0}
+  carbonizedResultItem: {fileID: 0}
   byproducts: []
   spawnByproductsOnStart: 0
-  cookingTime: 2
-  burningTime: 0
+  cookingTime: 10
+  canOvercook: 0
+  slightlyBurnedDelay: 5
+  burnedDelay: 10
+  carbonizedDelay: 15

@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
-  m_Name: Fuba
+  m_Name: CuscuzQueimado
   m_EditorClassIdentifier: 
-  itemId: fuba
-  displayName: Fuba
-  prefab: {fileID: 5478030388598050507, guid: 420cfcff10364944f9f4eb1b869408a0, type: 3}
+  itemId: cuscuz_queimado
+  displayName: Cuscuz Queimado
+  prefab: {fileID: 4647510380948870650, guid: a4c76940ec26ff343a002bc0f07b42a5, type: 3}

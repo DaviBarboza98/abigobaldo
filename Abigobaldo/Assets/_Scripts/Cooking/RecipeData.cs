@@ -15,20 +15,32 @@ public class RecipeData : ScriptableObject
 
     [Header("Resultado")]
     [SerializeField] private ItemData resultItem;
+    [SerializeField] private ItemData slightlyBurnedResultItem;
+    [SerializeField] private ItemData burnedResultItem;
+    [SerializeField] private ItemData carbonizedResultItem;
     [SerializeField] private List<ItemData> byproducts = new();
     [SerializeField] private bool spawnByproductsOnStart;
 
     [Header("Tempo")]
     [SerializeField] private float cookingTime = 3f;
-    [SerializeField] private float burningTime;
+    [SerializeField] private bool canOvercook;
+    [SerializeField] private float slightlyBurnedDelay = 5f;
+    [SerializeField] private float burnedDelay = 10f;
+    [SerializeField] private float carbonizedDelay = 15f;
 
     public ContainerType RequiredContainer => requiredContainer;
     public IReadOnlyList<ItemData> Ingredients => ingredients;
     public ItemData ResultItem => resultItem;
+    public ItemData SlightlyBurnedResultItem => slightlyBurnedResultItem;
+    public ItemData BurnedResultItem => burnedResultItem;
+    public ItemData CarbonizedResultItem => carbonizedResultItem;
     public IReadOnlyList<ItemData> Byproducts => byproducts;
     public bool SpawnByproductsOnStart => spawnByproductsOnStart;
     public float CookingTime => cookingTime;
-    public float BurningTime => burningTime;
+    public bool CanOvercook => canOvercook;
+    public float SlightlyBurnedDelay => slightlyBurnedDelay;
+    public float BurnedDelay => burnedDelay;
+    public float CarbonizedDelay => carbonizedDelay;
 
     public bool CanRunIn(ContainerType containerType)
     {
@@ -63,6 +75,8 @@ public class RecipeData : ScriptableObject
     private void OnValidate()
     {
         cookingTime = Mathf.Max(0f, cookingTime);
-        burningTime = Mathf.Max(0f, burningTime);
+        slightlyBurnedDelay = Mathf.Max(0f, slightlyBurnedDelay);
+        burnedDelay = Mathf.Max(slightlyBurnedDelay, burnedDelay);
+        carbonizedDelay = Mathf.Max(burnedDelay, carbonizedDelay);
     }
 }

@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class ItemContainer : MonoBehaviour, IInteractable
 {
+    private enum CookingResultState
+    {
+        Raw,
+        Ready,
+        SlightlyBurned,
+        Burned,
+        Carbonized
+    }
+
     [Header("Container")]
     [SerializeField] private ContainerType containerType;
 
@@ -23,14 +32,16 @@ public class ItemContainer : MonoBehaviour, IInteractable
     private readonly List<ItemData> storedItems = new();
     private CookingProcess cookingProcess;
     private RecipeData activeRecipe;
+    private CookingResultState resultState;
+    private int lastLoggedSecond = -1;
 
     public ContainerType Type => containerType;
     public IReadOnlyList<ItemData> StoredItems => storedItems;
     public int ItemCount => storedItems.Count;
     public bool IsEmpty => storedItems.Count == 0;
     public bool IsFull => storedItems.Count >= maxItems;
-    public bool IsCooking => cookingProcess != null && cookingProcess.IsCooking;
-    public bool HasReadyOutput => storedItems.Count == 1 && activeRecipe == null;
+    public bool IsCooking => cookingProcess != null && cookingProcess.IsRunning && !cookingProcess.IsReady;
+    public bool HasReadyOutput => cookingProcess != null && cookingProcess.IsReady && storedItems.Count == 1;
     public float CookingProgress => cookingProcess != null ? cookingProcess.Progress : 0f;
 
     private void Update()
@@ -65,9 +76,11 @@ public class ItemContainer : MonoBehaviour, IInteractable
         if (holder == null || holder.IsEmpty())
             return false;
 
-        if (IsCooking)
+        if (cookingProcess != null)
         {
-            Log($"{name}: espere a receita terminar.");
+            Log(cookingProcess.IsReady
+                ? $"{name}: retire ou emprate o item pronto antes de colocar outro ingrediente."
+                : $"{name}: espere a receita terminar.");
             return false;
         }
 
@@ -108,13 +121,13 @@ public class ItemContainer : MonoBehaviour, IInteractable
         if (holder == null || !holder.IsEmpty())
             return false;
 
-        if (IsCooking)
+        if (cookingProcess != null && !cookingProcess.IsReady)
             return false;
 
         if (storedItems.Count != 1)
             return false;
 
-        ItemData outputData = storedItems[0];
+        ItemData outputData = GetCurrentOutputData();
 
         if (outputData == null || outputData.Prefab == null)
             return false;
@@ -142,7 +155,7 @@ public class ItemContainer : MonoBehaviour, IInteractable
             return false;
         }
 
-        storedItems.Clear();
+        FinishAndClearCooking();
         Log($"{outputData.DisplayName} foi retirado de {containerType}.");
 
         return true;
@@ -150,18 +163,21 @@ public class ItemContainer : MonoBehaviour, IInteractable
 
     public bool TryMoveOutputToPlate(PlateContainer plate)
     {
-        if (plate == null || IsCooking)
+        if (plate == null)
+            return false;
+
+        if (cookingProcess != null && !cookingProcess.IsReady)
             return false;
 
         if (storedItems.Count != 1)
             return false;
 
-        ItemData outputData = storedItems[0];
+        ItemData outputData = GetCurrentOutputData();
 
         if (!plate.TryAddItem(outputData))
             return false;
 
-        storedItems.Clear();
+        FinishAndClearCooking();
         Log($"{outputData.DisplayName} foi colocado no prato.");
 
         return true;
@@ -206,6 +222,8 @@ public class ItemContainer : MonoBehaviour, IInteractable
         storedItems.Clear();
         cookingProcess = null;
         activeRecipe = null;
+        resultState = CookingResultState.Raw;
+        lastLoggedSecond = -1;
 
         Log($"{name}: todos os itens foram removidos.");
     }
@@ -224,18 +242,23 @@ public class ItemContainer : MonoBehaviour, IInteractable
             return;
 
         activeRecipe = recipe;
-        cookingProcess = new CookingProcess(recipe.CookingTime, recipe.BurningTime);
+        cookingProcess = new CookingProcess(recipe.CookingTime);
         cookingProcess.Start();
+        resultState = CookingResultState.Raw;
+        lastLoggedSecond = -1;
 
         if (recipe.SpawnByproductsOnStart)
             SpawnByproducts(recipe.Byproducts);
 
         if (recipe.CookingTime <= 0f)
-            FinishRecipe();
+            PrepareReadyOutput();
         else
+        {
+            Log($"{name}: receita iniciada em {containerType}. Tempo: {recipe.CookingTime:0}s.");
             Log(recipe.ResultItem != null
                 ? $"{name}: preparando {recipe.ResultItem.DisplayName}."
                 : $"{name}: preparando receita sem resultado definido.");
+        }
     }
 
     private bool TryFindRecipe(out RecipeData recipe)
@@ -261,16 +284,19 @@ public class ItemContainer : MonoBehaviour, IInteractable
 
     private void UpdateCookingProcess()
     {
-        if (cookingProcess == null || !cookingProcess.IsCooking)
+        if (cookingProcess == null || !cookingProcess.IsRunning)
             return;
 
         cookingProcess.Update(Time.deltaTime);
+        LogCookingTimer();
 
-        if (cookingProcess.IsReady)
-            FinishRecipe();
+        if (cookingProcess.IsReady && resultState == CookingResultState.Raw)
+            PrepareReadyOutput();
+
+        UpdateOvercookState();
     }
 
-    private void FinishRecipe()
+    private void PrepareReadyOutput()
     {
         if (activeRecipe == null)
             return;
@@ -286,12 +312,98 @@ public class ItemContainer : MonoBehaviour, IInteractable
         if (!activeRecipe.SpawnByproductsOnStart)
             SpawnByproducts(byproducts);
 
-        Log(result != null
-            ? $"{name}: receita pronta: {result.DisplayName}."
-            : $"{name}: receita terminou sem resultado.");
+        resultState = CookingResultState.Ready;
 
+        Log(result != null
+            ? $"{name}: pronto: {result.DisplayName}. Retire agora ou ele vai passar do ponto."
+            : $"{name}: receita terminou sem resultado.");
+    }
+
+    private void FinishAndClearCooking()
+    {
+        if (cookingProcess != null)
+            cookingProcess.Stop();
+
+        storedItems.Clear();
         cookingProcess = null;
         activeRecipe = null;
+        resultState = CookingResultState.Raw;
+        lastLoggedSecond = -1;
+    }
+
+    private void UpdateOvercookState()
+    {
+        if (activeRecipe == null || cookingProcess == null || !cookingProcess.IsReady)
+            return;
+
+        if (activeRecipe == null || !activeRecipe.CanOvercook)
+            return;
+
+        float overcookTime = cookingProcess.OvercookTime;
+
+        if (overcookTime >= activeRecipe.CarbonizedDelay)
+        {
+            SetResultState(CookingResultState.Carbonized, activeRecipe.CarbonizedResultItem, "carbonizado");
+            return;
+        }
+
+        if (overcookTime >= activeRecipe.BurnedDelay)
+        {
+            SetResultState(CookingResultState.Burned, activeRecipe.BurnedResultItem, "queimado");
+            return;
+        }
+
+        if (overcookTime >= activeRecipe.SlightlyBurnedDelay)
+            SetResultState(CookingResultState.SlightlyBurned, activeRecipe.SlightlyBurnedResultItem, "um pouco queimado");
+    }
+
+    private void SetResultState(CookingResultState newState, ItemData stateItem, string label)
+    {
+        if (resultState == newState)
+            return;
+
+        resultState = newState;
+
+        if (stateItem != null)
+        {
+            storedItems.Clear();
+            storedItems.Add(stateItem);
+        }
+
+        ItemData output = GetCurrentOutputData();
+        Log(output != null
+            ? $"{name}: {output.DisplayName} ficou {label}."
+            : $"{name}: o item ficou {label}.");
+    }
+
+    private ItemData GetCurrentOutputData()
+    {
+        return storedItems.Count > 0 ? storedItems[0] : null;
+    }
+
+    private void LogCookingTimer()
+    {
+        if (!showDebugLogs || cookingProcess == null)
+            return;
+
+        int currentSecond = Mathf.FloorToInt(cookingProcess.Timer);
+
+        if (currentSecond == lastLoggedSecond)
+            return;
+
+        lastLoggedSecond = currentSecond;
+
+        if (!cookingProcess.IsReady)
+        {
+            float remaining = Mathf.Max(0f, cookingProcess.CookingTime - cookingProcess.Timer);
+            Debug.Log($"{name}: cozinhando... faltam {remaining:0}s.");
+            return;
+        }
+
+        if (!activeRecipe.CanOvercook)
+            return;
+
+        Debug.Log($"{name}: pronto ha {cookingProcess.OvercookTime:0}s. +5 pouco queimado, +10 queimado, +15 carbonizado.");
     }
 
     private void SpawnByproducts(IReadOnlyList<ItemData> byproducts)

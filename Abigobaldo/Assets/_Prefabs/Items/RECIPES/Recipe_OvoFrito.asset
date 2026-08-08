@@ -16,9 +16,15 @@ MonoBehaviour:
   ingredients:
   - {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
   resultItem: {fileID: 11400000, guid: 0de109f99b25000418c2482dca9d6a65, type: 2}
+  slightlyBurnedResultItem: {fileID: 11400000, guid: e3ffb933d8ed407d98e5a428e2ee44a7, type: 2}
+  burnedResultItem: {fileID: 11400000, guid: 2de768233c224b1e894635f6b6e85257, type: 2}
+  carbonizedResultItem: {fileID: 11400000, guid: 2e1dca9c713d448b94206df10225bb0e, type: 2}
   byproducts:
   - {fileID: 11400000, guid: 4028d4429b9ce47478437323b0976f42, type: 2}
   - {fileID: 11400000, guid: 18977b1b149c40b4a833f9e854dfc4ae, type: 2}
   spawnByproductsOnStart: 1
-  cookingTime: 3
-  burningTime: 0
+  cookingTime: 10
+  canOvercook: 1
+  slightlyBurnedDelay: 5
+  burnedDelay: 10
+  carbonizedDelay: 15
