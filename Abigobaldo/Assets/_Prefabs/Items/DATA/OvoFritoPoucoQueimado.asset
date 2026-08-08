@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
   m_Name: OvoFritoPoucoQueimado
   m_EditorClassIdentifier: 
-  itemId: ovo_frito_pouco_queimado
-  displayName: Ovo Frito Pouco Queimado
+  itemId: ovo_frito_passado
+  displayName: Ovo Frito Passado
   prefab: {fileID: 4529970947412144807, guid: 5a2145899b580db45968db37c7fe6c51, type: 3}
+  cookState: 3

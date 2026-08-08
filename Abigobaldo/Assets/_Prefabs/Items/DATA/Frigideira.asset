@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
-  m_Name: OvoFritoCarbonizado
+  m_Name: Frigideira
   m_EditorClassIdentifier: 
-  itemId: ovo_frito_carbonizado
-  displayName: Ovo Frito Carbonizado
-  prefab: {fileID: 4529970947412144807, guid: 5a2145899b580db45968db37c7fe6c51, type: 3}
-  cookState: 5
+  itemId: frigideira
+  displayName: Frigideira
+  prefab: {fileID: 0}
+  cookState: 0

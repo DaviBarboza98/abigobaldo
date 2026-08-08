@@ -126,7 +126,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b853bbd592746e4db7ee006ac13f473, type: 3}
   m_Name:
   m_EditorClassIdentifier:
-  maxItems: 4
+  maxItems: 1
+  contentVisualRoot: {fileID: 0}
+  contentVisualLocalOffset: {x: 0, y: 0.08, z: 0}
+  contentVisualScale: 0.25
   showDebugLogs: 1
 --- !u!1001 &5466158921073474089
 PrefabInstance:

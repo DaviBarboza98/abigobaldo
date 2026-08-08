@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class PlateContainer : MonoBehaviour, IInteractable
 {
-    [SerializeField] private int maxItems = 4;
+    [SerializeField] private int maxItems = 1;
+    [SerializeField] private Transform contentVisualRoot;
+    [SerializeField] private Vector3 contentVisualLocalOffset = new Vector3(0f, 0.08f, 0f);
+    [SerializeField] private float contentVisualScale = 0.25f;
     [SerializeField] private bool showDebugLogs = true;
 
-    private readonly List<ItemData> platedItems = new();
+    private readonly List<ItemData> platedItems = new List<ItemData>();
+    private readonly List<GameObject> contentVisuals = new List<GameObject>();
 
     public IReadOnlyList<ItemData> PlatedItems => platedItems;
     public int ItemCount => platedItems.Count;
@@ -90,6 +94,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
 
         platedItems.Add(itemData);
         Log($"{itemData.DisplayName} foi colocado no prato. Total: {platedItems.Count}");
+        RefreshContentVisuals();
 
         return true;
     }
@@ -107,6 +112,61 @@ public class PlateContainer : MonoBehaviour, IInteractable
     public void ClearPlate()
     {
         platedItems.Clear();
+        RefreshContentVisuals();
+    }
+
+    private void RefreshContentVisuals()
+    {
+        for (int i = contentVisuals.Count - 1; i >= 0; i--)
+        {
+            if (contentVisuals[i] != null)
+                Destroy(contentVisuals[i]);
+        }
+
+        contentVisuals.Clear();
+
+        if (contentVisualRoot == null)
+            contentVisualRoot = transform;
+
+        for (int i = 0; i < platedItems.Count; i++)
+        {
+            ItemData item = platedItems[i];
+
+            if (item == null || item.Prefab == null)
+                continue;
+
+            GameObject visual = Instantiate(item.Prefab, contentVisualRoot);
+            visual.name = $"Prato_{item.DisplayName}";
+            visual.transform.localPosition = contentVisualLocalOffset;
+            visual.transform.localRotation = Quaternion.identity;
+            visual.transform.localScale = Vector3.one * contentVisualScale;
+            DisableGameplayComponents(visual);
+            contentVisuals.Add(visual);
+        }
+    }
+
+    private static void DisableGameplayComponents(GameObject visual)
+    {
+        foreach (Item item in visual.GetComponentsInChildren<Item>())
+            item.enabled = false;
+
+        foreach (ItemContainer container in visual.GetComponentsInChildren<ItemContainer>())
+            container.enabled = false;
+
+        foreach (PlateContainer plate in visual.GetComponentsInChildren<PlateContainer>())
+            plate.enabled = false;
+
+        foreach (Collider collider in visual.GetComponentsInChildren<Collider>())
+            collider.enabled = false;
+
+        foreach (Rigidbody body in visual.GetComponentsInChildren<Rigidbody>())
+        {
+            body.velocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.useGravity = false;
+            body.isKinematic = true;
+            body.detectCollisions = false;
+        }
     }
 
     private void LogContents()

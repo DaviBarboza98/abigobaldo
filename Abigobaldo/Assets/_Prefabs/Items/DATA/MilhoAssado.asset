@@ -15,3 +15,4 @@ MonoBehaviour:
   itemId: milho_assado
   displayName: Milho Assado
   prefab: {fileID: 8374132353690403299, guid: e89c04a704b1b064eb15d83ea7516917, type: 3}
+  cookState: 2

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
   m_Name: MilhoAssadoPoucoQueimado
   m_EditorClassIdentifier: 
-  itemId: milho_assado_pouco_queimado
-  displayName: Milho Assado Pouco Queimado
+  itemId: milho_assado_passado
+  displayName: Milho Assado Passado
   prefab: {fileID: 8374132353690403299, guid: e89c04a704b1b064eb15d83ea7516917, type: 3}
+  cookState: 3

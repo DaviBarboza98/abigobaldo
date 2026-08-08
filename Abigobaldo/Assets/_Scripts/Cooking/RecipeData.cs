@@ -11,14 +11,14 @@ public class RecipeData : ScriptableObject
     [SerializeField] private ContainerType requiredContainer;
 
     [Header("Ingredientes")]
-    [SerializeField] private List<ItemData> ingredients = new();
+    [SerializeField] private List<ItemData> ingredients = new List<ItemData>();
 
     [Header("Resultado")]
     [SerializeField] private ItemData resultItem;
     [SerializeField] private ItemData slightlyBurnedResultItem;
     [SerializeField] private ItemData burnedResultItem;
     [SerializeField] private ItemData carbonizedResultItem;
-    [SerializeField] private List<ItemData> byproducts = new();
+    [SerializeField] private List<ItemData> byproducts = new List<ItemData>();
     [SerializeField] private bool spawnByproductsOnStart;
 
     [Header("Tempo")]

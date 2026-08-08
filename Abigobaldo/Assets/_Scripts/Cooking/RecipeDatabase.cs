@@ -7,7 +7,7 @@ using UnityEngine;
 )]
 public class RecipeDatabase : ScriptableObject
 {
-    [SerializeField] private List<RecipeData> recipes = new();
+    [SerializeField] private List<RecipeData> recipes = new List<RecipeData>();
 
     public bool TryFindRecipe(
         ContainerType containerType,

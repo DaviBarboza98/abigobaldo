@@ -13,7 +13,11 @@ public class ItemData : ScriptableObject
     [Header("Visual")]
     [SerializeField] private GameObject prefab;
 
+    [Header("Estado")]
+    [SerializeField] private ItemCookState cookState = ItemCookState.Cru;
+
     public string ItemId => itemId;
     public string DisplayName => displayName;
     public GameObject Prefab => prefab;
+    public ItemCookState CookState => cookState;
 }

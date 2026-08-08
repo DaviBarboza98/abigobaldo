@@ -9,6 +9,7 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private Transform cameraPivot;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private Transform model;
+    [SerializeField] private string[] hiddenFirstPersonParts = { "Head" };
 
     [Header("-- VALORES --")]
     [SerializeField] private float sensitivity = 2f;
@@ -27,7 +28,7 @@ public class PlayerCamera : MonoBehaviour
         input = GetComponent<PlayerInputHandler>();
         movement = GetComponent<PlayerMovement>();
 
-        HideHead();
+        HideFirstPersonParts();
     }
 
     private void Update()
@@ -67,34 +68,67 @@ public class PlayerCamera : MonoBehaviour
         );
     }
 
-    private void HideHead()
+    private void HideFirstPersonParts()
     {
         if (model == null)
             return;
 
-        string[] partsToHide =
+        HideModelParts(hiddenFirstPersonParts);
+
+        string[] legacyPartsToHide =
         {
             "OlhoE",
             "OlhoD",
             "SombrancelhaE",
             "SombrancelhaD",
             "Nariz",
-            "CabeÃ§a",
+            "Cabeca",
             "Cabelin",
             "Bigode"
         };
 
-        foreach (string partName in partsToHide)
+        HideModelParts(legacyPartsToHide);
+    }
+
+    private void HideModelParts(string[] partNames)
+    {
+        if (partNames == null)
+            return;
+
+        foreach (string partName in partNames)
+            HideModelPart(partName);
+    }
+
+    private void HideModelPart(string partName)
+    {
+        if (string.IsNullOrWhiteSpace(partName))
+            return;
+
+        Transform part = FindDeepChild(model, partName);
+
+        if (part == null)
+            return;
+
+        foreach (Renderer renderer in part.GetComponentsInChildren<Renderer>())
+            renderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+    }
+
+    private static Transform FindDeepChild(Transform root, string childName)
+    {
+        if (root == null)
+            return null;
+
+        if (root.name == childName)
+            return root;
+
+        for (int i = 0; i < root.childCount; i++)
         {
-            Transform part = model.Find(partName);
+            Transform result = FindDeepChild(root.GetChild(i), childName);
 
-            if (part == null)
-                continue;
-
-            MeshRenderer renderer = part.GetComponent<MeshRenderer>();
-
-            if (renderer != null)
-                renderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            if (result != null)
+                return result;
         }
+
+        return null;
     }
 }

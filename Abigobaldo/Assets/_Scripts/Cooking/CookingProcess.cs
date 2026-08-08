@@ -22,6 +22,11 @@ public class CookingProcess
         IsRunning = true;
     }
 
+    public void Resume()
+    {
+        IsRunning = true;
+    }
+
     public void Update(float deltaTime)
     {
         if (!IsRunning)
@@ -31,6 +36,11 @@ public class CookingProcess
     }
 
     public void Stop()
+    {
+        IsRunning = false;
+    }
+
+    public void Pause()
     {
         IsRunning = false;
     }

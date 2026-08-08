@@ -11,6 +11,7 @@ public class Item : MonoBehaviour
     [SerializeField] private bool canBeThrown = true;
 
     private Rigidbody rb;
+    private MonoBehaviour[] holdStateBehaviours;
 
     public ItemData Data => itemData;
     public Rigidbody Rigidbody => rb;
@@ -21,6 +22,14 @@ public class Item : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        holdStateBehaviours = GetComponents<MonoBehaviour>();
+    }
+
+    public void Configure(ItemData data, bool held, bool thrown)
+    {
+        itemData = data;
+        canBeHeld = held;
+        canBeThrown = thrown;
     }
 
     public void PickUp(Vector3 position, Quaternion rotation)
@@ -34,6 +43,8 @@ public class Item : MonoBehaviour
         rb.useGravity = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        NotifyPickedUp();
     }
 
     public void Drop()
@@ -44,6 +55,7 @@ public class Item : MonoBehaviour
         rb.useGravity = true;
 
         transform.SetParent(null);
+        NotifyDropped();
     }
 
     public void Throw(Vector3 direction, float force)
@@ -55,5 +67,45 @@ public class Item : MonoBehaviour
 
         transform.SetParent(null);
         rb.AddForce(direction.normalized * force, ForceMode.Impulse);
+        NotifyThrown();
+    }
+
+    private void NotifyPickedUp()
+    {
+        RefreshReceivers();
+
+        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        {
+            ItemHoldStateReceiver receiver = behaviour as ItemHoldStateReceiver;
+            receiver?.OnPickedUp();
+        }
+    }
+
+    private void NotifyDropped()
+    {
+        RefreshReceivers();
+
+        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        {
+            ItemHoldStateReceiver receiver = behaviour as ItemHoldStateReceiver;
+            receiver?.OnDropped();
+        }
+    }
+
+    private void NotifyThrown()
+    {
+        RefreshReceivers();
+
+        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        {
+            ItemHoldStateReceiver receiver = behaviour as ItemHoldStateReceiver;
+            receiver?.OnThrown();
+        }
+    }
+
+    private void RefreshReceivers()
+    {
+        if (holdStateBehaviours == null || holdStateBehaviours.Length == 0)
+            holdStateBehaviours = GetComponents<MonoBehaviour>();
     }
 }

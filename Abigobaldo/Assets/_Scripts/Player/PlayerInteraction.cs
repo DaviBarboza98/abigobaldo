@@ -13,6 +13,7 @@ public class PlayerInteraction : MonoBehaviour
 
     private PlayerInputHandler input;
     private readonly RaycastHit[] interactionHits = new RaycastHit[16];
+    private Highlightable currentHighlight;
 
     public ItemHolder ItemHolder => itemHolder;
 
@@ -30,8 +31,12 @@ public class PlayerInteraction : MonoBehaviour
     private void Update()
     {
         if (itemHolder == null)
+        {
+            ClearCurrentHighlight();
             return;
+        }
 
+        UpdateHighlight();
         TryInteract();
         HandleDrop();
         HandleThrow();
@@ -62,6 +67,9 @@ public class PlayerInteraction : MonoBehaviour
             interactable.Interact(this);
             return;
         }
+
+        if (TryHandleEmptyHandContainer(interactable))
+            return;
 
         ItemSpawner spawner = hit.collider.GetComponentInParent<ItemSpawner>();
 
@@ -113,6 +121,81 @@ public class PlayerInteraction : MonoBehaviour
         return bestDistance < float.PositiveInfinity;
     }
 
+    private void UpdateHighlight()
+    {
+        if (playerCamera == null)
+        {
+            ClearCurrentHighlight();
+            return;
+        }
+
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+
+        if (!TryGetInteractionHit(ray, out RaycastHit hit))
+        {
+            ClearCurrentHighlight();
+            return;
+        }
+
+        Highlightable nextHighlight = GetHighlightableFromHit(hit.collider);
+
+        if (nextHighlight == currentHighlight)
+            return;
+
+        ClearCurrentHighlight();
+        currentHighlight = nextHighlight;
+
+        if (currentHighlight != null)
+            currentHighlight.SetHighlighted(true);
+    }
+
+    private Highlightable GetHighlightableFromHit(Collider hitCollider)
+    {
+        if (hitCollider == null)
+            return null;
+
+        GameObject highlightRoot = GetHighlightRoot(hitCollider);
+
+        if (highlightRoot == null)
+            return null;
+
+        Highlightable highlightable = highlightRoot.GetComponent<Highlightable>();
+
+        if (highlightable == null)
+            highlightable = highlightRoot.AddComponent<Highlightable>();
+
+        return highlightable;
+    }
+
+    private static GameObject GetHighlightRoot(Collider hitCollider)
+    {
+        Item item = hitCollider.GetComponentInParent<Item>();
+
+        if (item != null)
+            return item.gameObject;
+
+        ItemSpawner spawner = hitCollider.GetComponentInParent<ItemSpawner>();
+
+        if (spawner != null)
+            return spawner.gameObject;
+
+        IInteractable interactable = hitCollider.GetComponentInParent<IInteractable>();
+        Component interactableComponent = interactable as Component;
+
+        return interactableComponent != null
+            ? interactableComponent.gameObject
+            : null;
+    }
+
+    private void ClearCurrentHighlight()
+    {
+        if (currentHighlight == null)
+            return;
+
+        currentHighlight.SetHighlighted(false);
+        currentHighlight = null;
+    }
+
     private bool IsCurrentHeldItemCollider(Collider targetCollider)
     {
         if (targetCollider == null || itemHolder == null || itemHolder.IsEmpty())
@@ -140,6 +223,35 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         return false;
+    }
+
+    private bool TryHandleEmptyHandContainer(IInteractable interactable)
+    {
+        if (!itemHolder.IsEmpty())
+            return false;
+
+        ItemContainer container = interactable as ItemContainer;
+
+        if (container == null)
+            return false;
+
+        if (container.Type == ContainerType.Liquidificador)
+        {
+            container.Interact(this);
+            return true;
+        }
+
+        if (container.HasReadyOutput)
+        {
+            container.Interact(this);
+            return true;
+        }
+
+        if (container.TryPickUpContainer(itemHolder))
+            return true;
+
+        container.Interact(this);
+        return true;
     }
 
     private void HandleSpawner(ItemSpawner spawner)
