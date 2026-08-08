@@ -136,15 +136,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1397435921926800906, guid: c91a1b7c588d5e4419c7b06804fd4f02, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.18
+      value: 5.18
       objectReference: {fileID: 0}
     - target: {fileID: 1397435921926800906, guid: c91a1b7c588d5e4419c7b06804fd4f02, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.51
+      value: 4.76
       objectReference: {fileID: 0}
     - target: {fileID: 1397435921926800906, guid: c91a1b7c588d5e4419c7b06804fd4f02, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.183
+      value: -1.6830001
       objectReference: {fileID: 0}
     - target: {fileID: 1397435921926800906, guid: c91a1b7c588d5e4419c7b06804fd4f02, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1303,14 +1303,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 727488462}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbd4b3b3b60a7df47bc3be41f2fae9ee, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holder: {fileID: 0}
-  couscousPrefab: {fileID: 0}
-  cookingTime: 12
-  burningTime: 7
-  cooking: 0
+  containerType: 1
+  maxItems: 5
+  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
+  localRecipes: []
+  outputSpawnPoint: {fileID: 0}
+  showDebugLogs: 1
 --- !u!1 &753255640
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,8 +1356,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2edad7a235e11a4a82841872b99cdc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropDistance: 0
   throwForce: 0
+  positionFollowStrength: 18
+  maxFollowSpeed: 9
+  rotationFollowStrength: 18
+  maxAngularSpeed: 12
+  collisionSkin: 0.03
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  depenetrationIterations: 3
+  overlapCheckInterval: 0.12
+  minDistanceOffset: -0.75
+  maxDistanceOffset: 1.25
+  zoomSpeed: 0.0015
   itemRotationSensitivity: 0.25
 --- !u!1 &766070392 stripped
 GameObject:
@@ -1485,14 +1498,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 873007209}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab8a8fd68fc841f4ca6e2680c7101a22, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holder1: {fileID: 1847598674}
-  holder2: {fileID: 753255642}
-  flourPrefab: {fileID: 0}
-  processingTime: 10
-  processing: 0
+  containerType: 2
+  maxItems: 5
+  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
+  localRecipes: []
+  outputSpawnPoint: {fileID: 0}
+  showDebugLogs: 1
 --- !u!64 &873007212
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1949,8 +1963,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2edad7a235e11a4a82841872b99cdc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropDistance: 1
   throwForce: 8
+  positionFollowStrength: 18
+  maxFollowSpeed: 9
+  rotationFollowStrength: 18
+  maxAngularSpeed: 12
+  collisionSkin: 0.03
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  depenetrationIterations: 3
+  overlapCheckInterval: 0.12
+  minDistanceOffset: -0.75
+  maxDistanceOffset: 1.25
+  zoomSpeed: 0.0015
   itemRotationSensitivity: 0.25
 --- !u!1 &1313796200 stripped
 GameObject:
@@ -2773,8 +2799,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2edad7a235e11a4a82841872b99cdc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropDistance: 0
   throwForce: 0
+  positionFollowStrength: 18
+  maxFollowSpeed: 9
+  rotationFollowStrength: 18
+  maxAngularSpeed: 12
+  collisionSkin: 0.03
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  depenetrationIterations: 3
+  overlapCheckInterval: 0.12
+  minDistanceOffset: -0.75
+  maxDistanceOffset: 1.25
+  zoomSpeed: 0.0015
   itemRotationSensitivity: 0.25
 --- !u!1 &1861521926
 GameObject:
@@ -2942,16 +2980,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1402555962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b57b913554992e3428a449a1746018f4, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holder: {fileID: 0}
-  friedEggPrefab: {fileID: 0}
-  eggShellPrefab: {fileID: 0}
-  cookingTime: 12
-  burningTime: 7
-  cooking: 0
-  currentPlayer: {fileID: 0}
+  containerType: 0
+  maxItems: 5
+  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
+  localRecipes: []
+  outputSpawnPoint: {fileID: 0}
+  showDebugLogs: 1
 --- !u!1001 &1132632010108466015
 PrefabInstance:
   m_ObjectHideFlags: 0

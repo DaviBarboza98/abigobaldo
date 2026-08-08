@@ -123,9 +123,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
-      propertyPath: itemName
-      value: "Fub\xE1"
-      objectReference: {fileID: 0}
+      propertyPath: itemData
+      value:
+      objectReference: {fileID: 11400000, guid: 8f861095d31847098c8db9a47caa6a5a, type: 2}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
       propertyPath: canBeHeld
       value: 1

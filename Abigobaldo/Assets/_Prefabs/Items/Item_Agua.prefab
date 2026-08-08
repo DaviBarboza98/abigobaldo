@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e4cbaef6edbb8345a9d1235a1e9e730, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemName: "\xC1gua"
+  itemData: {fileID: 11400000, guid: e642d9d3edb940b88df71252f7508d90, type: 2}
   canBeHeld: 1
   canBeThrown: 1
 --- !u!1 &6493330857878624034

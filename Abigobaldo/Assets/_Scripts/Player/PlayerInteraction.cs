@@ -3,15 +3,16 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerInteraction : MonoBehaviour
 {
-    [Header("Referências")]
+    [Header("Referencias")]
     [SerializeField] private Camera playerCamera;
     [SerializeField] private ItemHolder itemHolder;
 
-    [Header("Interação")]
+    [Header("Interacao")]
     [SerializeField] private float interactionDistance = 3f;
     [SerializeField] private LayerMask interactionLayers = ~0;
 
     private PlayerInputHandler input;
+    private readonly RaycastHit[] interactionHits = new RaycastHit[16];
 
     public ItemHolder ItemHolder => itemHolder;
 
@@ -28,14 +29,17 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Update()
     {
-        HandleInteraction();
+        if (itemHolder == null)
+            return;
+
+        TryInteract();
         HandleDrop();
         HandleThrow();
-        HandleRotation(); //star adicionou isso
-
+        HandleHoldZoom();
+        HandleRotation();
     }
 
-    private void HandleInteraction()
+    private void TryInteract()
     {
         if (!input.InteractPressed)
             return;
@@ -43,31 +47,23 @@ public class PlayerInteraction : MonoBehaviour
         if (playerCamera == null)
             return;
 
-        if (itemHolder == null)
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+
+        if (!TryGetInteractionHit(ray, out RaycastHit hit))
             return;
 
-        Ray ray = new Ray(
-            playerCamera.transform.position,
-            playerCamera.transform.forward
-        );
+        IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
 
-        if (!Physics.Raycast(
-            ray,
-            out RaycastHit hit,
-            interactionDistance,
-            interactionLayers,
-            QueryTriggerInteraction.Collide
-        ))
+        if (TryInteractWithHeldPlate(interactable))
+            return;
+
+        if (!itemHolder.IsEmpty() && interactable != null)
         {
+            interactable.Interact(this);
             return;
         }
 
-        // ==========================================
-        // 1. ITEM SPAWNER
-        // ==========================================
-
-        ItemSpawner spawner =
-            hit.collider.GetComponentInParent<ItemSpawner>();
+        ItemSpawner spawner = hit.collider.GetComponentInParent<ItemSpawner>();
 
         if (spawner != null)
         {
@@ -75,12 +71,7 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        // ==========================================
-        // 2. ITEM
-        // ==========================================
-
-        Item item =
-            hit.collider.GetComponentInParent<Item>();
+        Item item = hit.collider.GetComponentInParent<Item>();
 
         if (item != null)
         {
@@ -88,17 +79,67 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        // ==========================================
-        // 3. INTERACTABLE
-        // ==========================================
-
-        IInteractable interactable =
-            hit.collider.GetComponentInParent<IInteractable>();
-
         if (interactable != null)
-        {
             interactable.Interact(this);
+    }
+
+    private bool TryGetInteractionHit(Ray ray, out RaycastHit bestHit)
+    {
+        int hitCount = Physics.RaycastNonAlloc(
+            ray,
+            interactionHits,
+            interactionDistance,
+            interactionLayers,
+            QueryTriggerInteraction.Collide
+        );
+
+        bestHit = default;
+        float bestDistance = float.PositiveInfinity;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            RaycastHit hit = interactionHits[i];
+
+            if (IsCurrentHeldItemCollider(hit.collider))
+                continue;
+
+            if (hit.distance >= bestDistance)
+                continue;
+
+            bestHit = hit;
+            bestDistance = hit.distance;
         }
+
+        return bestDistance < float.PositiveInfinity;
+    }
+
+    private bool IsCurrentHeldItemCollider(Collider targetCollider)
+    {
+        if (targetCollider == null || itemHolder == null || itemHolder.IsEmpty())
+            return false;
+
+        Item currentItem = itemHolder.CurrentItem;
+
+        return currentItem != null && targetCollider.transform.IsChildOf(currentItem.transform);
+    }
+
+    private bool TryInteractWithHeldPlate(IInteractable interactable)
+    {
+        if (itemHolder.IsEmpty())
+            return false;
+
+        PlateContainer heldPlate = itemHolder.CurrentItem.GetComponent<PlateContainer>();
+
+        if (heldPlate == null)
+            return false;
+
+        if (interactable is ItemContainer container)
+        {
+            container.TryMoveOutputToPlate(heldPlate);
+            return true;
+        }
+
+        return false;
     }
 
     private void HandleSpawner(ItemSpawner spawner)
@@ -112,25 +153,39 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         if (!itemHolder.TryPickUp(item))
-        {
             Destroy(item.gameObject);
-        }
     }
 
     private void HandleItem(Item item)
     {
         if (!itemHolder.IsEmpty())
+        {
+            TryPlateLooseItem(item);
             return;
+        }
 
         itemHolder.TryPickUp(item);
+    }
+
+    private bool TryPlateLooseItem(Item item)
+    {
+        if (item == null || itemHolder.IsEmpty())
+            return false;
+
+        if (item == itemHolder.CurrentItem)
+            return false;
+
+        PlateContainer heldPlate = itemHolder.CurrentItem.GetComponent<PlateContainer>();
+
+        if (heldPlate == null)
+            return false;
+
+        return heldPlate.TryAddLooseItem(item);
     }
 
     private void HandleDrop()
     {
         if (!input.DropPressed)
-            return;
-
-        if (itemHolder == null)
             return;
 
         itemHolder.DropItem();
@@ -141,9 +196,6 @@ public class PlayerInteraction : MonoBehaviour
         if (!input.ThrowPressed)
             return;
 
-        if (itemHolder == null)
-            return;
-
         itemHolder.ThrowItem();
     }
 
@@ -152,23 +204,20 @@ public class PlayerInteraction : MonoBehaviour
         if (!input.RotateHeld)
             return;
 
-        if (itemHolder == null)
-            return;
-
         if (itemHolder.IsEmpty())
             return;
 
         if (playerCamera == null)
             return;
 
-        itemHolder.RotateItem(
-            input.Look,
-            playerCamera.transform
-        );
+        itemHolder.RotateItem(input.Look, playerCamera.transform);
+    }
+
+    private void HandleHoldZoom()
+    {
+        if (Mathf.Approximately(input.HoldZoom, 0f))
+            return;
+
+        itemHolder.ZoomHeldItem(input.HoldZoom);
     }
 }
-
-
-}
-
-//star: criei um private void novo pra criar o código q faz o item girar quando o player segura R e mexe o cursor na tela

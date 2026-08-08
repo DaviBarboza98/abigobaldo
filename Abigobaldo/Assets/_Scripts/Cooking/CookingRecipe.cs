@@ -1,16 +1,10 @@
-using UnityEngine;
-
 [System.Serializable]
 public class CookingRecipe
 {
-    [Header("Ingredientes")]
+    [System.Obsolete("Use RecipeData ScriptableObject para novas receitas.")]
     public string ingredient1;
     public string ingredient2;
-
-    [Header("Resultado")]
-    public GameObject resultPrefab;
-
-    [Header("Tempo")]
+    public ItemData resultItem;
     public float cookingTime = 10f;
     public float burningTime = 7f;
 }

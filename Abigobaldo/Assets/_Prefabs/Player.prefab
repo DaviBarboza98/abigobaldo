@@ -30,6 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8419437334484555736}
+  - {fileID: 8687432313080562006}
   m_Father: {fileID: 3000975385269738713}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3658983871082885280
@@ -62,8 +63,7 @@ Transform:
   m_LocalPosition: {x: -0, y: -0.25, z: 0.107}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 8687432313080562006}
+  m_Children: []
   m_Father: {fileID: 7212591599591013443}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &4774237957801032376
@@ -216,7 +216,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraPivot: {fileID: 7212591599591013443}
   playerCamera: {fileID: 4774237957801032376}
-  itemHolder: {fileID: 8687432313080562006}
   model: {fileID: 1776566871151326401}
   sensitivity: 0.2
   minPitch: -80
@@ -224,10 +223,6 @@ MonoBehaviour:
   defaultFov: 75
   runningFov: 85
   fovSmoothSpeed: 8
-  collisionCheckRadius: 0.03
-  itemCollisionLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &2107297783323293639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -300,11 +295,11 @@ Transform:
   m_GameObject: {fileID: 8379618038624594708}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.19, z: 2.2229998}
+  m_LocalPosition: {x: 0, y: -1.44, z: 2.33}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8419437334484555736}
+  m_Father: {fileID: 7212591599591013443}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6285104347786073
 MonoBehaviour:
@@ -318,8 +313,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2edad7a235e11a4a82841872b99cdc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropDistance: 0
   throwForce: 8
+  positionFollowStrength: 18
+  maxFollowSpeed: 9
+  rotationFollowStrength: 18
+  maxAngularSpeed: 12
+  collisionSkin: 0.03
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  depenetrationIterations: 3
+  overlapCheckInterval: 0.12
+  minDistanceOffset: -0.75
+  maxDistanceOffset: 1.25
+  zoomSpeed: 0.0015
   itemRotationSensitivity: 0.25
 --- !u!1001 &2246481842692608810
 PrefabInstance:

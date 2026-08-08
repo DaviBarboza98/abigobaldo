@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
+  m_Name: Prato
+  m_EditorClassIdentifier: 
+  itemId: prato
+  displayName: Prato
+  prefab: {fileID: 7975939182928145019, guid: c3fa874fe7d39934a92d0805a056eb80, type: 3}

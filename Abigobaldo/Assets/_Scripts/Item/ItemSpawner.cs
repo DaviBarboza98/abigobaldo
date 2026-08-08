@@ -7,19 +7,24 @@ public class ItemSpawner : MonoBehaviour
 
     public Item SpawnItem()
     {
+        TrySpawnItem(out Item item);
+        return item;
+    }
+
+    public bool TrySpawnItem(out Item item)
+    {
+        item = null;
+
         if (itemPrefab == null)
-            return null;
+            return false;
 
         GameObject itemObject = Instantiate(itemPrefab);
+        item = itemObject.GetComponent<Item>();
 
-        Item item = itemObject.GetComponent<Item>();
+        if (item != null)
+            return true;
 
-        if (item == null)
-        {
-            Destroy(itemObject);
-            return null;
-        }
-
-        return item;
+        Destroy(itemObject);
+        return false;
     }
 }

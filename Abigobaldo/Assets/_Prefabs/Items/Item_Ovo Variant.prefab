@@ -123,9 +123,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
-      propertyPath: itemName
-      value: Ovo
-      objectReference: {fileID: 0}
+      propertyPath: itemData
+      value:
+      objectReference: {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
       propertyPath: canBeHeld
       value: 1

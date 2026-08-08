@@ -49,9 +49,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
-      propertyPath: itemName
-      value: Prato
-      objectReference: {fileID: 0}
+      propertyPath: itemData
+      value:
+      objectReference: {fileID: 11400000, guid: 65edb819b35d4c78aa9be6d91a580ed2, type: 2}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
       propertyPath: canBeHeld
       value: 1
@@ -79,6 +79,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5663555680424387291, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
       insertIndex: 1
       addedObject: {fileID: 5142916688847356435}
+    - targetCorrespondingSourceObject: {fileID: 5663555680424387291, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8401191702753361161}
   m_SourcePrefab: {fileID: 100100000, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
 --- !u!4 &4707944842118535075 stripped
 Transform:
@@ -111,6 +114,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 0.0873394, z: 1}
   m_Center: {x: 0, y: 0.0008869171, z: 0}
+--- !u!114 &8401191702753361161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7975939182928145019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b853bbd592746e4db7ee006ac13f473, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  maxItems: 4
+  showDebugLogs: 1
 --- !u!1001 &5466158921073474089
 PrefabInstance:
   m_ObjectHideFlags: 0

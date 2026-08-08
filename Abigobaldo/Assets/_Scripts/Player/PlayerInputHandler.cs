@@ -6,6 +6,7 @@ public class PlayerInputHandler : MonoBehaviour
 {
     public Vector2 Movement { get; private set; }
     public Vector2 Look { get; private set; }
+    public float HoldZoom { get; private set; }
 
     public bool RunPressed { get; private set; }
     public bool InteractPressed { get; private set; }
@@ -13,7 +14,6 @@ public class PlayerInputHandler : MonoBehaviour
     public bool ThrowPressed { get; private set; }
     public bool ToggleCursorPressed { get; private set; }
     public bool RotateHeld { get; private set; }
-
 
     private bool isPaused;
 
@@ -29,15 +29,19 @@ public class PlayerInputHandler : MonoBehaviour
 
         ReadMovement();
         ReadLook();
-        ReadActions() ; 
+        ReadZoom();
+        ReadActions();
     }
 
     private void ReadMovement()
     {
-        Vector2 movement = Vector2.zero;
-
         if (Keyboard.current == null)
+        {
+            Movement = Vector2.zero;
             return;
+        }
+
+        Vector2 movement = Vector2.zero;
 
         if (Keyboard.current.aKey.isPressed)
             movement.x -= 1f;
@@ -51,21 +55,23 @@ public class PlayerInputHandler : MonoBehaviour
         if (Keyboard.current.wKey.isPressed)
             movement.y += 1f;
 
-        if (movement.sqrMagnitude > 1f)
-            movement.Normalize();
-
-        Movement = movement;
+        Movement = movement.sqrMagnitude > 1f
+            ? movement.normalized
+            : movement;
     }
 
     private void ReadLook()
     {
-        if (Mouse.current == null)
-        {
-            Look = Vector2.zero;
-            return;
-        }
+        Look = Mouse.current != null
+            ? Mouse.current.delta.ReadValue()
+            : Vector2.zero;
+    }
 
-        Look = Mouse.current.delta.ReadValue();
+    private void ReadZoom()
+    {
+        HoldZoom = Mouse.current != null
+            ? Mouse.current.scroll.ReadValue().y
+            : 0f;
     }
 
     private void ReadActions()
@@ -73,23 +79,12 @@ public class PlayerInputHandler : MonoBehaviour
         if (Keyboard.current == null)
             return;
 
-        RunPressed =
-            Keyboard.current.leftShiftKey.isPressed;
-
-        InteractPressed =
-            Keyboard.current.eKey.wasPressedThisFrame;
-
-        DropPressed =
-            Keyboard.current.gKey.wasPressedThisFrame;
-
-        ThrowPressed =
-            Keyboard.current.tKey.wasPressedThisFrame;
-
-        ToggleCursorPressed =
-            Keyboard.current.vKey.wasPressedThisFrame;
-
-        RotateHeld =
-            Keyboard.current.rKey.isPressed;
+        RunPressed = Keyboard.current.leftShiftKey.isPressed;
+        InteractPressed = Keyboard.current.eKey.wasPressedThisFrame;
+        DropPressed = Keyboard.current.gKey.wasPressedThisFrame;
+        ThrowPressed = Keyboard.current.tKey.wasPressedThisFrame;
+        ToggleCursorPressed = Keyboard.current.vKey.wasPressedThisFrame;
+        RotateHeld = Keyboard.current.rKey.isPressed;
     }
 
     private void LateUpdate()
@@ -109,21 +104,13 @@ public class PlayerInputHandler : MonoBehaviour
             return;
 
         isPaused = !isPaused;
+        Time.timeScale = isPaused ? 0f : 1f;
 
-        if (isPaused)
-        {
-            Time.timeScale = 0f;
+        Cursor.lockState = isPaused
+            ? CursorLockMode.None
+            : CursorLockMode.Locked;
 
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Time.timeScale = 1f;
-
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        Cursor.visible = isPaused;
     }
 
     private void ClearInput()
@@ -136,9 +123,7 @@ public class PlayerInputHandler : MonoBehaviour
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
-        RotateHeld = false; //star adicionou isso
+        RotateHeld = false;
+        HoldZoom = 0f;
     }
 }
-
-
-//star: criei um botão no R pra o jogo conseguir identificar quando o player clicar no R e assim puder criar um script pra rotacionar os itens. 04.08.2026 - 23:56

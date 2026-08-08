@@ -13,12 +13,8 @@ public class Item : MonoBehaviour
     private Rigidbody rb;
 
     public ItemData Data => itemData;
-
-    public string ItemName =>
-        itemData != null
-            ? itemData.DisplayName
-            : gameObject.name;
-
+    public Rigidbody Rigidbody => rb;
+    public string ItemName => itemData != null ? itemData.DisplayName : gameObject.name;
     public bool CanBeHeld => canBeHeld;
     public bool CanBeThrown => canBeThrown;
 
@@ -27,47 +23,37 @@ public class Item : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    public void PickUp(Transform holder)
+    public void PickUp(Vector3 position, Quaternion rotation)
     {
+        transform.SetParent(null);
+        transform.SetPositionAndRotation(position, rotation);
+
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-
-        rb.isKinematic = true;
+        rb.isKinematic = false;
         rb.useGravity = false;
-
-        transform.SetParent(holder);
-
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
-    public void Drop(Vector3 position)
+    public void Drop()
     {
-        transform.SetParent(null);
-        transform.position = position;
-
-        rb.isKinematic = false;
-        rb.useGravity = true;
-    }
-
-    public void Throw(
-        Vector3 position,
-        Vector3 direction,
-        float force
-    )
-    {
-        transform.SetParent(null);
-        transform.position = position;
-
-        rb.isKinematic = false;
-        rb.useGravity = true;
-
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+        rb.useGravity = true;
 
-        rb.AddForce(
-            direction * force,
-            ForceMode.Impulse
-        );
+        transform.SetParent(null);
+    }
+
+    public void Throw(Vector3 direction, float force)
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+        rb.useGravity = true;
+
+        transform.SetParent(null);
+        rb.AddForce(direction.normalized * force, ForceMode.Impulse);
     }
 }

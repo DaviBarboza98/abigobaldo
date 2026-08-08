@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Item_CascaDeOvo_2 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
+      propertyPath: itemData
+      value:
+      objectReference: {fileID: 11400000, guid: 18977b1b149c40b4a833f9e854dfc4ae, type: 2}
     - target: {fileID: 6803519871751363006, guid: 89c6b2587bd114a43b77b0812d514d37, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

@@ -49,9 +49,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
-      propertyPath: itemName
-      value: Milho
-      objectReference: {fileID: 0}
+      propertyPath: itemData
+      value:
+      objectReference: {fileID: 11400000, guid: eda4a8b2bf953204793f0ba03cc9b882, type: 2}
     - target: {fileID: 5272041128027104982, guid: 243cee19fb4cec941961e9b859a83174, type: 3}
       propertyPath: canBeHeld
       value: 1

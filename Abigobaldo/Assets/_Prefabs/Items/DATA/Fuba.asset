@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
+  m_Name: Fuba
+  m_EditorClassIdentifier: 
+  itemId: fuba
+  displayName: Fuba
+  prefab: {fileID: 5663555680424387291, guid: 08cfafe9aa6ca514488095f9489e782e, type: 3}
