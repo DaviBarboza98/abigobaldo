@@ -1,27 +1,28 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(
-    fileName = "NovaReceita",
+    fileName = "NewRecipe",
     menuName = "Abigobaldos/Recipe Data"
 )]
 public class RecipeData : ScriptableObject
 {
-    [Header("Estacao")]
+    [Header("Station")]
     [SerializeField] private ContainerType requiredContainer;
 
-    [Header("Ingredientes")]
-    [SerializeField] private List<ItemData> ingredients = new List<ItemData>();
+    [Header("Ingredients")]
+    [SerializeField] private List<ObjectData> ingredients = new List<ObjectData>();
 
-    [Header("Resultado")]
-    [SerializeField] private ItemData resultItem;
+    [Header("Result")]
+    [SerializeField] private ObjectData resultObject;
+    [SerializeField] private Material readyMaterial;
     [SerializeField] private Material overcookedMaterial;
     [SerializeField] private Material burnedMaterial;
     [SerializeField] private Material carbonizedMaterial;
-    [SerializeField] private List<ItemData> byproducts = new List<ItemData>();
+    [SerializeField] private List<ObjectData> byproducts = new List<ObjectData>();
     [SerializeField] private bool spawnByproductsOnStart;
 
-    [Header("Tempo")]
+    [Header("Timing")]
     [SerializeField] private float cookingTime = 3f;
     [SerializeField] private bool canOvercook;
     [SerializeField] private float slightlyBurnedDelay = 5f;
@@ -29,12 +30,13 @@ public class RecipeData : ScriptableObject
     [SerializeField] private float carbonizedDelay = 15f;
 
     public ContainerType RequiredContainer => requiredContainer;
-    public IReadOnlyList<ItemData> Ingredients => ingredients;
-    public ItemData ResultItem => resultItem;
+    public IReadOnlyList<ObjectData> Ingredients => ingredients;
+    public ObjectData ResultObject => resultObject;
+    public Material ReadyMaterial => readyMaterial;
     public Material OvercookedMaterial => overcookedMaterial;
     public Material BurnedMaterial => burnedMaterial;
     public Material CarbonizedMaterial => carbonizedMaterial;
-    public IReadOnlyList<ItemData> Byproducts => byproducts;
+    public IReadOnlyList<ObjectData> Byproducts => byproducts;
     public bool SpawnByproductsOnStart => spawnByproductsOnStart;
     public float CookingTime => cookingTime;
     public bool CanOvercook => canOvercook;
@@ -47,7 +49,7 @@ public class RecipeData : ScriptableObject
         return requiredContainer == containerType;
     }
 
-    public bool Matches(ContainerType containerType, IReadOnlyList<ItemData> contents)
+    public bool Matches(ContainerType containerType, IReadOnlyList<ObjectData> contents)
     {
         if (!CanRunIn(containerType))
             return false;
@@ -58,9 +60,9 @@ public class RecipeData : ScriptableObject
         if (contents.Count != ingredients.Count)
             return false;
 
-        List<ItemData> remaining = new List<ItemData>(contents);
+        List<ObjectData> remaining = new List<ObjectData>(contents);
 
-        foreach (ItemData ingredient in ingredients)
+        foreach (ObjectData ingredient in ingredients)
         {
             if (ingredient == null)
                 return false;
@@ -80,3 +82,4 @@ public class RecipeData : ScriptableObject
         carbonizedDelay = Mathf.Max(burnedDelay, carbonizedDelay);
     }
 }
+

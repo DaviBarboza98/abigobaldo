@@ -1,31 +1,31 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 public class PlateContainer : MonoBehaviour, IInteractable
 {
-    [SerializeField] private int maxItems = 1;
+    [SerializeField] private int maxObjects = 1;
     [SerializeField] private Transform contentVisualRoot;
     [SerializeField] private Vector3 contentVisualLocalOffset = new Vector3(0f, 0.08f, 0f);
     [SerializeField] private float contentVisualScale = 0.25f;
     [SerializeField] private bool showDebugLogs = true;
 
-    private readonly List<ItemData> platedItems = new List<ItemData>();
+    private readonly List<ObjectData> platedObjects = new List<ObjectData>();
     private readonly List<Color?> platedTints = new List<Color?>();
     private readonly List<Material> platedMaterials = new List<Material>();
     private readonly List<GameObject> contentVisuals = new List<GameObject>();
 
-    public IReadOnlyList<ItemData> PlatedItems => platedItems;
-    public int ItemCount => platedItems.Count;
-    public bool IsFull => platedItems.Count >= maxItems;
-    public bool IsEmpty => platedItems.Count == 0;
+    public IReadOnlyList<ObjectData> PlatedObjects => platedObjects;
+    public int ObjectCount => platedObjects.Count;
+    public bool IsFull => platedObjects.Count >= maxObjects;
+    public bool IsEmpty => platedObjects.Count == 0;
 
     public void Interact(PlayerInteraction player)
     {
-        if (player == null || player.ItemHolder == null)
+        if (player == null || player.Holder == null)
             return;
 
-        ItemHolder holder = player.ItemHolder;
+        Holder holder = player.Holder;
 
         if (holder.IsEmpty())
         {
@@ -33,101 +33,101 @@ public class PlateContainer : MonoBehaviour, IInteractable
             return;
         }
 
-        Objeto heldItem = holder.CurrentObjeto;
+        HoldableObject heldObject = holder.CurrentObject;
 
-        if (heldItem == null || heldItem.gameObject == gameObject)
+        if (heldObject == null || heldObject.gameObject == gameObject)
         {
             LogContents();
             return;
         }
 
-        TryAddHeldItem(holder);
+        TryAddHeldObject(holder);
     }
 
-    public bool TryAddHeldItem(ItemHolder holder)
+    public bool TryAddHeldObject(Holder holder)
     {
         if (holder == null || holder.IsEmpty())
             return false;
 
-        Objeto heldItem = holder.CurrentObjeto;
+        HoldableObject heldObject = holder.CurrentObject;
 
-        if (heldItem == null || heldItem.Data == null)
+        if (heldObject == null || heldObject.Data == null)
             return false;
 
-        if (heldItem.GetComponent<PlateContainer>() != null)
+        if (heldObject.GetComponent<PlateContainer>() != null)
             return false;
 
-        Color? tint = heldItem.HasRuntimeTint ? heldItem.RuntimeTint : null;
-        if (!TryAddItem(heldItem.Data, tint, heldItem.RuntimeMaterial))
+        Color? tint = heldObject.HasRuntimeTint ? heldObject.RuntimeTint : null;
+        if (!TryAddObject(heldObject.Data, tint, heldObject.RuntimeMaterial))
             return false;
 
-        Objeto removedItem = holder.RemoveObjeto();
+        HoldableObject removedObject = holder.RemoveObject();
 
-        if (removedItem != null)
-            Destroy(removedItem.gameObject);
+        if (removedObject != null)
+            Destroy(removedObject.gameObject);
 
         return true;
     }
 
-    public bool TryAddLooseItem(Objeto item)
+    public bool TryAddLooseObject(HoldableObject looseObject)
     {
-        if (item == null || item.Data == null)
+        if (looseObject == null || looseObject.Data == null)
             return false;
 
-        if (item.GetComponent<PlateContainer>() != null)
+        if (looseObject.GetComponent<PlateContainer>() != null)
             return false;
 
-        Color? tint = item.HasRuntimeTint ? item.RuntimeTint : null;
-        if (!TryAddItem(item.Data, tint, item.RuntimeMaterial))
+        Color? tint = looseObject.HasRuntimeTint ? looseObject.RuntimeTint : null;
+        if (!TryAddObject(looseObject.Data, tint, looseObject.RuntimeMaterial))
             return false;
 
-        Destroy(item.gameObject);
+        Destroy(looseObject.gameObject);
         return true;
     }
 
-    public bool TryAddItem(ItemData itemData)
+    public bool TryAddObject(ObjectData objectData)
     {
-        return TryAddItem(itemData, null);
+        return TryAddObject(objectData, null);
     }
 
-    public bool TryAddItem(ItemData itemData, Color? tint)
+    public bool TryAddObject(ObjectData objectData, Color? tint)
     {
-        return TryAddItem(itemData, tint, null);
+        return TryAddObject(objectData, tint, null);
     }
 
-    public bool TryAddItem(ItemData itemData, Color? tint, Material material)
+    public bool TryAddObject(ObjectData objectData, Color? tint, Material material)
     {
-        if (itemData == null)
+        if (objectData == null)
             return false;
 
         if (IsFull)
         {
-            Log($"{name}: o prato esta cheio.");
+            Log($"{name}: plate is full.");
             return false;
         }
 
-        platedItems.Add(itemData);
+        platedObjects.Add(objectData);
         platedTints.Add(tint);
         platedMaterials.Add(material);
-        Log($"{itemData.DisplayName} foi colocado no prato. Total: {platedItems.Count}");
+        Log($"{objectData.DisplayName} was plated. Total: {platedObjects.Count}");
         RefreshContentVisuals();
 
         return true;
     }
 
-    public bool ContainsItem(ItemData itemData)
+    public bool ContainsObject(ObjectData objectData)
     {
-        return itemData != null && platedItems.Contains(itemData);
+        return objectData != null && platedObjects.Contains(objectData);
     }
 
-    public List<ItemData> GetContentsCopy()
+    public List<ObjectData> GetContentsCopy()
     {
-        return new List<ItemData>(platedItems);
+        return new List<ObjectData>(platedObjects);
     }
 
     public void ClearPlate()
     {
-        platedItems.Clear();
+        platedObjects.Clear();
         platedTints.Clear();
         platedMaterials.Clear();
         RefreshContentVisuals();
@@ -146,15 +146,15 @@ public class PlateContainer : MonoBehaviour, IInteractable
         if (contentVisualRoot == null)
             contentVisualRoot = transform;
 
-        for (int i = 0; i < platedItems.Count; i++)
+        for (int i = 0; i < platedObjects.Count; i++)
         {
-            ItemData item = platedItems[i];
+            ObjectData platedObject = platedObjects[i];
 
-            if (item == null || item.Prefab == null)
+            if (platedObject == null || platedObject.Prefab == null)
                 continue;
 
-            GameObject visual = Instantiate(item.Prefab, contentVisualRoot);
-            visual.name = $"Prato_{item.DisplayName}";
+            GameObject visual = Instantiate(platedObject.Prefab, contentVisualRoot);
+            visual.name = $"Plate_{platedObject.DisplayName}";
             visual.transform.localPosition = contentVisualLocalOffset;
             visual.transform.localRotation = Quaternion.identity;
             visual.transform.localScale = Vector3.one * contentVisualScale;
@@ -196,24 +196,24 @@ public class PlateContainer : MonoBehaviour, IInteractable
         if (!showDebugLogs)
             return;
 
-        if (platedItems.Count == 0)
+        if (platedObjects.Count == 0)
         {
-            Debug.Log($"{name}: o prato esta vazio.");
+            Debug.Log($"{name}: plate is empty.");
             return;
         }
 
         StringBuilder contents = new StringBuilder();
 
-        for (int i = 0; i < platedItems.Count; i++)
+        for (int i = 0; i < platedObjects.Count; i++)
         {
-            ItemData item = platedItems[i];
-            contents.Append(item != null ? item.DisplayName : "Item nulo");
+            ObjectData platedObject = platedObjects[i];
+            contents.Append(platedObject != null ? platedObject.DisplayName : "Null object");
 
-            if (i < platedItems.Count - 1)
+            if (i < platedObjects.Count - 1)
                 contents.Append(", ");
         }
 
-        Debug.Log($"{name} contem: {contents}");
+        Debug.Log($"{name} contains: {contents}");
     }
 
     private void Log(string message)
@@ -224,6 +224,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
 
     private void OnValidate()
     {
-        maxItems = Mathf.Max(1, maxItems);
+        maxObjects = Mathf.Max(1, maxObjects);
     }
 }
+

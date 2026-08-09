@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ParticleEmitterController : MonoBehaviour
 {
@@ -98,11 +98,11 @@ public class ParticleEmitterController : MonoBehaviour
     {
         string hierarchyName = GetHierarchyName().ToLowerInvariant();
 
-        if (hierarchyName.Contains("cooktop") || hierarchyName.Contains("fogao") || hierarchyName.Contains("fogo") || hierarchyName.Contains("flame"))
+        if (hierarchyName.Contains("cooktop") || hierarchyName.Contains("stove") || hierarchyName.Contains("fire") || hierarchyName.Contains("flame"))
             preset = ParticlePreset.BlueCooktopFlame;
-        else if (hierarchyName.Contains("queim") || hierarchyName.Contains("burn") || hierarchyName.Contains("smoke"))
+        else if (hierarchyName.Contains("burn") || hierarchyName.Contains("smoke"))
             preset = ParticlePreset.DarkBurnSmoke;
-        else if (hierarchyName.Contains("cuscuz") || hierarchyName.Contains("cuscuzeira") || hierarchyName.Contains("vapor"))
+        else if (hierarchyName.Contains("couscous") || hierarchyName.Contains("steam"))
             preset = ParticlePreset.HeavySteam;
         else
             preset = ParticlePreset.SoftSteam;
@@ -233,3 +233,4 @@ public class ParticleEmitterController : MonoBehaviour
         return fullName;
     }
 }
+

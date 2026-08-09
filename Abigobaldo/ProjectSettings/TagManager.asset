@@ -5,7 +5,6 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
-  - Item
   - DepositCube
   layers:
   - Default
@@ -18,7 +17,7 @@ TagManager:
   - 
   - Player
   - Interactable
-  - Objeto
+  - HoldableObject
   - Container
   - Door
   - Spawner

@@ -1,6 +1,7 @@
-public interface IRecipeStation : IInteractable
+﻿public interface IRecipeStation : IInteractable
 {
     bool HasReadyOutput { get; }
-    bool TryPickUpContainer(ItemHolder holder);
+    bool TryPickUpContainer(Holder holder);
     bool TryMoveOutputToPlate(PlateContainer plate);
 }
+

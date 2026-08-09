@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -41,7 +41,7 @@ public static class UrpProjectSetup
 
         if (litShader == null)
         {
-            Debug.LogWarning("Abigobaldo URP: shader Universal Render Pipeline/Lit nao encontrado.");
+            Debug.LogWarning("Abigobaldo URP: Universal Render Pipeline/Lit shader was not found.");
             return;
         }
 
@@ -225,3 +225,4 @@ public static class UrpProjectSetup
             material.SetFloat(propertyName, value);
     }
 }
+

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Highlightable : MonoBehaviour
 {
@@ -151,3 +151,4 @@ public class Highlightable : MonoBehaviour
             receiver?.OnHighlightChanged(highlighted);
     }
 }
+

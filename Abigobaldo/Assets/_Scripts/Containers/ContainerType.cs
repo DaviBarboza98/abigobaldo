@@ -1,6 +1,6 @@
-public enum ContainerType
+﻿public enum ContainerType
 {
-    Frigideira,
-    Cuscuzeira,
-    Liquidificador
+    FryingPan,
+    CouscousPot,
+    Blender
 }

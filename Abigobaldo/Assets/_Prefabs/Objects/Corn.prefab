@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &2813320483235236368
 GameObject:
@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5476154161464375255}
   - component: {fileID: 8542009991385431553}
   - component: {fileID: 6249097551242426066}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Corn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 11400000, guid: eda4a8b2bf953204793f0ba03cc9b882, type: 2}
+  objectData: {fileID: 11400000, guid: eda4a8b2bf953204793f0ba03cc9b882, type: 2}
   role: 0
   canBeHeld: 1
   canBeThrown: 1
@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 490349533967517164}
   - component: {fileID: 8244964264224545026}
   - component: {fileID: 8957358846500651753}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,3 +202,8 @@ CapsuleCollider:
   m_Height: 0.07763866
   m_Direction: 2
   m_Center: {x: -0.0012125969, y: -0.0000002771616, z: 0.038530566}
+
+
+
+
+

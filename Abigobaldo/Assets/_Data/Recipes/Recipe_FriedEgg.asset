@@ -1,0 +1,34 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15ddf7098174a14dbc5b81ccb686782, type: 3}
+  m_Name: Recipe_FriedEgg
+  m_EditorClassIdentifier: 
+  requiredContainer: 0
+  ingredients:
+  - {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
+  resultObject: {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
+  readyMaterial: {fileID: 0}
+  overcookedMaterial: {fileID: 0}
+  burnedMaterial: {fileID: 0}
+  carbonizedMaterial: {fileID: 0}
+  byproducts:
+  - {fileID: 11400000, guid: 4028d4429b9ce47478437323b0976f42, type: 2}
+  - {fileID: 11400000, guid: 18977b1b149c40b4a833f9e854dfc4ae, type: 2}
+  spawnByproductsOnStart: 1
+  cookingTime: 10
+  canOvercook: 1
+  slightlyBurnedDelay: 5
+  burnedDelay: 10
+  carbonizedDelay: 15
+
+
+

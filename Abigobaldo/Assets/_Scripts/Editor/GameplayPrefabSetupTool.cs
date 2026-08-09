@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -9,25 +9,25 @@ public static class GameplayPrefabSetupTool
     private const string ObjectsFolder = "Assets/_Prefabs/Objects";
     private const string ContainersFolder = "Assets/_Prefabs/Containers";
     private const string SpawnersFolder = "Assets/_Prefabs/Spawners";
-    [MenuItem("Abigobaldo/Gameplay/Normalizar cena e prefabs")]
+    [MenuItem("Abigobaldo/Gameplay/Normalize Scene And Prefabs")]
     public static void NormalizeOpenSceneAndPrefabs()
     {
         EnsureFolders();
         PromoteLikelySceneObjects();
 
-        foreach (Objeto objeto in Object.FindObjectsOfType<Objeto>(true))
-            NormalizeObjeto(objeto);
+        foreach (HoldableObject holdableObject in Object.FindObjectsOfType<HoldableObject>(true))
+            NormalizeObject(holdableObject);
 
         foreach (FryingPan fryingPan in Object.FindObjectsOfType<FryingPan>(true))
             NormalizeStation(fryingPan);
 
-        foreach (Cuscuzeira cuscuzeira in Object.FindObjectsOfType<Cuscuzeira>(true))
-            NormalizeStation(cuscuzeira);
+        foreach (CouscousPot couscousPot in Object.FindObjectsOfType<CouscousPot>(true))
+            NormalizeStation(couscousPot);
 
         foreach (Blender blender in Object.FindObjectsOfType<Blender>(true))
             NormalizeStation(blender);
 
-        foreach (ObjetoSpawner spawner in Object.FindObjectsOfType<ObjetoSpawner>(true))
+        foreach (ObjectSpawner spawner in Object.FindObjectsOfType<ObjectSpawner>(true))
             NormalizeSpawner(spawner);
 
         foreach (OpenableDoor door in Object.FindObjectsOfType<OpenableDoor>(true))
@@ -45,16 +45,16 @@ public static class GameplayPrefabSetupTool
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log("Abigobaldo: cena normalizada, dados criados quando faltavam e prefabs salvos/atualizados.");
+        Debug.Log("Abigobaldo: scene normalized, missing data created, and prefabs saved/updated.");
     }
 
-    private static void NormalizeObjeto(Objeto objeto)
+    private static void NormalizeObject(HoldableObject holdableObject)
     {
-        if (objeto == null)
+        if (holdableObject == null)
             return;
 
-        GameObject root = objeto.gameObject;
-        GameLayers.SetLayerRecursivelyIfDefault(root, GameLayers.Objeto);
+        GameObject root = holdableObject.gameObject;
+        GameLayers.SetLayerRecursivelyIfDefault(root, GameLayers.HoldableObject);
 
         Rigidbody body = GetOrAdd<Rigidbody>(root);
         body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
@@ -80,7 +80,7 @@ public static class GameplayPrefabSetupTool
                 GetOrAdd<OpenableDoor>(sceneObject);
 
             if (LooksLikeLooseObject(normalizedName))
-                GetOrAdd<Objeto>(sceneObject);
+                GetOrAdd<HoldableObject>(sceneObject);
 
             if (TryGetContainerType(normalizedName, out ContainerType containerType))
                 ConfigureStation(GetOrAddSpecificStation(sceneObject, containerType), containerType, normalizedName);
@@ -89,36 +89,37 @@ public static class GameplayPrefabSetupTool
 
     private static bool LooksLikeDoor(string normalizedName)
     {
-        return normalizedName.Contains("door") || normalizedName.Contains("porta");
+        return normalizedName.Contains("door");
     }
 
     private static bool LooksLikeLooseObject(string normalizedName)
     {
-        return normalizedName.Contains("saleiro")
-            || normalizedName.Contains("pimenteiro")
-            || normalizedName.Contains("macaco")
+        return normalizedName.Contains("salt")
+            || normalizedName.Contains("pepper")
+            || normalizedName.Contains("monkey")
             || normalizedName.Contains("suzanne")
-            || normalizedName.Contains("tabua")
-            || normalizedName.Contains("tábua");
+            || normalizedName.Contains("cuttingboard")
+            || normalizedName.Contains("cutting_board")
+            || normalizedName.Contains("cutting board");
     }
 
     private static bool TryGetContainerType(string normalizedName, out ContainerType containerType)
     {
-        if (normalizedName.Contains("frigideira") || normalizedName.Contains("frying"))
+        if (normalizedName.Contains("frying"))
         {
-            containerType = ContainerType.Frigideira;
+            containerType = ContainerType.FryingPan;
             return true;
         }
 
-        if (normalizedName.Contains("cuscuzeira") || normalizedName.Contains("cuscuz"))
+        if (normalizedName.Contains("couscous"))
         {
-            containerType = ContainerType.Cuscuzeira;
+            containerType = ContainerType.CouscousPot;
             return true;
         }
 
-        if (normalizedName.Contains("liquidificador") || normalizedName.Contains("blender"))
+        if (normalizedName.Contains("blender"))
         {
-            containerType = ContainerType.Liquidificador;
+            containerType = ContainerType.Blender;
             return true;
         }
 
@@ -129,8 +130,8 @@ public static class GameplayPrefabSetupTool
     private static void ConfigureStation(MonoBehaviour station, ContainerType containerType, string normalizedName)
     {
         SerializedObject serializedObject = new SerializedObject(station);
-        SetBool(serializedObject, "canBePickedUp", containerType != ContainerType.Liquidificador);
-        SetBool(serializedObject, "requiresManualActivation", containerType == ContainerType.Liquidificador);
+        SetBool(serializedObject, "canBePickedUp", containerType != ContainerType.Blender);
+        SetBool(serializedObject, "requiresManualActivation", containerType == ContainerType.Blender);
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(station);
@@ -140,11 +141,11 @@ public static class GameplayPrefabSetupTool
     {
         switch (containerType)
         {
-            case ContainerType.Frigideira:
+            case ContainerType.FryingPan:
                 return GetOrAdd<FryingPan>(target);
-            case ContainerType.Cuscuzeira:
-                return GetOrAdd<Cuscuzeira>(target);
-            case ContainerType.Liquidificador:
+            case ContainerType.CouscousPot:
+                return GetOrAdd<CouscousPot>(target);
+            case ContainerType.Blender:
                 return GetOrAdd<Blender>(target);
             default:
                 return null;
@@ -164,7 +165,7 @@ public static class GameplayPrefabSetupTool
         EditorUtility.SetDirty(station);
     }
 
-    private static void NormalizeSpawner(ObjetoSpawner spawner)
+    private static void NormalizeSpawner(ObjectSpawner spawner)
     {
         if (spawner == null)
             return;
@@ -215,24 +216,24 @@ public static class GameplayPrefabSetupTool
 
     private static void SaveScenePrefabs()
     {
-        foreach (Objeto objeto in Object.FindObjectsOfType<Objeto>(true))
+        foreach (HoldableObject holdableObject in Object.FindObjectsOfType<HoldableObject>(true))
         {
-            if (HasRecipeStation(objeto.gameObject))
+            if (HasRecipeStation(holdableObject.gameObject))
                 continue;
 
-            SavePrefabFor(objeto.gameObject, ObjectsFolder);
+            SavePrefabFor(holdableObject.gameObject, ObjectsFolder);
         }
 
         foreach (FryingPan fryingPan in Object.FindObjectsOfType<FryingPan>(true))
             SavePrefabFor(fryingPan.gameObject, ContainersFolder);
 
-        foreach (Cuscuzeira cuscuzeira in Object.FindObjectsOfType<Cuscuzeira>(true))
-            SavePrefabFor(cuscuzeira.gameObject, ContainersFolder);
+        foreach (CouscousPot couscousPot in Object.FindObjectsOfType<CouscousPot>(true))
+            SavePrefabFor(couscousPot.gameObject, ContainersFolder);
 
         foreach (Blender blender in Object.FindObjectsOfType<Blender>(true))
             SavePrefabFor(blender.gameObject, ContainersFolder);
 
-        foreach (ObjetoSpawner spawner in Object.FindObjectsOfType<ObjetoSpawner>(true))
+        foreach (ObjectSpawner spawner in Object.FindObjectsOfType<ObjectSpawner>(true))
             SavePrefabFor(spawner.gameObject, SpawnersFolder);
     }
 
@@ -315,7 +316,7 @@ public static class GameplayPrefabSetupTool
     private static bool HasRecipeStation(GameObject target)
     {
         return target.GetComponent<FryingPan>() != null
-            || target.GetComponent<Cuscuzeira>() != null
+            || target.GetComponent<CouscousPot>() != null
             || target.GetComponent<Blender>() != null;
     }
 
@@ -326,7 +327,7 @@ public static class GameplayPrefabSetupTool
         EnsureFolder("Assets/_Prefabs", "Containers");
         EnsureFolder("Assets/_Prefabs", "Spawners");
         EnsureFolder("Assets", "_Data");
-        EnsureFolder("Assets/_Data", "Objetos");
+        EnsureFolder("Assets/_Data", "Objects");
     }
 
     private static void EnsureFolder(string parent, string child)
@@ -343,7 +344,7 @@ public static class GameplayPrefabSetupTool
         foreach (char invalid in Path.GetInvalidFileNameChars())
             clean = clean.Replace(invalid.ToString(CultureInfo.InvariantCulture), string.Empty);
 
-        return string.IsNullOrWhiteSpace(clean) ? "Objeto" : clean;
+        return string.IsNullOrWhiteSpace(clean) ? "HoldableObject" : clean;
     }
 
     private static void SetBool(SerializedObject serializedObject, string propertyName, bool value)
@@ -365,3 +366,4 @@ public static class GameplayPrefabSetupTool
         return new Vector3(Mathf.Abs(value.x), Mathf.Abs(value.y), Mathf.Abs(value.z));
     }
 }
+

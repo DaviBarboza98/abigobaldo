@@ -1,19 +1,19 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Blender : MonoBehaviour, IRecipeStation
 {
-    [Header("Receitas")]
+    [Header("Recipes")]
     [SerializeField] private RecipeDatabase recipeDatabase;
     [SerializeField] private List<RecipeData> localRecipes = new List<RecipeData>();
 
-    [Header("Copo")]
+    [Header("Cup")]
     [SerializeField] private Transform cupAnchor;
     [SerializeField] private BlenderCup startingCup;
     [SerializeField] private bool autoAttachNearbyCup = true;
     [SerializeField] private float autoAttachRadius = 1.25f;
 
-    [Header("Mistura")]
+    [Header("Mixing")]
     [SerializeField] private float spinSpeed = 720f;
 
     [Header("Debug")]
@@ -57,15 +57,15 @@ public class Blender : MonoBehaviour, IRecipeStation
 
     public void Interact(PlayerInteraction player)
     {
-        if (player == null || player.ItemHolder == null)
+        if (player == null || player.Holder == null)
             return;
 
-        ItemHolder holder = player.ItemHolder;
+        Holder holder = player.Holder;
 
         if (!holder.IsEmpty())
         {
-            BlenderCup heldCup = holder.CurrentObjeto != null
-                ? holder.CurrentObjeto.GetComponent<BlenderCup>()
+            BlenderCup heldCup = holder.CurrentObject != null
+                ? holder.CurrentObject.GetComponent<BlenderCup>()
                 : null;
 
             if (heldCup != null)
@@ -78,7 +78,7 @@ public class Blender : MonoBehaviour, IRecipeStation
         TogglePower();
     }
 
-    public bool TryPickUpContainer(ItemHolder holder)
+    public bool TryPickUpContainer(Holder holder)
     {
         return false;
     }
@@ -98,7 +98,7 @@ public class Blender : MonoBehaviour, IRecipeStation
         return true;
     }
 
-    public bool TryTakeOutput(ItemHolder holder)
+    public bool TryTakeOutput(Holder holder)
     {
         if (currentCup == null || holder == null || !holder.IsEmpty() || !HasReadyOutput)
             return false;
@@ -120,12 +120,12 @@ public class Blender : MonoBehaviour, IRecipeStation
         FinishAndClearRecipe(false);
     }
 
-    private void AttachHeldCup(ItemHolder holder, BlenderCup cup)
+    private void AttachHeldCup(Holder holder, BlenderCup cup)
     {
         if (currentCup != null || holder == null || cup == null)
             return;
 
-        holder.RemoveObjeto();
+        holder.RemoveObject();
         AttachCup(cup);
     }
 
@@ -136,7 +136,7 @@ public class Blender : MonoBehaviour, IRecipeStation
 
         currentCup = cup;
         currentCup.AttachTo(this, cupAnchor);
-        Log($"{name}: copo encaixado.");
+        Log($"{name}: cup attached.");
 
         if (powered)
             TryStartRecipe();
@@ -181,7 +181,7 @@ public class Blender : MonoBehaviour, IRecipeStation
         if (enabled && currentCup == null)
         {
             powered = false;
-            Log($"{name}: encaixe o copo antes de ligar.");
+            Log($"{name}: attach the cup before powering on.");
             return;
         }
 
@@ -192,7 +192,7 @@ public class Blender : MonoBehaviour, IRecipeStation
             if (powered)
                 TryStartRecipe();
 
-            Log(powered ? $"{name}: ligado." : $"{name}: desligado.");
+            Log(powered ? $"{name}: powered on." : $"{name}: powered off.");
             return;
         }
 
@@ -201,7 +201,7 @@ public class Blender : MonoBehaviour, IRecipeStation
         else
             cookingProcess.Pause();
 
-        Log(powered ? $"{name}: ligado." : $"{name}: desligado.");
+        Log(powered ? $"{name}: powered on." : $"{name}: powered off.");
     }
 
     private void TryStartRecipe()
@@ -211,7 +211,7 @@ public class Blender : MonoBehaviour, IRecipeStation
 
         if (!TryFindRecipe(out RecipeData recipe))
         {
-            Log($"{name}: ingredientes nao formam uma receita.");
+            Log($"{name}: ingredients do not match a recipe.");
             return;
         }
 
@@ -221,18 +221,18 @@ public class Blender : MonoBehaviour, IRecipeStation
         outputPrepared = false;
         cookingProcess.Start();
 
-        Log($"{name}: receita iniciada. Tempo: {recipe.CookingTime:0}s.");
+        Log($"{name}: recipe started. Time: {recipe.CookingTime:0}s.");
     }
 
     private bool TryFindRecipe(out RecipeData recipe)
     {
-        IReadOnlyList<ItemData> contents = currentCup != null
+        IReadOnlyList<ObjectData> contents = currentCup != null
             ? currentCup.Contents
             : null;
 
         foreach (RecipeData localRecipe in localRecipes)
         {
-            if (localRecipe != null && localRecipe.Matches(ContainerType.Liquidificador, contents))
+            if (localRecipe != null && localRecipe.Matches(ContainerType.Blender, contents))
             {
                 recipe = localRecipe;
                 return true;
@@ -240,7 +240,7 @@ public class Blender : MonoBehaviour, IRecipeStation
         }
 
         if (recipeDatabase != null)
-            return recipeDatabase.TryFindRecipe(ContainerType.Liquidificador, contents, out recipe);
+            return recipeDatabase.TryFindRecipe(ContainerType.Blender, contents, out recipe);
 
         recipe = null;
         return false;
@@ -263,10 +263,10 @@ public class Blender : MonoBehaviour, IRecipeStation
         if (activeRecipe == null || currentCup == null || outputPrepared)
             return;
 
-        currentCup.ReplaceContentsWithResult(activeRecipe.ResultItem);
+        currentCup.ReplaceContentsWithResult(activeRecipe.ResultObject);
         outputPrepared = true;
         SetPower(false);
-        Log($"{name}: receita pronta.");
+        Log($"{name}: recipe ready.");
     }
 
     private void FinishAndClearRecipe(bool clearCupOutput = true)
@@ -292,7 +292,7 @@ public class Blender : MonoBehaviour, IRecipeStation
 
         lastLoggedSecond = second;
         if (!cookingProcess.IsReady)
-            Debug.Log($"{name}: batendo... faltam {Mathf.Max(0f, cookingProcess.CookingTime - cookingProcess.Timer):0}s.");
+            Debug.Log($"{name}: blending... {Mathf.Max(0f, cookingProcess.CookingTime - cookingProcess.Timer):0}s left.");
     }
 
     private void Log(string message)
@@ -307,3 +307,4 @@ public class Blender : MonoBehaviour, IRecipeStation
         autoAttachRadius = Mathf.Max(0.01f, autoAttachRadius);
     }
 }
+

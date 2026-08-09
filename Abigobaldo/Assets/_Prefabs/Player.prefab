@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &1987054095871316129
 GameObject:
@@ -210,7 +210,7 @@ GameObject:
   - component: {fileID: 7716992371561957745}
   - component: {fileID: 6705359910218086875}
   m_Layer: 8
-  m_Name: ItemHolder
+  m_Name: Holder
   m_TagString: Untagged
   m_Icon: {fileID: 7174288486110832750, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -257,7 +257,7 @@ MonoBehaviour:
   minDistanceOffset: -0.75
   maxDistanceOffset: 1.25
   zoomSpeed: 0.0015
-  itemRotationSensitivity: 0.25
+  objectRotationSensitivity: 0.25
 --- !u!1 &4099592715680885007
 GameObject:
   m_ObjectHideFlags: 0
@@ -575,3 +575,7 @@ Transform:
   - {fileID: 3278117202761720590}
   m_Father: {fileID: 1920853767946290423}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+
+
+
+

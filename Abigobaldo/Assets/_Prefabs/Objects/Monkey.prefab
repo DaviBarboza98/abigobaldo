@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &4999071036040219493
 GameObject:
@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4568317413168749777}
   - component: {fileID: 3729332238479081127}
   - component: {fileID: 7738032529380723519}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Monkey
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 11400000, guid: 7699bfcd9bc411442a78fdafb63860c8, type: 2}
+  objectData: {fileID: 11400000, guid: 7699bfcd9bc411442a78fdafb63860c8, type: 2}
   role: 0
   canBeHeld: 1
   canBeThrown: 1
@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 7873391043534815771}
   - component: {fileID: 8700261595650193664}
   - component: {fileID: 4015502919183368215}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -201,3 +201,8 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -2222346464153789849, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}
+
+
+
+
+

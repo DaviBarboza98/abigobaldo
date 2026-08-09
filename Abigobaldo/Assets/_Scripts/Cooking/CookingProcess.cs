@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CookingProcess
 {
@@ -51,3 +51,4 @@ public class CookingProcess
         IsRunning = false;
     }
 }
+

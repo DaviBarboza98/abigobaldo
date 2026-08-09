@@ -1,4 +1,5 @@
-public interface IHighlightStateReceiver
+﻿public interface IHighlightStateReceiver
 {
     void OnHighlightChanged(bool highlighted);
 }
+

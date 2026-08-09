@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &1122777838689699106
 GameObject:
@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5001270328239129324}
   - component: {fileID: -4798223690140621708}
   - component: {fileID: 3333299256076916125}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Plate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 11400000, guid: 65edb819b35d4c78aa9be6d91a580ed2, type: 2}
+  objectData: {fileID: 11400000, guid: 65edb819b35d4c78aa9be6d91a580ed2, type: 2}
   role: 0
   canBeHeld: 1
   canBeThrown: 1
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b853bbd592746e4db7ee006ac13f473, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxItems: 1
+  maxObjects: 1
   contentVisualRoot: {fileID: 2101857986803981692}
   contentVisualLocalOffset: {x: 0, y: 0.08, z: 0}
   contentVisualScale: 0.25
@@ -122,7 +122,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2101857986803981692}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 8418204508859773708, guid: 0000000000000000d000000000000000, type: 0}
@@ -156,7 +156,7 @@ GameObject:
   - component: {fileID: 7978127729164182553}
   - component: {fileID: 5286372396831772883}
   - component: {fileID: 503778046462445285}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,3 +251,8 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -5759799247406190690, guid: 6a8ff1501cd2e6c4699e1b9c58b6b306, type: 3}
+
+
+
+
+

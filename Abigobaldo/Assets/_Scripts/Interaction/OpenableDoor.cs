@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class OpenableDoor : MonoBehaviour, IHoldInteractable
 {
@@ -82,3 +82,4 @@ public class OpenableDoor : MonoBehaviour, IHoldInteractable
         }
     }
 }
+

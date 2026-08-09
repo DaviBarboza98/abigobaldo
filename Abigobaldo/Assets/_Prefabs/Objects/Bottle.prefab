@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &1159535525918946566
 GameObject:
@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 630858360474187341}
   - component: {fileID: 3525333900523353714}
   - component: {fileID: 2704151249875197343}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Bottle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 11400000, guid: 6bdb2922eb220e748877be0339e24711, type: 2}
+  objectData: {fileID: 11400000, guid: 6bdb2922eb220e748877be0339e24711, type: 2}
   role: 0
   canBeHeld: 1
   canBeThrown: 1
@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 7201602071844335130}
   - component: {fileID: 7050219404601863781}
   - component: {fileID: 4462373886443199591}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,3 +202,8 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 1125402466440901994, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}
+
+
+
+
+

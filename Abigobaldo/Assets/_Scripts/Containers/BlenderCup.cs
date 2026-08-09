@@ -1,12 +1,12 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-[RequireComponent(typeof(Objeto))]
-public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
+[RequireComponent(typeof(HoldableObject))]
+public class BlenderCup : MonoBehaviour, IInteractable, HoldStateReceiver
 {
-    [Header("Conteudo")]
-    [SerializeField] private int maxItems = 1;
+    [Header("Contents")]
+    [SerializeField] private int maxObjects = 1;
     [SerializeField] private Transform contentRoot;
     [SerializeField] private Vector3 contentLocalOffset;
     [SerializeField] private float ingredientVisualScale = 0.18f;
@@ -16,20 +16,20 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    private readonly List<ItemData> contents = new List<ItemData>();
+    private readonly List<ObjectData> contents = new List<ObjectData>();
     private readonly List<GameObject> visuals = new List<GameObject>();
     private Blender attachedBase;
-    private Objeto objeto;
+    private HoldableObject holdableObject;
     private Rigidbody rb;
     private Collider[] colliders;
 
-    public IReadOnlyList<ItemData> Contents => contents;
+    public IReadOnlyList<ObjectData> Contents => contents;
     public bool IsAttached => attachedBase != null;
     public bool HasSingleOutput => contents.Count == 1;
 
     private void Awake()
     {
-        objeto = GetComponent<Objeto>();
+        holdableObject = GetComponent<HoldableObject>();
         rb = GetComponent<Rigidbody>();
         colliders = GetComponentsInChildren<Collider>();
 
@@ -39,26 +39,26 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     public void Interact(PlayerInteraction player)
     {
-        if (player == null || player.ItemHolder == null)
+        if (player == null || player.Holder == null)
             return;
 
-        ItemHolder holder = player.ItemHolder;
+        Holder holder = player.Holder;
 
         if (holder.IsEmpty())
         {
-            if (TryTakeLastItem(holder))
+            if (TryTakeLastObject(holder))
                 return;
 
             if (attachedBase != null)
                 DetachToHolder(holder);
             else
-                holder.TryPickUp(objeto);
+                holder.TryPickUp(holdableObject);
 
             return;
         }
 
-        PlateContainer heldPlate = holder.CurrentObjeto != null
-            ? holder.CurrentObjeto.GetComponent<PlateContainer>()
+        PlateContainer heldPlate = holder.CurrentObject != null
+            ? holder.CurrentObject.GetComponent<PlateContainer>()
             : null;
 
         if (heldPlate != null && TryMoveOutputToPlate(heldPlate))
@@ -81,14 +81,14 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         SetPhysicsEnabled(false);
     }
 
-    public bool DetachToHolder(ItemHolder holder)
+    public bool DetachToHolder(Holder holder)
     {
         if (holder == null || !holder.IsEmpty())
             return false;
 
         Blender previousBase = attachedBase;
 
-        if (!holder.TryPickUp(objeto))
+        if (!holder.TryPickUp(holdableObject))
             return false;
 
         attachedBase = null;
@@ -102,34 +102,34 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         if (plate == null || contents.Count != 1)
             return false;
 
-        if (!plate.TryAddItem(contents[0]))
+        if (!plate.TryAddObject(contents[0]))
             return false;
 
         ClearContents();
         return true;
     }
 
-    public bool TryTakeOutput(ItemHolder holder)
+    public bool TryTakeOutput(Holder holder)
     {
         if (holder == null || !holder.IsEmpty() || contents.Count != 1)
             return false;
 
-        if (!ObjetoDeliveryUtility.TryDeliverToHolder(contents[0], holder))
+        if (!ObjectDeliveryUtility.TryDeliverToHolder(contents[0], holder))
             return false;
 
         ClearContents();
         return true;
     }
 
-    public bool TryTakeLastItem(ItemHolder holder)
+    public bool TryTakeLastObject(Holder holder)
     {
         if (holder == null || !holder.IsEmpty() || contents.Count == 0)
             return false;
 
         int lastIndex = contents.Count - 1;
-        ItemData item = contents[lastIndex];
+        ObjectData targetObject = contents[lastIndex];
 
-        if (!ObjetoDeliveryUtility.TryDeliverToHolder(item, holder))
+        if (!ObjectDeliveryUtility.TryDeliverToHolder(targetObject, holder))
             return false;
 
         contents.RemoveAt(lastIndex);
@@ -138,7 +138,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         return true;
     }
 
-    public void ReplaceContentsWithResult(ItemData result)
+    public void ReplaceContentsWithResult(ObjectData result)
     {
         contents.Clear();
 
@@ -181,19 +181,19 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     {
     }
 
-    private bool TryStoreHeldObject(ItemHolder holder)
+    private bool TryStoreHeldObject(Holder holder)
     {
         if (!IsAttached)
             return false;
 
-        if (contents.Count >= maxItems)
+        if (contents.Count >= maxObjects)
             return false;
 
-        Objeto held = holder.CurrentObjeto;
+        HoldableObject held = holder.CurrentObject;
         if (held == null || held.Data == null || held.GetComponent<BlenderCup>() != null)
             return false;
 
-        Objeto removed = holder.RemoveObjeto();
+        HoldableObject removed = holder.RemoveObject();
         if (removed == null)
             return false;
 
@@ -227,7 +227,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             CreateVisual(contents[i], scale);
     }
 
-    private void CreateVisual(ItemData data, float scale)
+    private void CreateVisual(ObjectData data, float scale)
     {
         if (data == null || data.Prefab == null || contentRoot == null)
             return;
@@ -309,7 +309,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
         {
             string lowerName = child.name.ToLowerInvariant();
-            if (lowerName == "cupcontentroot" || lowerName == "contentroot" || lowerName == "conteudo")
+            if (lowerName == "cupcontentroot" || lowerName == "contentroot")
                 return child;
         }
 
@@ -324,7 +324,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         StringBuilder text = new StringBuilder();
         for (int i = 0; i < contents.Count; i++)
         {
-            text.Append(contents[i] != null ? contents[i].DisplayName : "Dado nulo");
+            text.Append(contents[i] != null ? contents[i].DisplayName : "Null data");
             if (i < contents.Count - 1)
                 text.Append(", ");
         }
@@ -334,6 +334,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     private void OnValidate()
     {
-        maxItems = 1;
+        maxObjects = 1;
     }
 }
+

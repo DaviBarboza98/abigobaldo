@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 [DefaultExecutionOrder(-100)]
@@ -134,3 +134,4 @@ public class PlayerInputHandler : MonoBehaviour
         HoldZoom = 0f;
     }
 }
+

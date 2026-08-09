@@ -1,0 +1,20 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de81e9fc29f273f4381d6c0462b413a0, type: 3}
+  m_Name: Eggshell2
+  m_EditorClassIdentifier: 
+  objectId: eggshell_2
+  displayName: Eggshell
+  prefab: {fileID: 4016348621787944144, guid: e2353c2247c64ba49822fad5cc7b5c91, type: 3}
+  cookState: 0
+
+

@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &17471538979890751
 GameObject:
@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3138962348910111856}
   - component: {fileID: 7834336234920922254}
   - component: {fileID: 9068971933370090571}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   - component: {fileID: 2229106488926298912}
   - component: {fileID: 6580640618867528606}
   - component: {fileID: 1699500175529166550}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Egg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
+  objectData: {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
   role: 0
   canBeHeld: 1
   canBeThrown: 1
@@ -201,3 +201,8 @@ MonoBehaviour:
   localHighlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   localEmissionColor: {r: 1, g: 0.65, b: 0.05, a: 1}
   localEmissionIntensity: 1.1
+
+
+
+
+

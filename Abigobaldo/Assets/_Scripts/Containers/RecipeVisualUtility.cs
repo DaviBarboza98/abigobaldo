@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class RecipeVisualUtility
 {
@@ -9,7 +9,7 @@ public static class RecipeVisualUtility
 
     public static void DisableGameplayComponents(GameObject visual, bool disablePhysics)
     {
-        foreach (Objeto objeto in visual.GetComponentsInChildren<Objeto>())
+        foreach (HoldableObject objeto in visual.GetComponentsInChildren<HoldableObject>())
             objeto.enabled = false;
 
         foreach (MonoBehaviour behaviour in visual.GetComponentsInChildren<MonoBehaviour>())
@@ -34,3 +34,4 @@ public static class RecipeVisualUtility
         }
     }
 }
+

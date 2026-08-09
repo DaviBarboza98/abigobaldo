@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &208563410572725738
 GameObject:
@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4500309737583085150}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: AttachedColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3215472786980585369}
   - component: {fileID: 8288116963489418117}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_2_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8029579760333215633}
   - component: {fileID: 7812063723656807894}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wall1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -153,7 +153,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4272789963094638082}
   - component: {fileID: 1573362365099282373}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_1_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -207,7 +207,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7934453527496267345}
   - component: {fileID: 5076039310575414305}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wall1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -260,7 +260,7 @@ GameObject:
   m_Component:
   - component: {fileID: 607632278174178893}
   - component: {fileID: 3389065073991228698}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_0_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -314,7 +314,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2885486302384068902}
   - component: {fileID: 6111516588545030187}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_2_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -368,7 +368,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9028749976207096646}
   - component: {fileID: 5466797253012557956}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_0_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -422,7 +422,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6303111035038666680}
   - component: {fileID: 6121677692216561933}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_2_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -476,7 +476,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7692384010085773704}
   - component: {fileID: 6433465716527652798}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_1_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -531,7 +531,7 @@ GameObject:
   - component: {fileID: 7782308743347047663}
   - component: {fileID: 7665172730845646927}
   - component: {fileID: 5402798399598627904}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Tampa
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -613,7 +613,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6223295435119066507}
   - component: {fileID: 5968705935657257166}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_0_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -670,7 +670,7 @@ GameObject:
   - component: {fileID: 8680899098386369196}
   - component: {fileID: 5856529572549924346}
   - component: {fileID: 312233700227800006}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BlenderCup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -734,7 +734,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 11400000, guid: 7b833cbaf40245f479d871ba2c41ab94, type: 2}
+  objectData: {fileID: 11400000, guid: 7b833cbaf40245f479d871ba2c41ab94, type: 2}
   role: 4
   canBeHeld: 1
   canBeThrown: 1
@@ -767,7 +767,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37d36914fe790324db9f07ac6c7e814a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxItems: 1
+  maxObjects: 1
   contentRoot: {fileID: 9198940960261186637}
   contentLocalOffset: {x: 0, y: 0, z: 0}
   ingredientVisualScale: 0.18
@@ -784,7 +784,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7745346338161152640}
   - component: {fileID: 4636484252501087260}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: HeldColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -839,7 +839,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5515084781326555469}
   - component: {fileID: 6845620034534516593}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_1_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -893,7 +893,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2715901657054128201}
   - component: {fileID: 5148236821023657732}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_0_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -947,7 +947,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8377146724906037948}
   - component: {fileID: 569763419949773182}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_1_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1001,7 +1001,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6867245519029141815}
   - component: {fileID: 9073456606713048872}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_0_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1055,7 +1055,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3967605242167462244}
   - component: {fileID: 5090051967231607369}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wall1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1108,7 +1108,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4862079612390853154}
   - component: {fileID: 1291426254969947914}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1162,7 +1162,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8812092320126842155}
   - component: {fileID: 8478089393369383433}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_0_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1216,7 +1216,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9207393537397808671}
   - component: {fileID: 6978569735582970765}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_0_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1270,7 +1270,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8753603545340085095}
   - component: {fileID: 3873053301536975824}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_0_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1324,7 +1324,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4285696655917968481}
   - component: {fileID: 529969980656266167}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_2_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1379,7 +1379,7 @@ GameObject:
   - component: {fileID: 2221564290528384406}
   - component: {fileID: 7328672876782824090}
   - component: {fileID: 4424599236077611023}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1465,7 +1465,7 @@ GameObject:
   m_Component:
   - component: {fileID: 608594565414068827}
   - component: {fileID: 6297673669441924473}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_2_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1519,7 +1519,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7755745946469227928}
   - component: {fileID: 5456348029208493437}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_2_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1573,7 +1573,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6479583915970330594}
   - component: {fileID: 3668358799520114403}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_1_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1627,7 +1627,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8912300878760337290}
   - component: {fileID: 5960855736626666851}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_1_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1681,7 +1681,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9036139665483100244}
   - component: {fileID: 3239066227811340312}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_1_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1735,7 +1735,7 @@ GameObject:
   m_Component:
   - component: {fileID: 284186065205262632}
   - component: {fileID: 7094448971857222313}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_0_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1789,7 +1789,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2935352795249453504}
   - component: {fileID: 87054168890494183}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_0_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1843,7 +1843,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6837346015564337709}
   - component: {fileID: 3887395345859766267}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_1_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1897,7 +1897,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1176036096249456783}
   - component: {fileID: 3680357787851234259}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_2_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1951,7 +1951,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4500704149006671310}
   - component: {fileID: 4232768827904452825}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_1_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2005,7 +2005,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7699632310219053716}
   - component: {fileID: 2100736281427004646}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Wall1 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2058,7 +2058,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3229740702011529566}
   - component: {fileID: 5770338943084399375}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_0_2_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2111,7 +2111,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6480998763080546764}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: VoxelMeshColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2177,7 +2177,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4020050066749412835}
   - component: {fileID: 4354328492066507201}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_2_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2231,7 +2231,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6776355288994111547}
   - component: {fileID: 3214121666432340504}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_1_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2285,7 +2285,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8345188345430773156}
   - component: {fileID: 7497353499708163022}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_2_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2339,7 +2339,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3011138558413359890}
   - component: {fileID: 3689333070487368794}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_1_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2393,7 +2393,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6935554743921663380}
   - component: {fileID: 1282895573273004360}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_1_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2447,7 +2447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7534291660449851617}
   - component: {fileID: 1501420402345963025}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2499,7 +2499,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9198940960261186637}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: CupContentRoot
   m_TagString: Untagged
   m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}
@@ -2531,7 +2531,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2415140511044795972}
   - component: {fileID: 1820713700806687746}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_2_0_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2585,7 +2585,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7973286965775999202}
   - component: {fileID: 7037793474744568640}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Voxel_1_0_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2629,3 +2629,8 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+
+
+
+
+

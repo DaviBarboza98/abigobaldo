@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &3832088550422518647
 GameObject:
@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6257751771569702920}
   - component: {fileID: 6212984959295721029}
   - component: {fileID: 5815749003534158829}
-  m_Layer: 9
+  m_Layer: 10
   m_Name: Pepper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 0}
+  objectData: {fileID: 11400000, guid: 850f1921154749669182901092086f68, type: 2}
   role: 0
   canBeHeld: 1
   canBeThrown: 1
@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 5685873624606431152}
   - component: {fileID: 5630146955041267176}
   - component: {fileID: 7250997949832770372}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,3 +224,9 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6520794469422360905, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}
+
+
+
+
+
+

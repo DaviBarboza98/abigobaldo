@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &312233700227800001
 GameObject:
@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 7504799428335400582}
   - component: {fileID: 312233700227800007}
   m_Layer: 0
-  m_Name: Liquidificador
+  m_Name: Blender
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -519,3 +519,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
   m_PrefabInstance: {fileID: 7966855434620858669}
   m_PrefabAsset: {fileID: 0}
+
+
+
+

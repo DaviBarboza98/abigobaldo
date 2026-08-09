@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
 [RequireComponent(typeof(PlayerInputHandler))]
@@ -135,3 +135,4 @@ public class PlayerCamera : MonoBehaviour
         return null;
     }
 }
+

@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class GameLayers
 {
     public const string Player = "Player";
     public const string Interactable = "Interactable";
-    public const string Objeto = "Objeto";
+    public const string HoldableObject = "HoldableObject";
     public const string Container = "Container";
     public const string Door = "Door";
     public const string Spawner = "Spawner";
@@ -12,7 +12,7 @@ public static class GameLayers
 
     public static LayerMask InteractionMask => GetMaskOrEverything(
         Interactable,
-        Objeto,
+        HoldableObject,
         Container,
         Door,
         Spawner,
@@ -22,7 +22,7 @@ public static class GameLayers
     public static LayerMask PhysicsObjectCollisionMask => GetMaskOrEverything(
         "Default",
         Interactable,
-        Objeto,
+        HoldableObject,
         Container,
         Door,
         HomeSlot
@@ -53,3 +53,4 @@ public static class GameLayers
         return mask != 0 ? mask : ~0;
     }
 }
+

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GameInteractionManager : MonoBehaviour
 {
@@ -24,3 +24,4 @@ public class GameInteractionManager : MonoBehaviour
         Instance = this;
     }
 }
+

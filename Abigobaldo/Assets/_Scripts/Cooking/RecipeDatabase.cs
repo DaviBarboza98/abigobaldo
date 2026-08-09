@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(
@@ -11,7 +11,7 @@ public class RecipeDatabase : ScriptableObject
 
     public bool TryFindRecipe(
         ContainerType containerType,
-        IReadOnlyList<ItemData> contents,
+        IReadOnlyList<ObjectData> contents,
         out RecipeData recipe
     )
     {
@@ -31,3 +31,4 @@ public class RecipeDatabase : ScriptableObject
         return false;
     }
 }
+
