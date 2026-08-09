@@ -1,0 +1,147 @@
+using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody))]
+public class Objeto : MonoBehaviour
+{
+    [Header("Dados")]
+    [SerializeField] private ItemData objetoData;
+
+    [Header("Propriedades")]
+    [SerializeField] private bool canBeHeld = true;
+    [SerializeField] private bool canBeThrown = true;
+    [SerializeField] private bool createHomeSlotFromInitialPose;
+    [SerializeField] private Vector3 homeSlotPadding = new Vector3(0.15f, 0.15f, 0.15f);
+
+    private Rigidbody rb;
+    private MonoBehaviour[] holdStateBehaviours;
+    private ObjetoHomeSlot homeSlot;
+
+    public ItemData Data => objetoData;
+    public Rigidbody Rigidbody => rb;
+    public string ObjetoName => objetoData != null ? objetoData.DisplayName : gameObject.name;
+    public bool CanBeHeld => canBeHeld;
+    public bool CanBeThrown => canBeThrown;
+    public ObjetoHomeSlot HomeSlot => homeSlot;
+
+    protected virtual void Awake()
+    {
+        GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Objeto);
+
+        rb = GetComponent<Rigidbody>();
+        holdStateBehaviours = GetComponents<MonoBehaviour>();
+
+        if (createHomeSlotFromInitialPose)
+            homeSlot = ObjetoHomeSlot.CreateFor(this, homeSlotPadding);
+    }
+
+    public void Configure(ItemData data, bool held, bool thrown)
+    {
+        objetoData = data;
+        canBeHeld = held;
+        canBeThrown = thrown;
+    }
+
+    public void SetHomeSlot(ObjetoHomeSlot slot)
+    {
+        homeSlot = slot;
+    }
+
+    public virtual void PickUp(Vector3 position, Quaternion rotation)
+    {
+        transform.SetParent(null);
+        transform.SetPositionAndRotation(position, rotation);
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+        rb.useGravity = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        NotifyPickedUp();
+    }
+
+    public virtual void Drop()
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+        rb.useGravity = true;
+
+        transform.SetParent(null);
+        NotifyDropped();
+    }
+
+    public virtual void Throw(Vector3 direction, float force)
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+        rb.useGravity = true;
+
+        transform.SetParent(null);
+        rb.AddForce(direction.normalized * force, ForceMode.Impulse);
+        NotifyThrown();
+    }
+
+    public void PlaceAt(Transform anchor)
+    {
+        if (anchor == null)
+            return;
+
+        transform.SetParent(null);
+        transform.SetPositionAndRotation(anchor.position, anchor.rotation);
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        NotifyDropped();
+    }
+
+    private void NotifyPickedUp()
+    {
+        RefreshReceivers();
+
+        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        {
+            ItemHoldStateReceiver receiver = behaviour as ItemHoldStateReceiver;
+            receiver?.OnPickedUp();
+        }
+    }
+
+    private void NotifyDropped()
+    {
+        RefreshReceivers();
+
+        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        {
+            ItemHoldStateReceiver receiver = behaviour as ItemHoldStateReceiver;
+            receiver?.OnDropped();
+        }
+    }
+
+    private void NotifyThrown()
+    {
+        RefreshReceivers();
+
+        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        {
+            ItemHoldStateReceiver receiver = behaviour as ItemHoldStateReceiver;
+            receiver?.OnThrown();
+        }
+    }
+
+    private void RefreshReceivers()
+    {
+        if (holdStateBehaviours == null || holdStateBehaviours.Length == 0)
+            holdStateBehaviours = GetComponents<MonoBehaviour>();
+    }
+
+    private void OnValidate()
+    {
+        homeSlotPadding.x = Mathf.Max(0f, homeSlotPadding.x);
+        homeSlotPadding.y = Mathf.Max(0f, homeSlotPadding.y);
+        homeSlotPadding.z = Mathf.Max(0f, homeSlotPadding.z);
+    }
+}

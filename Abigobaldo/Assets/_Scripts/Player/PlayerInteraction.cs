@@ -9,15 +9,17 @@ public class PlayerInteraction : MonoBehaviour
 
     [Header("Interacao")]
     [SerializeField] private float interactionDistance = 3f;
-    [SerializeField] private LayerMask interactionLayers = ~0;
+    [SerializeField] private LayerMask interactionLayers;
     [SerializeField] private float highlightRefreshInterval = 0.04f;
 
     private PlayerInputHandler input;
     private readonly RaycastHit[] interactionHits = new RaycastHit[16];
     private Highlightable currentHighlight;
+    private IHoldInteractable currentHoldInteractable;
     private float nextHighlightRefreshTime;
 
     public ItemHolder ItemHolder => itemHolder;
+    public Camera PlayerCamera => playerCamera;
 
     private void Awake()
     {
@@ -28,6 +30,9 @@ public class PlayerInteraction : MonoBehaviour
 
         if (itemHolder == null)
             itemHolder = GetComponentInChildren<ItemHolder>();
+
+        if (interactionLayers.value == 0 || interactionLayers.value == ~0)
+            interactionLayers = GameLayers.InteractionMask;
     }
 
     private void Update()
@@ -39,6 +44,7 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         UpdateHighlight();
+        HandleHeldInteraction();
         TryInteract();
         HandleDrop();
         HandleThrow();
@@ -59,6 +65,14 @@ public class PlayerInteraction : MonoBehaviour
         if (!TryGetInteractionHit(ray, out RaycastHit hit))
             return;
 
+        IHoldInteractable holdInteractable = hit.collider.GetComponentInParent<IHoldInteractable>();
+
+        if (holdInteractable != null)
+        {
+            BeginHeldInteraction(holdInteractable);
+            return;
+        }
+
         IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
 
         if (TryInteractWithHeldPlate(interactable))
@@ -73,19 +87,27 @@ public class PlayerInteraction : MonoBehaviour
         if (TryHandleEmptyHandContainer(interactable))
             return;
 
-        ItemSpawner spawner = hit.collider.GetComponentInParent<ItemSpawner>();
+        ObjetoSpawner objetoSpawner = hit.collider.GetComponentInParent<ObjetoSpawner>();
 
-        if (spawner != null)
+        if (objetoSpawner != null)
         {
-            HandleSpawner(spawner);
+            HandleSpawner(objetoSpawner);
             return;
         }
 
-        Item item = hit.collider.GetComponentInParent<Item>();
+        ItemSpawner legacySpawner = hit.collider.GetComponentInParent<ItemSpawner>();
 
-        if (item != null)
+        if (legacySpawner != null)
         {
-            HandleItem(item);
+            HandleLegacySpawner(legacySpawner);
+            return;
+        }
+
+        Objeto objeto = hit.collider.GetComponentInParent<Objeto>();
+
+        if (objeto != null)
+        {
+            HandleObjeto(objeto);
             return;
         }
 
@@ -174,17 +196,30 @@ public class PlayerInteraction : MonoBehaviour
         return highlightable;
     }
 
-    private static GameObject GetHighlightRoot(Collider hitCollider)
+    private GameObject GetHighlightRoot(Collider hitCollider)
     {
-        Item item = hitCollider.GetComponentInParent<Item>();
+        ObjetoHomeSlot homeSlot = hitCollider.GetComponentInParent<ObjetoHomeSlot>();
 
-        if (item != null)
-            return item.gameObject;
+        if (homeSlot != null)
+        {
+            Objeto heldObjeto = itemHolder != null ? itemHolder.CurrentObjeto : null;
+            return homeSlot.ShouldHighlightFor(heldObjeto) ? homeSlot.gameObject : null;
+        }
 
-        ItemSpawner spawner = hitCollider.GetComponentInParent<ItemSpawner>();
+        Objeto objeto = hitCollider.GetComponentInParent<Objeto>();
+
+        if (objeto != null)
+            return objeto.gameObject;
+
+        ObjetoSpawner spawner = hitCollider.GetComponentInParent<ObjetoSpawner>();
 
         if (spawner != null)
             return spawner.gameObject;
+
+        ItemSpawner legacySpawner = hitCollider.GetComponentInParent<ItemSpawner>();
+
+        if (legacySpawner != null)
+            return legacySpawner.gameObject;
 
         IInteractable interactable = hitCollider.GetComponentInParent<IInteractable>();
         Component interactableComponent = interactable as Component;
@@ -208,7 +243,7 @@ public class PlayerInteraction : MonoBehaviour
         if (targetCollider == null || itemHolder == null || itemHolder.IsEmpty())
             return false;
 
-        Item currentItem = itemHolder.CurrentItem;
+        Objeto currentItem = itemHolder.CurrentObjeto;
 
         return currentItem != null && targetCollider.transform.IsChildOf(currentItem.transform);
     }
@@ -218,7 +253,7 @@ public class PlayerInteraction : MonoBehaviour
         if (itemHolder.IsEmpty())
             return false;
 
-        PlateContainer heldPlate = itemHolder.CurrentItem.GetComponent<PlateContainer>();
+        PlateContainer heldPlate = itemHolder.CurrentObjeto.GetComponent<PlateContainer>();
 
         if (heldPlate == null)
             return false;
@@ -261,12 +296,26 @@ public class PlayerInteraction : MonoBehaviour
         return true;
     }
 
-    private void HandleSpawner(ItemSpawner spawner)
+    private void HandleSpawner(ObjetoSpawner spawner)
     {
         if (!itemHolder.IsEmpty())
             return;
 
-        Item item = spawner.SpawnItem();
+        Objeto objeto = spawner.SpawnObjeto();
+
+        if (objeto == null)
+            return;
+
+        if (!itemHolder.TryPickUp(objeto))
+            Destroy(objeto.gameObject);
+    }
+
+    private void HandleLegacySpawner(ItemSpawner spawner)
+    {
+        if (!itemHolder.IsEmpty())
+            return;
+
+        Objeto item = spawner.SpawnObjeto();
 
         if (item == null)
             return;
@@ -275,7 +324,7 @@ public class PlayerInteraction : MonoBehaviour
             Destroy(item.gameObject);
     }
 
-    private void HandleItem(Item item)
+    private void HandleObjeto(Objeto item)
     {
         if (!itemHolder.IsEmpty())
         {
@@ -286,15 +335,15 @@ public class PlayerInteraction : MonoBehaviour
         itemHolder.TryPickUp(item);
     }
 
-    private bool TryPlateLooseItem(Item item)
+    private bool TryPlateLooseItem(Objeto item)
     {
         if (item == null || itemHolder.IsEmpty())
             return false;
 
-        if (item == itemHolder.CurrentItem)
+        if (item == itemHolder.CurrentObjeto)
             return false;
 
-        PlateContainer heldPlate = itemHolder.CurrentItem.GetComponent<PlateContainer>();
+        PlateContainer heldPlate = itemHolder.CurrentObjeto.GetComponent<PlateContainer>();
 
         if (heldPlate == null)
             return false;
@@ -338,6 +387,30 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         itemHolder.ZoomHeldItem(input.HoldZoom);
+    }
+
+    private void HandleHeldInteraction()
+    {
+        if (currentHoldInteractable == null)
+            return;
+
+        if (input.InteractHeld)
+        {
+            currentHoldInteractable.UpdateHold(this);
+            return;
+        }
+
+        currentHoldInteractable.EndHold(this);
+        currentHoldInteractable = null;
+    }
+
+    private void BeginHeldInteraction(IHoldInteractable holdInteractable)
+    {
+        if (currentHoldInteractable != null && currentHoldInteractable != holdInteractable)
+            currentHoldInteractable.EndHold(this);
+
+        currentHoldInteractable = holdInteractable;
+        currentHoldInteractable.BeginHold(this);
     }
 
     private void OnValidate()

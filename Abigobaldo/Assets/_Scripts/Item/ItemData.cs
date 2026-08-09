@@ -1,16 +1,16 @@
 using UnityEngine;
 
 [CreateAssetMenu(
-    fileName = "NovoItem",
-    menuName = "Abigobaldos/Item Data"
+    fileName = "NovoObjeto",
+    menuName = "Abigobaldos/Objeto Data"
 )]
 public class ItemData : ScriptableObject
 {
-    [Header("Identificação")]
+    [Header("Identificacao")]
     [SerializeField] private string itemId;
     [SerializeField] private string displayName;
 
-    [Header("Visual")]
+    [Header("Prefab")]
     [SerializeField] private GameObject prefab;
 
     [Header("Estado")]

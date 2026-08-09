@@ -23,16 +23,17 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     [SerializeField] private RecipeDatabase recipeDatabase;
     [SerializeField] private List<RecipeData> localRecipes = new List<RecipeData>();
 
-    [Header("Saida")]
+    [Header("Saida de objeto pronto")]
     [SerializeField] private Transform outputSpawnPoint;
 
-    [Header("Item pegavel")]
+    [Header("Objeto pegavel")]
     [SerializeField] private bool canBePickedUp;
     [SerializeField] private ItemData containerItemData;
     [SerializeField] private bool createStoveSlotOnAwake;
     [SerializeField] private Vector3 stoveSlotSize = new Vector3(0.75f, 0.35f, 0.75f);
 
-    [Header("Visual interno")]
+    [Header("Visual de conteudo opcional")]
+    [SerializeField] private bool useContentVisuals;
     [SerializeField] private Transform contentVisualRoot;
     [SerializeField] private Vector3 contentVisualLocalOffset = new Vector3(0f, 0.12f, 0f);
     [SerializeField] private float contentVisualScale = 0.22f;
@@ -42,19 +43,11 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     [SerializeField] private float blenderMorphDuration = 3f;
     [SerializeField] private float blenderShrinkScale = 0.03f;
 
-    [Header("Particulas")]
-    [SerializeField] private bool createDefaultSteam = true;
-    [SerializeField] private Transform particlesRoot;
-    [SerializeField] private Vector3 particlesLocalOffset = new Vector3(0f, 0.25f, 0f);
+    [Header("Particulas configuradas no prefab")]
+    [SerializeField] private ParticleEmitterController steamParticles;
     [SerializeField] private Color steamColor = new Color(0.85f, 0.85f, 0.85f, 0.45f);
     [SerializeField] private Color burnedSteamColor = new Color(0.25f, 0.22f, 0.2f, 0.6f);
     [SerializeField] private float steamRate = 8f;
-    [SerializeField] private float particleLifetime = 1.1f;
-    [SerializeField] private float particleSpeed = 0.45f;
-    [SerializeField] private float particleSize = 0.12f;
-    [SerializeField] private float particleRadius = 0.12f;
-    [SerializeField] private float particleConeAngle = 18f;
-    [SerializeField] private Sprite particleSprite;
 
     [Header("Ativacao")]
     [SerializeField] private bool requiresManualActivation;
@@ -70,9 +63,8 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     private readonly List<GameObject> contentVisuals = new List<GameObject>();
     private bool cookingEnabled = true;
     private bool isInstalledOnHeat;
-    private ParticleSystem steamParticles;
     private Rigidbody containerBody;
-    private Item containerItem;
+    private Objeto containerItem;
     private StoveSlot homeSlot;
     private bool loggedAlmostReady;
     private bool blenderVisualMorphed;
@@ -91,32 +83,10 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     private void Awake()
     {
-        if (contentVisualRoot == null)
-            contentVisualRoot = containerType == ContainerType.Liquidificador
-                ? GetOrCreateContentVisualRoot()
-                : transform;
+        GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Container);
 
         if (canBePickedUp)
             EnsurePickupComponents();
-
-        if (createDefaultSteam)
-        {
-            if (particlesRoot == null)
-                particlesRoot = RuntimeParticleFactory.GetOrCreateParticlesRoot(transform, particlesLocalOffset);
-
-            steamParticles = RuntimeParticleFactory.CreateSteam(
-                particlesRoot,
-                $"{name}_Steam",
-                steamColor,
-                steamRate,
-                particleLifetime,
-                particleSpeed,
-                particleSize,
-                particleRadius,
-                particleConeAngle,
-                particleSprite
-            );
-        }
 
         if (containerType == ContainerType.Liquidificador)
             TryMakeBlenderJarTransparent();
@@ -187,7 +157,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             return false;
         }
 
-        Item heldItem = holder.CurrentItem;
+        Objeto heldItem = holder.CurrentObjeto;
 
         if (heldItem == null)
             return false;
@@ -198,7 +168,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             return false;
         }
 
-        Item removedItem = holder.RemoveItem();
+        Objeto removedItem = holder.RemoveObjeto();
 
         if (removedItem == null)
             return false;
@@ -261,7 +231,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             : transform.rotation;
 
         GameObject outputObject = Instantiate(outputData.Prefab, spawnPosition, spawnRotation);
-        Item outputItem = outputObject.GetComponent<Item>();
+        Objeto outputItem = outputObject.GetComponent<Objeto>();
 
         if (outputItem == null)
         {
@@ -658,14 +628,14 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     private void EnsurePickupComponents()
     {
-        containerItem = GetComponent<Item>();
+        containerItem = GetComponent<Objeto>();
         containerBody = GetComponent<Rigidbody>();
 
         if (containerBody == null)
             containerBody = gameObject.AddComponent<Rigidbody>();
 
         if (containerItem == null)
-            containerItem = gameObject.AddComponent<Item>();
+            containerItem = gameObject.AddComponent<Objeto>();
 
         containerItem.Configure(containerItemData, true, false);
     }
@@ -685,7 +655,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
         contentVisuals.Clear();
 
-        if (contentVisualRoot == null)
+        if (!useContentVisuals || contentVisualRoot == null)
             return;
 
         if (overrideSingleVisual != null)
@@ -782,36 +752,21 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             Log($"{name}: os ingredientes comecaram a virar {activeRecipe.ResultItem.DisplayName}.");
     }
 
-    private Transform GetOrCreateContentVisualRoot()
-    {
-        Transform existingRoot = transform.Find("ContentVisualRoot");
-
-        if (existingRoot != null)
-            return existingRoot;
-
-        GameObject rootObject = new GameObject("ContentVisualRoot");
-        Transform root = rootObject.transform;
-        root.SetParent(transform, false);
-        root.localPosition = Vector3.zero;
-        root.localRotation = Quaternion.identity;
-        root.localScale = Vector3.one;
-
-        return root;
-    }
-
     private void UpdateSteam()
     {
         if (steamParticles == null)
             return;
 
         bool shouldEmit = cookingProcess != null && cookingProcess.IsRunning && cookingProcess.Timer > 0.5f;
-        ParticleSystem.EmissionModule emission = steamParticles.emission;
-        emission.enabled = shouldEmit;
-
-        ParticleSystem.MainModule main = steamParticles.main;
-        main.startColor = resultState == CookingResultState.Burned || resultState == CookingResultState.Carbonized
+        steamParticles.SetRate(steamRate);
+        steamParticles.SetColor(resultState == CookingResultState.Burned || resultState == CookingResultState.Carbonized
             ? burnedSteamColor
-            : steamColor;
+            : steamColor);
+
+        if (shouldEmit)
+            steamParticles.Play();
+        else
+            steamParticles.Stop();
     }
 
     private void TryMakeBlenderJarTransparent()
@@ -834,12 +789,19 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             if (transparentMaterial.HasProperty("_Color"))
                 transparentMaterial.color = color;
 
-            transparentMaterial.SetFloat("_Mode", 3f);
-            transparentMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            transparentMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            transparentMaterial.SetInt("_ZWrite", 0);
+            if (transparentMaterial.HasProperty("_BaseColor"))
+                transparentMaterial.SetColor("_BaseColor", color);
+
+            SetMaterialFloatIfPresent(transparentMaterial, "_Mode", 3f);
+            SetMaterialFloatIfPresent(transparentMaterial, "_Surface", 1f);
+            SetMaterialFloatIfPresent(transparentMaterial, "_Blend", 0f);
+            SetMaterialFloatIfPresent(transparentMaterial, "_AlphaClip", 0f);
+            SetMaterialFloatIfPresent(transparentMaterial, "_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            SetMaterialFloatIfPresent(transparentMaterial, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            SetMaterialFloatIfPresent(transparentMaterial, "_ZWrite", 0f);
             transparentMaterial.DisableKeyword("_ALPHATEST_ON");
             transparentMaterial.EnableKeyword("_ALPHABLEND_ON");
+            transparentMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
             transparentMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             transparentMaterial.renderQueue = 3000;
 
@@ -866,9 +828,15 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             || text.Contains("liquidificador_copo");
     }
 
+    private static void SetMaterialFloatIfPresent(Material material, string propertyName, float value)
+    {
+        if (material.HasProperty(propertyName))
+            material.SetFloat(propertyName, value);
+    }
+
     private static void DisableGameplayComponents(GameObject visual)
     {
-        foreach (Item item in visual.GetComponentsInChildren<Item>())
+        foreach (Objeto item in visual.GetComponentsInChildren<Objeto>())
             item.enabled = false;
 
         foreach (ItemContainer container in visual.GetComponentsInChildren<ItemContainer>())
@@ -925,11 +893,6 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     {
         maxItems = Mathf.Max(1, maxItems);
         steamRate = Mathf.Max(0f, steamRate);
-        particleLifetime = Mathf.Max(0.01f, particleLifetime);
-        particleSpeed = Mathf.Max(0f, particleSpeed);
-        particleSize = Mathf.Max(0.01f, particleSize);
-        particleRadius = Mathf.Max(0f, particleRadius);
-        particleConeAngle = Mathf.Max(0f, particleConeAngle);
         blenderMorphStartTime = Mathf.Max(0f, blenderMorphStartTime);
         blenderMorphDuration = Mathf.Max(0f, blenderMorphDuration);
         blenderShrinkScale = Mathf.Max(0.001f, blenderShrinkScale);

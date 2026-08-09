@@ -11,7 +11,20 @@ public class ItemSpawner : MonoBehaviour
         return item;
     }
 
+    public Objeto SpawnObjeto()
+    {
+        TrySpawnObjeto(out Objeto objeto);
+        return objeto;
+    }
+
     public bool TrySpawnItem(out Item item)
+    {
+        bool spawned = TrySpawnObjeto(out Objeto objeto);
+        item = objeto as Item;
+        return spawned && item != null;
+    }
+
+    public bool TrySpawnObjeto(out Objeto item)
     {
         item = null;
 
@@ -19,7 +32,7 @@ public class ItemSpawner : MonoBehaviour
             return false;
 
         GameObject itemObject = Instantiate(itemPrefab);
-        item = itemObject.GetComponent<Item>();
+        item = itemObject.GetComponent<Objeto>();
 
         if (item != null)
             return true;

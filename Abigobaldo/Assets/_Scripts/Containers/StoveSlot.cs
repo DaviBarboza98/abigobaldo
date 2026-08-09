@@ -4,17 +4,23 @@ public class StoveSlot : MonoBehaviour, IInteractable
 {
     [SerializeField] private ContainerType acceptedType = ContainerType.Frigideira;
     [SerializeField] private Transform containerAnchor;
-    [SerializeField] private ParticleSystem flameParticles;
+    [SerializeField] private ParticleEmitterController flameParticles;
 
     private ItemContainer currentContainer;
     private Collider slotCollider;
 
     public Transform ContainerAnchor => containerAnchor != null ? containerAnchor : transform;
 
+    private void Awake()
+    {
+        GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.HomeSlot);
+    }
+
     public static StoveSlot CreateFor(ItemContainer container, Vector3 size)
     {
         GameObject slotObject = new GameObject($"{container.name}_StoveSlot");
         slotObject.transform.SetPositionAndRotation(container.transform.position, container.transform.rotation);
+        GameLayers.SetLayerRecursivelyIfDefault(slotObject, GameLayers.HomeSlot);
 
         BoxCollider collider = slotObject.AddComponent<BoxCollider>();
         collider.isTrigger = true;
@@ -25,7 +31,6 @@ public class StoveSlot : MonoBehaviour, IInteractable
         slot.containerAnchor = slotObject.transform;
         slot.currentContainer = container;
         slot.slotCollider = collider;
-        slot.flameParticles = RuntimeParticleFactory.CreateBlueFlame(slotObject.transform, $"{slotObject.name}_Flame");
         slot.UpdateFlame();
 
         return slot;
@@ -36,13 +41,13 @@ public class StoveSlot : MonoBehaviour, IInteractable
         if (player == null || player.ItemHolder == null || player.ItemHolder.IsEmpty())
             return;
 
-        Item heldItem = player.ItemHolder.CurrentItem;
+        Objeto heldItem = player.ItemHolder.CurrentObjeto;
         ItemContainer heldContainer = heldItem != null ? heldItem.GetComponent<ItemContainer>() : null;
 
         if (heldContainer == null || heldContainer.Type != acceptedType)
             return;
 
-        player.ItemHolder.RemoveItem();
+        player.ItemHolder.RemoveObjeto();
         currentContainer = heldContainer;
         heldContainer.DockToSlot(this);
         UpdateFlame();
@@ -68,7 +73,9 @@ public class StoveSlot : MonoBehaviour, IInteractable
         if (flameParticles == null)
             return;
 
-        ParticleSystem.EmissionModule emission = flameParticles.emission;
-        emission.enabled = currentContainer != null;
+        if (currentContainer != null)
+            flameParticles.Play();
+        else
+            flameParticles.Stop();
     }
 }

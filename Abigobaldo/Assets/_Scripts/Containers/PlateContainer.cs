@@ -31,7 +31,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
             return;
         }
 
-        Item heldItem = holder.CurrentItem;
+        Objeto heldItem = holder.CurrentObjeto;
 
         if (heldItem == null || heldItem.gameObject == gameObject)
         {
@@ -47,7 +47,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
         if (holder == null || holder.IsEmpty())
             return false;
 
-        Item heldItem = holder.CurrentItem;
+        Objeto heldItem = holder.CurrentObjeto;
 
         if (heldItem == null || heldItem.Data == null)
             return false;
@@ -58,7 +58,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
         if (!TryAddItem(heldItem.Data))
             return false;
 
-        Item removedItem = holder.RemoveItem();
+        Objeto removedItem = holder.RemoveObjeto();
 
         if (removedItem != null)
             Destroy(removedItem.gameObject);
@@ -66,7 +66,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
         return true;
     }
 
-    public bool TryAddLooseItem(Item item)
+    public bool TryAddLooseItem(Objeto item)
     {
         if (item == null || item.Data == null)
             return false;
@@ -147,7 +147,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
 
     private static void DisableGameplayComponents(GameObject visual)
     {
-        foreach (Item item in visual.GetComponentsInChildren<Item>())
+        foreach (Objeto item in visual.GetComponentsInChildren<Objeto>())
             item.enabled = false;
 
         foreach (ItemContainer container in visual.GetComponentsInChildren<ItemContainer>())

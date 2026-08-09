@@ -11,7 +11,7 @@ public class ItemHolder : MonoBehaviour
     [SerializeField] private float rotationFollowStrength = 18f;
     [SerializeField] private float maxAngularSpeed = 12f;
     [SerializeField] private float collisionSkin = 0.03f;
-    [SerializeField] private LayerMask collisionLayers = ~0;
+    [SerializeField] private LayerMask collisionLayers;
     [SerializeField] private int depenetrationIterations = 3;
     [SerializeField] private float overlapCheckInterval = 0.12f;
 
@@ -23,7 +23,7 @@ public class ItemHolder : MonoBehaviour
     [Header("Rotacao do item")]
     [SerializeField] private float itemRotationSensitivity = 0.25f;
 
-    private Item currentItem;
+    private Objeto currentObjeto;
     private Vector3 defaultLocalPosition;
     private float distanceOffset;
     private Quaternion localTargetRotation = Quaternion.identity;
@@ -33,10 +33,14 @@ public class ItemHolder : MonoBehaviour
     private float nextOverlapCheckTime;
     private float heldItemBoundsRadius = 0.5f;
 
-    public Item CurrentItem => currentItem;
+    public Objeto CurrentObjeto => currentObjeto;
+    public Item CurrentItem => currentObjeto as Item;
 
     private void FixedUpdate()
     {
+        if (collisionLayers.value == 0)
+            collisionLayers = GameLayers.PhysicsObjectCollisionMask;
+
         FollowHeldItem();
     }
 
@@ -47,51 +51,62 @@ public class ItemHolder : MonoBehaviour
 
     public bool IsEmpty()
     {
-        return currentItem == null;
+        return currentObjeto == null;
     }
 
     public bool TryPickUp(Item item)
     {
+        return TryPickUp(item as Objeto);
+    }
+
+    public bool TryPickUp(Objeto item)
+    {
         if (item == null)
             return false;
 
-        if (currentItem != null)
+        if (currentObjeto != null)
             return false;
 
         if (!item.CanBeHeld)
             return false;
 
-        currentItem = item;
+        currentObjeto = item;
         distanceOffset = 0f;
         localTargetRotation = Quaternion.identity;
         transform.localPosition = defaultLocalPosition;
-        heldItemColliders = currentItem.GetComponentsInChildren<Collider>();
+        heldItemColliders = currentObjeto.GetComponentsInChildren<Collider>();
         heldItemBoundsRadius = CalculateHeldItemBoundsRadius();
         nextOverlapCheckTime = Time.fixedTime;
 
-        currentItem.PickUp(transform.position, GetTargetRotation());
+        currentObjeto.HomeSlot?.MarkPickedUp(currentObjeto);
+        currentObjeto.PickUp(transform.position, GetTargetRotation());
         SetPlayerCollisionIgnored(true);
 
         return true;
     }
 
-    public Item RemoveItem()
+    public Objeto RemoveObjeto()
     {
-        if (currentItem == null)
+        if (currentObjeto == null)
             return null;
 
         SetPlayerCollisionIgnored(false);
 
-        Item item = currentItem;
-        currentItem = null;
+        Objeto item = currentObjeto;
+        currentObjeto = null;
         heldItemColliders = null;
 
         return item;
     }
 
+    public Item RemoveItem()
+    {
+        return RemoveObjeto() as Item;
+    }
+
     public bool RotateItem(Vector2 mouseDelta, Transform cameraTransform)
     {
-        if (currentItem == null)
+        if (currentObjeto == null)
             return false;
 
         if (cameraTransform == null)
@@ -112,7 +127,7 @@ public class ItemHolder : MonoBehaviour
 
     public bool ZoomHeldItem(float scrollDelta)
     {
-        if (currentItem == null)
+        if (currentObjeto == null)
             return false;
 
         distanceOffset = Mathf.Clamp(
@@ -127,7 +142,7 @@ public class ItemHolder : MonoBehaviour
 
     public bool DropItem()
     {
-        Item item = RemoveItem();
+        Objeto item = RemoveObjeto();
 
         if (item == null)
             return false;
@@ -138,13 +153,13 @@ public class ItemHolder : MonoBehaviour
 
     public bool ThrowItem()
     {
-        if (currentItem == null)
+        if (currentObjeto == null)
             return false;
 
-        if (!currentItem.CanBeThrown)
+        if (!currentObjeto.CanBeThrown)
             return false;
 
-        Item item = RemoveItem();
+        Objeto item = RemoveObjeto();
         item.Throw(transform.forward, throwForce);
 
         return true;
@@ -152,10 +167,10 @@ public class ItemHolder : MonoBehaviour
 
     private void FollowHeldItem()
     {
-        if (currentItem == null)
+        if (currentObjeto == null)
             return;
 
-        Rigidbody itemBody = currentItem.Rigidbody;
+        Rigidbody itemBody = currentObjeto.Rigidbody;
 
         if (itemBody == null)
             return;
@@ -214,7 +229,7 @@ public class ItemHolder : MonoBehaviour
     {
         if (heldItemColliders == null || heldItemColliders.Length == 0)
         {
-            heldItemColliders = currentItem.GetComponentsInChildren<Collider>();
+            heldItemColliders = currentObjeto.GetComponentsInChildren<Collider>();
             heldItemBoundsRadius = CalculateHeldItemBoundsRadius();
         }
 
@@ -272,7 +287,7 @@ public class ItemHolder : MonoBehaviour
         if (other == null || !other.enabled)
             return false;
 
-        if (currentItem != null && other.transform.IsChildOf(currentItem.transform))
+        if (currentObjeto != null && other.transform.IsChildOf(currentObjeto.transform))
             return false;
 
         if (other.transform.IsChildOf(transform.root))
@@ -329,14 +344,14 @@ public class ItemHolder : MonoBehaviour
 
     private void SetPlayerCollisionIgnored(bool ignored)
     {
-        if (currentItem == null)
+        if (currentObjeto == null)
             return;
 
         if (playerColliders == null || playerColliders.Length == 0)
             playerColliders = transform.root.GetComponentsInChildren<Collider>();
 
         if (heldItemColliders == null || heldItemColliders.Length == 0)
-            heldItemColliders = currentItem.GetComponentsInChildren<Collider>();
+            heldItemColliders = currentObjeto.GetComponentsInChildren<Collider>();
 
         foreach (Collider itemCollider in heldItemColliders)
         {

@@ -2,10 +2,7 @@ using UnityEngine;
 
 public class Highlightable : MonoBehaviour
 {
-    [Header("Highlight")]
-    [SerializeField] private Color highlightColor = new Color(1f, 0.85f, 0.2f, 1f);
-    [SerializeField] private Color emissionColor = new Color(1f, 0.65f, 0.05f, 1f);
-    [SerializeField] private float emissionIntensity = 0.9f;
+    [Header("Renderers")]
     [SerializeField] private bool includeInactiveRenderers;
 
     private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -13,6 +10,7 @@ public class Highlightable : MonoBehaviour
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
     private Renderer[] renderers;
+    private IHighlightStateReceiver[] stateReceivers;
     private MaterialPropertyBlock propertyBlock;
     private bool isHighlighted;
 
@@ -21,6 +19,7 @@ public class Highlightable : MonoBehaviour
     private void Awake()
     {
         RefreshRenderers();
+        EnableEmissionKeyword();
     }
 
     private void OnDisable()
@@ -50,9 +49,13 @@ public class Highlightable : MonoBehaviour
 
             if (highlighted)
             {
-                propertyBlock.SetColor(ColorId, highlightColor);
-                propertyBlock.SetColor(BaseColorId, highlightColor);
-                propertyBlock.SetColor(EmissionColorId, emissionColor * emissionIntensity);
+                Color activeHighlightColor = GetHighlightColor();
+                Color activeEmissionColor = GetEmissionColor();
+                float activeEmissionIntensity = GetEmissionIntensity();
+
+                propertyBlock.SetColor(ColorId, activeHighlightColor);
+                propertyBlock.SetColor(BaseColorId, activeHighlightColor);
+                propertyBlock.SetColor(EmissionColorId, activeEmissionColor * activeEmissionIntensity);
             }
             else
             {
@@ -61,6 +64,8 @@ public class Highlightable : MonoBehaviour
 
             targetRenderer.SetPropertyBlock(propertyBlock);
         }
+
+        NotifyStateReceivers(highlighted);
     }
 
     public void Highlight()
@@ -76,5 +81,58 @@ public class Highlightable : MonoBehaviour
     public void RefreshRenderers()
     {
         renderers = GetComponentsInChildren<Renderer>(includeInactiveRenderers);
+        stateReceivers = GetComponentsInChildren<IHighlightStateReceiver>(includeInactiveRenderers);
+        EnableEmissionKeyword();
+    }
+
+    private void EnableEmissionKeyword()
+    {
+        if (renderers == null)
+            return;
+
+        foreach (Renderer targetRenderer in renderers)
+        {
+            if (targetRenderer == null)
+                continue;
+
+            foreach (Material material in targetRenderer.sharedMaterials)
+            {
+                if (material == null)
+                    continue;
+
+                if (material.HasProperty(EmissionColorId))
+                    material.EnableKeyword("_EMISSION");
+            }
+        }
+    }
+
+    private Color GetHighlightColor()
+    {
+        return GameInteractionManager.Instance != null
+            ? GameInteractionManager.Instance.HighlightColor
+            : Color.yellow;
+    }
+
+    private Color GetEmissionColor()
+    {
+        return GameInteractionManager.Instance != null
+            ? GameInteractionManager.Instance.EmissionColor
+            : new Color(1f, 0.65f, 0.05f, 1f);
+    }
+
+    private float GetEmissionIntensity()
+    {
+        return GameInteractionManager.Instance != null
+            ? GameInteractionManager.Instance.EmissionIntensity
+            : 1.1f;
+    }
+
+    private void NotifyStateReceivers(bool highlighted)
+    {
+        if (stateReceivers == null || stateReceivers.Length == 0)
+            stateReceivers = GetComponentsInChildren<IHighlightStateReceiver>(includeInactiveRenderers);
+
+        foreach (IHighlightStateReceiver receiver in stateReceivers)
+            receiver?.OnHighlightChanged(highlighted);
     }
 }

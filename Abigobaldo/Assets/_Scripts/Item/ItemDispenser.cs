@@ -18,14 +18,14 @@ public class ItemDispenser : MonoBehaviour, IInteractable
         if (!holder.IsEmpty())
             return;
 
-        if (!TryCreateItem(out Item item))
+        if (!TryCreateItem(out Objeto item))
             return;
 
         if (!holder.TryPickUp(item))
             Destroy(item.gameObject);
     }
 
-    private bool TryCreateItem(out Item item)
+    private bool TryCreateItem(out Objeto item)
     {
         item = null;
 
@@ -33,7 +33,7 @@ public class ItemDispenser : MonoBehaviour, IInteractable
             return false;
 
         GameObject itemObject = Instantiate(itemPrefab);
-        item = itemObject.GetComponent<Item>();
+        item = itemObject.GetComponent<Objeto>();
 
         if (item != null)
             return true;

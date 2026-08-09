@@ -16,13 +16,13 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Interactable
+  - Objeto
+  - Container
+  - Door
+  - Spawner
+  - HomeSlot
   - 
   - 
   - 

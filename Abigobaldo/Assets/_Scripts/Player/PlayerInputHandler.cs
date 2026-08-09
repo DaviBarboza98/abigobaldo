@@ -9,7 +9,9 @@ public class PlayerInputHandler : MonoBehaviour
     public float HoldZoom { get; private set; }
 
     public bool RunPressed { get; private set; }
+    public bool InteractHeld { get; private set; }
     public bool InteractPressed { get; private set; }
+    public bool InteractReleased { get; private set; }
     public bool DropPressed { get; private set; }
     public bool ThrowPressed { get; private set; }
     public bool ToggleCursorPressed { get; private set; }
@@ -80,7 +82,9 @@ public class PlayerInputHandler : MonoBehaviour
             return;
 
         RunPressed = Keyboard.current.leftShiftKey.isPressed;
+        InteractHeld = Keyboard.current.eKey.isPressed;
         InteractPressed = Keyboard.current.eKey.wasPressedThisFrame;
+        InteractReleased = Keyboard.current.eKey.wasReleasedThisFrame;
         DropPressed = Keyboard.current.gKey.wasPressedThisFrame;
         ThrowPressed = Keyboard.current.tKey.wasPressedThisFrame;
         ToggleCursorPressed = Keyboard.current.vKey.wasPressedThisFrame;
@@ -90,6 +94,7 @@ public class PlayerInputHandler : MonoBehaviour
     private void LateUpdate()
     {
         InteractPressed = false;
+        InteractReleased = false;
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
@@ -119,7 +124,9 @@ public class PlayerInputHandler : MonoBehaviour
         Look = Vector2.zero;
 
         RunPressed = false;
+        InteractHeld = false;
         InteractPressed = false;
+        InteractReleased = false;
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
