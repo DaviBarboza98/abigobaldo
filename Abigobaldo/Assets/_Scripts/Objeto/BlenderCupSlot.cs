@@ -17,6 +17,11 @@ public class BlenderCupSlot : MonoBehaviour, IInteractable
     public bool IsOccupied => currentObjeto != null;
     public Objeto CurrentObjeto => currentObjeto;
 
+    public void SetBlender(Blender blender)
+    {
+        linkedBlender = blender;
+    }
+
     private void Awake()
     {
         GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.HomeSlot);

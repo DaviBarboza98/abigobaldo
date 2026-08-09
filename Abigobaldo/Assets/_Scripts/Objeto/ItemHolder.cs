@@ -34,7 +34,6 @@ public class ItemHolder : MonoBehaviour
     private float heldItemBoundsRadius = 0.5f;
 
     public Objeto CurrentObjeto => currentObjeto;
-    public Item CurrentItem => currentObjeto as Item;
 
     private void FixedUpdate()
     {
@@ -52,11 +51,6 @@ public class ItemHolder : MonoBehaviour
     public bool IsEmpty()
     {
         return currentObjeto == null;
-    }
-
-    public bool TryPickUp(Item item)
-    {
-        return TryPickUp(item as Objeto);
     }
 
     public bool TryPickUp(Objeto item)
@@ -78,7 +72,6 @@ public class ItemHolder : MonoBehaviour
         heldItemBoundsRadius = CalculateHeldItemBoundsRadius();
         nextOverlapCheckTime = Time.fixedTime;
 
-        currentObjeto.HomeSlot?.MarkPickedUp(currentObjeto);
         currentObjeto.PickUp(transform.position, GetTargetRotation());
         SetPlayerCollisionIgnored(true);
 
@@ -97,11 +90,6 @@ public class ItemHolder : MonoBehaviour
         heldItemColliders = null;
 
         return item;
-    }
-
-    public Item RemoveItem()
-    {
-        return RemoveObjeto() as Item;
     }
 
     public bool RotateItem(Vector2 mouseDelta, Transform cameraTransform)

@@ -95,14 +95,6 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        ItemSpawner legacySpawner = hit.collider.GetComponentInParent<ItemSpawner>();
-
-        if (legacySpawner != null)
-        {
-            HandleLegacySpawner(legacySpawner);
-            return;
-        }
-
         Objeto objeto = hit.collider.GetComponentInParent<Objeto>();
 
         if (objeto != null)
@@ -198,14 +190,6 @@ public class PlayerInteraction : MonoBehaviour
 
     private GameObject GetHighlightRoot(Collider hitCollider)
     {
-        ObjetoHomeSlot homeSlot = hitCollider.GetComponentInParent<ObjetoHomeSlot>();
-
-        if (homeSlot != null)
-        {
-            Objeto heldObjeto = itemHolder != null ? itemHolder.CurrentObjeto : null;
-            return homeSlot.ShouldHighlightFor(heldObjeto) ? homeSlot.gameObject : null;
-        }
-
         Objeto objeto = hitCollider.GetComponentInParent<Objeto>();
 
         if (objeto != null)
@@ -215,11 +199,6 @@ public class PlayerInteraction : MonoBehaviour
 
         if (spawner != null)
             return spawner.gameObject;
-
-        ItemSpawner legacySpawner = hitCollider.GetComponentInParent<ItemSpawner>();
-
-        if (legacySpawner != null)
-            return legacySpawner.gameObject;
 
         IInteractable interactable = hitCollider.GetComponentInParent<IInteractable>();
         Component interactableComponent = interactable as Component;
@@ -264,9 +243,9 @@ public class PlayerInteraction : MonoBehaviour
         if (heldPlate == null)
             return false;
 
-        if (interactable is RecipeContainer container)
+        if (interactable is IRecipeStation station)
         {
-            container.TryMoveOutputToPlate(heldPlate);
+            station.TryMoveOutputToPlate(heldPlate);
             return true;
         }
 
@@ -278,27 +257,21 @@ public class PlayerInteraction : MonoBehaviour
         if (!itemHolder.IsEmpty())
             return false;
 
-        RecipeContainer container = interactable as RecipeContainer;
+        IRecipeStation station = interactable as IRecipeStation;
 
-        if (container == null)
+        if (station == null)
             return false;
 
-        if (container.Type == ContainerType.Liquidificador)
+        if (station.HasReadyOutput)
         {
-            container.Interact(this);
+            station.Interact(this);
             return true;
         }
 
-        if (container.HasReadyOutput)
-        {
-            container.Interact(this);
-            return true;
-        }
-
-        if (container.TryPickUpContainer(itemHolder))
+        if (station.TryPickUpContainer(itemHolder))
             return true;
 
-        container.Interact(this);
+        station.Interact(this);
         return true;
     }
 
@@ -307,27 +280,7 @@ public class PlayerInteraction : MonoBehaviour
         if (!itemHolder.IsEmpty())
             return;
 
-        Objeto objeto = spawner.SpawnObjeto(itemHolder);
-
-        if (objeto == null)
-            return;
-
-        if (!itemHolder.TryPickUp(objeto))
-            Destroy(objeto.gameObject);
-    }
-
-    private void HandleLegacySpawner(ItemSpawner spawner)
-    {
-        if (!itemHolder.IsEmpty())
-            return;
-
-        Objeto item = spawner.SpawnObjeto();
-
-        if (item == null)
-            return;
-
-        if (!itemHolder.TryPickUp(item))
-            Destroy(item.gameObject);
+        spawner.SpawnObjeto(itemHolder);
     }
 
     private void HandleObjeto(Objeto item)

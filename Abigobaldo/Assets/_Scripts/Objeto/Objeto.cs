@@ -22,13 +22,9 @@ public class Objeto : MonoBehaviour
     [Header("Propriedades")]
     [SerializeField] private bool canBeHeld = true;
     [SerializeField] private bool canBeThrown = true;
-    [Tooltip("Legado. Use slots especificos, como BlenderCupSlot, para encaixes novos.")]
-    [SerializeField] private bool createHomeSlotFromInitialPose;
-    [SerializeField] private Vector3 homeSlotPadding = new Vector3(0.15f, 0.15f, 0.15f);
 
     private Rigidbody rb;
     private MonoBehaviour[] holdStateBehaviours;
-    private ObjetoHomeSlot homeSlot;
 
     public ItemData Data => objetoData;
     public ObjetoRole Role => role;
@@ -36,7 +32,6 @@ public class Objeto : MonoBehaviour
     public string ObjetoName => objetoData != null ? objetoData.DisplayName : gameObject.name;
     public bool CanBeHeld => canBeHeld;
     public bool CanBeThrown => canBeThrown;
-    public ObjetoHomeSlot HomeSlot => homeSlot;
 
     protected virtual void Awake()
     {
@@ -45,8 +40,6 @@ public class Objeto : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         EnsureDynamicMeshCollidersAreConvex();
         holdStateBehaviours = GetComponents<MonoBehaviour>();
-
-        createHomeSlotFromInitialPose = false;
     }
 
     public void Configure(ItemData data, bool held, bool thrown)
@@ -54,11 +47,6 @@ public class Objeto : MonoBehaviour
         objetoData = data;
         canBeHeld = held;
         canBeThrown = thrown;
-    }
-
-    public void SetHomeSlot(ObjetoHomeSlot slot)
-    {
-        homeSlot = slot;
     }
 
     public virtual void PickUp(Vector3 position, Quaternion rotation)
@@ -151,13 +139,6 @@ public class Objeto : MonoBehaviour
     {
         if (holdStateBehaviours == null || holdStateBehaviours.Length == 0)
             holdStateBehaviours = GetComponents<MonoBehaviour>();
-    }
-
-    private void OnValidate()
-    {
-        homeSlotPadding.x = Mathf.Max(0f, homeSlotPadding.x);
-        homeSlotPadding.y = Mathf.Max(0f, homeSlotPadding.y);
-        homeSlotPadding.z = Mathf.Max(0f, homeSlotPadding.z);
     }
 
     private void EnsureDynamicMeshCollidersAreConvex()

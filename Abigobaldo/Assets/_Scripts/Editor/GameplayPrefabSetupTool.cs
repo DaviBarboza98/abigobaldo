@@ -18,8 +18,14 @@ public static class GameplayPrefabSetupTool
         foreach (Objeto objeto in Object.FindObjectsOfType<Objeto>(true))
             NormalizeObjeto(objeto);
 
-        foreach (RecipeContainer container in Object.FindObjectsOfType<RecipeContainer>(true))
-            NormalizeContainer(container);
+        foreach (FryingPan fryingPan in Object.FindObjectsOfType<FryingPan>(true))
+            NormalizeStation(fryingPan);
+
+        foreach (Cuscuzeira cuscuzeira in Object.FindObjectsOfType<Cuscuzeira>(true))
+            NormalizeStation(cuscuzeira);
+
+        foreach (Blender blender in Object.FindObjectsOfType<Blender>(true))
+            NormalizeStation(blender);
 
         foreach (ObjetoSpawner spawner in Object.FindObjectsOfType<ObjetoSpawner>(true))
             NormalizeSpawner(spawner);
@@ -77,7 +83,7 @@ public static class GameplayPrefabSetupTool
                 GetOrAdd<Objeto>(sceneObject);
 
             if (TryGetContainerType(normalizedName, out ContainerType containerType))
-                ConfigureContainer(GetOrAddSpecificContainer(sceneObject, containerType), containerType, normalizedName);
+                ConfigureStation(GetOrAddSpecificStation(sceneObject, containerType), containerType, normalizedName);
         }
     }
 
@@ -120,48 +126,42 @@ public static class GameplayPrefabSetupTool
         return false;
     }
 
-    private static void ConfigureContainer(RecipeContainer container, ContainerType containerType, string normalizedName)
+    private static void ConfigureStation(MonoBehaviour station, ContainerType containerType, string normalizedName)
     {
-        SerializedObject serializedObject = new SerializedObject(container);
-        SetEnum(serializedObject, "containerType", (int)containerType);
+        SerializedObject serializedObject = new SerializedObject(station);
         SetBool(serializedObject, "canBePickedUp", containerType != ContainerType.Liquidificador);
         SetBool(serializedObject, "requiresManualActivation", containerType == ContainerType.Liquidificador);
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(container);
+        EditorUtility.SetDirty(station);
     }
 
-    private static RecipeContainer GetOrAddSpecificContainer(GameObject target, ContainerType containerType)
+    private static MonoBehaviour GetOrAddSpecificStation(GameObject target, ContainerType containerType)
     {
-        RecipeContainer existing = target.GetComponent<RecipeContainer>();
-
-        if (existing != null)
-            return existing;
-
         switch (containerType)
         {
             case ContainerType.Frigideira:
-                return target.AddComponent<FryingPan>();
+                return GetOrAdd<FryingPan>(target);
             case ContainerType.Cuscuzeira:
-                return target.AddComponent<Cuscuzeira>();
+                return GetOrAdd<Cuscuzeira>(target);
             case ContainerType.Liquidificador:
-                return target.AddComponent<Blender>();
+                return GetOrAdd<Blender>(target);
             default:
-                return target.AddComponent<RecipeContainer>();
+                return null;
         }
     }
 
-    private static void NormalizeContainer(RecipeContainer container)
+    private static void NormalizeStation(MonoBehaviour station)
     {
-        if (container == null)
+        if (station == null)
             return;
 
-        GameLayers.SetLayerRecursivelyIfDefault(container.gameObject, GameLayers.Container);
-        GetOrAdd<Highlightable>(container.gameObject);
-        EnsureAtLeastOneCollider(container.gameObject);
-        MakeMeshCollidersConvex(container.gameObject);
+        GameLayers.SetLayerRecursivelyIfDefault(station.gameObject, GameLayers.Container);
+        GetOrAdd<Highlightable>(station.gameObject);
+        EnsureAtLeastOneCollider(station.gameObject);
+        MakeMeshCollidersConvex(station.gameObject);
 
-        EditorUtility.SetDirty(container);
+        EditorUtility.SetDirty(station);
     }
 
     private static void NormalizeSpawner(ObjetoSpawner spawner)
@@ -217,14 +217,20 @@ public static class GameplayPrefabSetupTool
     {
         foreach (Objeto objeto in Object.FindObjectsOfType<Objeto>(true))
         {
-            if (objeto.GetComponent<RecipeContainer>() != null)
+            if (HasRecipeStation(objeto.gameObject))
                 continue;
 
             SavePrefabFor(objeto.gameObject, ObjectsFolder);
         }
 
-        foreach (RecipeContainer container in Object.FindObjectsOfType<RecipeContainer>(true))
-            SavePrefabFor(container.gameObject, ContainersFolder);
+        foreach (FryingPan fryingPan in Object.FindObjectsOfType<FryingPan>(true))
+            SavePrefabFor(fryingPan.gameObject, ContainersFolder);
+
+        foreach (Cuscuzeira cuscuzeira in Object.FindObjectsOfType<Cuscuzeira>(true))
+            SavePrefabFor(cuscuzeira.gameObject, ContainersFolder);
+
+        foreach (Blender blender in Object.FindObjectsOfType<Blender>(true))
+            SavePrefabFor(blender.gameObject, ContainersFolder);
 
         foreach (ObjetoSpawner spawner in Object.FindObjectsOfType<ObjetoSpawner>(true))
             SavePrefabFor(spawner.gameObject, SpawnersFolder);
@@ -304,6 +310,13 @@ public static class GameplayPrefabSetupTool
     {
         T component = target.GetComponent<T>();
         return component != null ? component : target.AddComponent<T>();
+    }
+
+    private static bool HasRecipeStation(GameObject target)
+    {
+        return target.GetComponent<FryingPan>() != null
+            || target.GetComponent<Cuscuzeira>() != null
+            || target.GetComponent<Blender>() != null;
     }
 
     private static void EnsureFolders()

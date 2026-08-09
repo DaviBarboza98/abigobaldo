@@ -140,32 +140,8 @@ public class PlateContainer : MonoBehaviour, IInteractable
             visual.transform.localPosition = contentVisualLocalOffset;
             visual.transform.localRotation = Quaternion.identity;
             visual.transform.localScale = Vector3.one * contentVisualScale;
-            DisableGameplayComponents(visual);
+            RecipeVisualUtility.DisableGameplayComponents(visual);
             contentVisuals.Add(visual);
-        }
-    }
-
-    private static void DisableGameplayComponents(GameObject visual)
-    {
-        foreach (Objeto item in visual.GetComponentsInChildren<Objeto>())
-            item.enabled = false;
-
-        foreach (RecipeContainer container in visual.GetComponentsInChildren<RecipeContainer>())
-            container.enabled = false;
-
-        foreach (PlateContainer plate in visual.GetComponentsInChildren<PlateContainer>())
-            plate.enabled = false;
-
-        foreach (Collider collider in visual.GetComponentsInChildren<Collider>())
-            collider.enabled = false;
-
-        foreach (Rigidbody body in visual.GetComponentsInChildren<Rigidbody>())
-        {
-            body.velocity = Vector3.zero;
-            body.angularVelocity = Vector3.zero;
-            body.useGravity = false;
-            body.isKinematic = true;
-            body.detectCollisions = false;
         }
     }
 

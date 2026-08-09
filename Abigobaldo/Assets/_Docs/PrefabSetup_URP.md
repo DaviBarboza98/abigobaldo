@@ -58,7 +58,7 @@ Layers criadas:
 - `Container`: frigideira, cuscuzeira, liquidificador, prato e futuros containers.
 - `Door`: portas de armario, geladeira e freezer.
 - `Spawner`: spawners de objeto/agua.
-- `HomeSlot`: pontos fantasmas de reposicionamento.
+- `HomeSlot`: encaixes/slots interativos, como o ponto do copo do liquidificador.
 
 Os scripts principais tentam aplicar a layer automaticamente quando o GameObject ainda esta em `Default`. Se voce colocar uma layer manualmente no prefab, o codigo respeita e nao troca.
 
@@ -153,9 +153,14 @@ Estrutura recomendada:
    - `SetColor(Color)`
    - `SetRate(float)`
 
-## Base de receita
+## Scripts de receita
 
-`RecipeContainer` e a base compartilhada dos scripts `FryingPan`, `Cuscuzeira` e `Blender`. Voce nao precisa colocar `RecipeContainer` direto nos prefabs novos.
+Nao existe mais classe base de receita/container. A logica fica distribuida nos scripts especificos:
+- `FryingPan`: ingredientes, fritura, vapor leve, visual em cima da frigideira e estados de queima.
+- `Cuscuzeira`: ingredientes, cozimento, vapor forte e estados de queima.
+- `Blender`: ingredientes dentro do copo, ligar/desligar, animacao de mistura e resultado final.
+
+As receitas continuam modulares via `RecipeData` e `RecipeDatabase`.
 
 `Max Items`:
 Quantidade maxima de ingredientes guardados antes de bloquear entrada.
@@ -170,13 +175,13 @@ Lista opcional de receitas so daquele container. Pode deixar vazio se usar o dat
 Ponto onde o resultado aparece se o player retirar o item pronto com a mao vazia. Tambem e usado para subprodutos, tipo cascas de ovo. Se vazio, usa a posicao do container + um offset para cima.
 
 `Can Be Picked Up`:
-Liga se o container inteiro pode ser pego na mao. Use em `Frigideira` e `Cuscuzeira`. Para o liquidificador novo, normalmente quem e pegavel e o `CopoDoLiquidificador`, nao a base/motor.
+Existe na `FryingPan` e na `Cuscuzeira`. Liga se o container inteiro pode ser pego na mao. No liquidificador novo, quem e pegavel e o `CopoDoLiquidificador`, nao a base/motor.
 
 `Container Item Data`:
 ObjetoData que representa o proprio container quando ele e pegavel. Ex: `Frigideira.asset`, `Cuscuzeira.asset`.
 
 `Frying Motion Radius` / `Frying Motion Speed`:
-Movimento visual pequeno enquanto cozinha. Na frigideira parece fritura; no liquidificador parece mexer.
+Campos da `FryingPan`. Controlam o movimento visual pequeno enquanto cozinha.
 
 `Blender Morph Start Time`:
 Tempo antes dos ingredientes comecarem a encolher no liquidificador.
@@ -199,8 +204,8 @@ Cor quando passou do ponto/queimou/carbonizou.
 `Steam Rate`:
 Quantidade emitida enquanto cozinha.
 
-`Requires Manual Activation`:
-Use no liquidificador. Mao vazia + `E` liga/desliga.
+`Spin Speed` / `Shake Radius` / `Morph Start Time` / `Morph Duration`:
+Campos do `Blender`. Controlam os ingredientes girando, mexendo e encolhendo ate virar o resultado.
 
 `Show Debug Logs`:
 Liga mensagens no Console com tempo e estado da receita.
@@ -248,10 +253,7 @@ Crie tambem um filho vazio/collider no ponto onde o copo encaixa. O transform de
 - `Linked Blender`: pode deixar vazio se o slot for filho da base; ele acha o `Blender` automaticamente.
 
 `Blender`:
-- `Can Be Picked Up`: desligado
-- `Requires Manual Activation`: ligado
 - `Cup Content Root`: vazio dentro do copo encaixado
-- `Steam Particles`: vazio/null
 - `Required Cup Slot`: o `BlenderCupSlot` do copo. Com isso a base so liga/processa com o copo encaixado.
 
 ### Copo do liquidificador
