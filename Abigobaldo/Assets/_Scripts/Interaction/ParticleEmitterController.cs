@@ -102,7 +102,7 @@ public class ParticleEmitterController : MonoBehaviour
             preset = ParticlePreset.BlueCooktopFlame;
         else if (hierarchyName.Contains("burn") || hierarchyName.Contains("smoke"))
             preset = ParticlePreset.DarkBurnSmoke;
-        else if (hierarchyName.Contains("couscous") || hierarchyName.Contains("steam"))
+        else if (hierarchyName.Contains("cuscuz") || hierarchyName.Contains("steam"))
             preset = ParticlePreset.HeavySteam;
         else
             preset = ParticlePreset.SoftSteam;
@@ -233,4 +233,5 @@ public class ParticleEmitterController : MonoBehaviour
         return fullName;
     }
 }
+
 

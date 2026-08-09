@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &4005277980777447984
 GameObject:
@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2745244684140842291}
   - component: {fileID: 6701163956463881255}
   m_Layer: 10
-  m_Name: Couscous
+  m_Name: Cuscuz
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -151,3 +151,4 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6f0419b81518d614ab71edaa915556bf, type: 3}
   m_PrefabInstance: {fileID: 2601551829910507407}
   m_PrefabAsset: {fileID: 0}
+

@@ -276,7 +276,7 @@ public class PlayerInteraction : MonoBehaviour
         if (station == null)
             return false;
 
-        if (station.HasReadyOutput)
+        if (station.HasStoredObjects || station.HasReadyOutput)
         {
             station.Interact(this);
             return true;
@@ -396,4 +396,5 @@ public class PlayerInteraction : MonoBehaviour
         highlightRefreshInterval = Mathf.Max(0.01f, highlightRefreshInterval);
     }
 }
+
 

@@ -26,6 +26,7 @@ public class Blender : MonoBehaviour, IRecipeStation
     private bool powered;
     private bool outputPrepared;
 
+    public bool HasStoredObjects => currentCup != null && currentCup.ContentCount > 0;
     public bool HasReadyOutput => currentCup != null && cookingProcess != null && cookingProcess.IsReady && outputPrepared && currentCup.HasSingleOutput;
     private bool IsCooking => currentCup != null && cookingProcess != null && cookingProcess.IsRunning && !cookingProcess.IsReady;
 
@@ -61,6 +62,12 @@ public class Blender : MonoBehaviour, IRecipeStation
             return;
 
         Holder holder = player.Holder;
+
+        if (holder.IsEmpty() && currentCup != null && currentCup.TryTakeLastObject(holder))
+        {
+            CancelActiveRecipe("contents changed.");
+            return;
+        }
 
         if (!holder.IsEmpty())
         {
@@ -251,6 +258,12 @@ public class Blender : MonoBehaviour, IRecipeStation
         if (currentCup == null || cookingProcess == null || !cookingProcess.IsRunning)
             return;
 
+        if (activeRecipe == null || !activeRecipe.Matches(ContainerType.Blender, currentCup.Contents))
+        {
+            CancelActiveRecipe("contents changed.");
+            return;
+        }
+
         cookingProcess.Update(Time.deltaTime);
         LogTimer();
 
@@ -281,6 +294,17 @@ public class Blender : MonoBehaviour, IRecipeStation
             currentCup.ClearContents();
     }
 
+    private void CancelActiveRecipe(string reason)
+    {
+        cookingProcess?.Stop();
+        cookingProcess = null;
+        activeRecipe = null;
+        lastLoggedSecond = -1;
+        outputPrepared = false;
+        powered = false;
+        Log($"{name}: recipe canceled, {reason}");
+    }
+
     private void LogTimer()
     {
         if (!showDebugLogs || cookingProcess == null)
@@ -307,4 +331,5 @@ public class Blender : MonoBehaviour, IRecipeStation
         autoAttachRadius = Mathf.Max(0.01f, autoAttachRadius);
     }
 }
+
 

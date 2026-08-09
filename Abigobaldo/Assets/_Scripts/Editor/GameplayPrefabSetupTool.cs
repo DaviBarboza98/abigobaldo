@@ -21,8 +21,8 @@ public static class GameplayPrefabSetupTool
         foreach (FryingPan fryingPan in Object.FindObjectsOfType<FryingPan>(true))
             NormalizeStation(fryingPan);
 
-        foreach (CouscousPot couscousPot in Object.FindObjectsOfType<CouscousPot>(true))
-            NormalizeStation(couscousPot);
+        foreach (Cuscuzeira cuscuzeira in Object.FindObjectsOfType<Cuscuzeira>(true))
+            NormalizeStation(cuscuzeira);
 
         foreach (Blender blender in Object.FindObjectsOfType<Blender>(true))
             NormalizeStation(blender);
@@ -111,9 +111,9 @@ public static class GameplayPrefabSetupTool
             return true;
         }
 
-        if (normalizedName.Contains("couscous"))
+        if (normalizedName.Contains("cuscuz"))
         {
-            containerType = ContainerType.CouscousPot;
+            containerType = ContainerType.Cuscuzeira;
             return true;
         }
 
@@ -143,8 +143,8 @@ public static class GameplayPrefabSetupTool
         {
             case ContainerType.FryingPan:
                 return GetOrAdd<FryingPan>(target);
-            case ContainerType.CouscousPot:
-                return GetOrAdd<CouscousPot>(target);
+            case ContainerType.Cuscuzeira:
+                return GetOrAdd<Cuscuzeira>(target);
             case ContainerType.Blender:
                 return GetOrAdd<Blender>(target);
             default:
@@ -227,8 +227,8 @@ public static class GameplayPrefabSetupTool
         foreach (FryingPan fryingPan in Object.FindObjectsOfType<FryingPan>(true))
             SavePrefabFor(fryingPan.gameObject, ContainersFolder);
 
-        foreach (CouscousPot couscousPot in Object.FindObjectsOfType<CouscousPot>(true))
-            SavePrefabFor(couscousPot.gameObject, ContainersFolder);
+        foreach (Cuscuzeira cuscuzeira in Object.FindObjectsOfType<Cuscuzeira>(true))
+            SavePrefabFor(cuscuzeira.gameObject, ContainersFolder);
 
         foreach (Blender blender in Object.FindObjectsOfType<Blender>(true))
             SavePrefabFor(blender.gameObject, ContainersFolder);
@@ -316,7 +316,7 @@ public static class GameplayPrefabSetupTool
     private static bool HasRecipeStation(GameObject target)
     {
         return target.GetComponent<FryingPan>() != null
-            || target.GetComponent<CouscousPot>() != null
+            || target.GetComponent<Cuscuzeira>() != null
             || target.GetComponent<Blender>() != null;
     }
 
@@ -366,4 +366,5 @@ public static class GameplayPrefabSetupTool
         return new Vector3(Mathf.Abs(value.x), Mathf.Abs(value.y), Mathf.Abs(value.z));
     }
 }
+
 

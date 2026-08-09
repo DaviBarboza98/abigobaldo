@@ -50,3 +50,4 @@ public class PlayerCursor : MonoBehaviour
         Cursor.visible = true;
     }
 }
+

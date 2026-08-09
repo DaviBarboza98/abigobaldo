@@ -22,13 +22,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     [SerializeField] private Transform objectSurface;
     [SerializeField] private Vector3 objectLocalOffset = new Vector3(0f, 0.08f, 0f);
     [SerializeField] private float objectVisualScale = 0.22f;
-    [SerializeField] private float fryingMotionRadius = 0.025f;
-    [SerializeField] private float fryingMotionSpeed = 18f;
-    [SerializeField] private bool usePhysicalObjectVisual = true;
-    [SerializeField] private float visualDropHeight = 0.18f;
-    [SerializeField] private float visualMass = 0.08f;
-    [SerializeField] private float visualDrag = 0.05f;
-    [SerializeField] private PhysicMaterial lowFrictionMaterial;
+
     [Header("Particles")]
     [SerializeField] private ParticleEmitterController steamParticles;
     [SerializeField] private Color steamColor = new Color(0.85f, 0.85f, 0.85f, 0.45f);
@@ -50,8 +44,8 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     private Rigidbody rb;
     private HoldableObject holdableObject;
 
+    public bool HasStoredObjects => contents.Count > 0 || pendingByproducts.Count > 0;
     public bool HasReadyOutput => cookingProcess != null && cookingProcess.IsReady && contents.Count == 1;
-    private bool IsCooking => cookingProcess != null && cookingProcess.IsRunning && !cookingProcess.IsReady;
 
     private void Awake()
     {
@@ -66,7 +60,6 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     private void Update()
     {
         UpdateCooking();
-        UpdateVisualMotion();
         UpdateSteam();
     }
 
@@ -77,7 +70,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
         if (player.Holder.IsEmpty())
         {
-            if (TryTakeOutput(player.Holder) || TryTakePendingByproduct(player.Holder))
+            if (TryTakeLastContent(player.Holder) || TryTakePendingByproduct(player.Holder))
                 return;
 
             LogContents();
@@ -151,6 +144,29 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
         FinishAndClearRecipe();
         RefreshVisuals();
+        return true;
+    }
+
+    private bool TryTakeLastContent(Holder holder)
+    {
+        if (holder == null || !holder.IsEmpty() || contents.Count == 0)
+            return false;
+
+        int lastIndex = contents.Count - 1;
+        ObjectData output = contents.Count == 1 ? GetCurrentOutputObject() : contents[lastIndex];
+        ObjectCookState cookState = contents.Count == 1 ? GetCurrentCookState() : ObjectCookState.Raw;
+        Material outputMaterial = contents.Count == 1 ? GetCurrentOutputMaterial() : null;
+
+        if (output == null || output.Prefab == null)
+            return false;
+
+        if (!ObjectDeliveryUtility.TryDeliverToHolder(output, holder, cookState, null, outputMaterial))
+            return false;
+
+        contents.RemoveAt(lastIndex);
+        CancelActiveRecipe();
+        RefreshVisuals();
+        LogContents();
         return true;
     }
 
@@ -305,38 +321,12 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
         GameObject visual = Instantiate(data.Prefab, objectSurface);
         visual.name = $"FryingPanVisual_{data.DisplayName}";
-        visual.transform.localPosition = GetVisualPosition(index, count) + Vector3.up * (usePhysicalObjectVisual ? visualDropHeight : 0f);
+        visual.transform.localPosition = GetVisualPosition(index, count);
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = Vector3.one * objectVisualScale;
-        RecipeVisualUtility.DisableGameplayComponents(visual, !usePhysicalObjectVisual);
-        ConfigureVisualPhysics(visual);
+        RecipeVisualUtility.DisableGameplayComponents(visual);
         visuals.Add(visual);
         ApplyCookMaterialForCurrentState();
-    }
-
-    private void ConfigureVisualPhysics(GameObject visual)
-    {
-        if (!usePhysicalObjectVisual)
-            return;
-
-        Rigidbody body = visual.GetComponent<Rigidbody>();
-        if (body == null)
-            body = visual.AddComponent<Rigidbody>();
-
-        body.mass = visualMass;
-        body.drag = visualDrag;
-        body.angularDrag = visualDrag;
-        body.useGravity = true;
-        body.isKinematic = false;
-        body.detectCollisions = true;
-        body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-        body.interpolation = RigidbodyInterpolation.Interpolate;
-
-        if (lowFrictionMaterial == null)
-            return;
-
-        foreach (Collider targetCollider in visual.GetComponentsInChildren<Collider>())
-            targetCollider.material = lowFrictionMaterial;
     }
 
     private Vector3 GetVisualPosition(int index, int count)
@@ -346,26 +336,6 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
         float angle = Mathf.PI * 2f * index / count;
         return objectLocalOffset + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * 0.12f;
-    }
-
-    private void UpdateVisualMotion()
-    {
-        if (!IsCooking)
-            return;
-
-        if (usePhysicalObjectVisual)
-            return;
-
-        for (int i = 0; i < visuals.Count; i++)
-        {
-            GameObject visual = visuals[i];
-            if (visual == null)
-                continue;
-
-            float phase = Time.time * fryingMotionSpeed + i * 1.73f;
-            Vector3 motion = new Vector3(Mathf.Sin(phase), 0f, Mathf.Cos(phase * 0.8f));
-            visual.transform.localPosition = GetVisualPosition(i, visuals.Count) + motion * fryingMotionRadius;
-        }
     }
 
     private void ClearVisuals()
@@ -448,6 +418,16 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     {
         cookingProcess?.Stop();
         contents.Clear();
+        cookingProcess = null;
+        activeRecipe = null;
+        resultState = ResultState.Raw;
+        lastLoggedSecond = -1;
+        loggedAlmostReady = false;
+    }
+
+    private void CancelActiveRecipe()
+    {
+        cookingProcess?.Stop();
         cookingProcess = null;
         activeRecipe = null;
         resultState = ResultState.Raw;
@@ -557,12 +537,11 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     {
         maxObjects = Mathf.Max(1, maxObjects);
         steamRate = Mathf.Max(0f, steamRate);
-        visualDropHeight = Mathf.Max(0f, visualDropHeight);
-        visualMass = Mathf.Max(0.001f, visualMass);
-        visualDrag = Mathf.Max(0f, visualDrag);
+        objectVisualScale = Mathf.Max(0.01f, objectVisualScale);
         returnPointSize.x = Mathf.Max(0.05f, returnPointSize.x);
         returnPointSize.y = Mathf.Max(0.05f, returnPointSize.y);
         returnPointSize.z = Mathf.Max(0.05f, returnPointSize.z);
     }
 }
+
 

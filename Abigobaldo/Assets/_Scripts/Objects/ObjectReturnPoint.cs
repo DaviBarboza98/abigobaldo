@@ -105,3 +105,4 @@ public class ObjectReturnPoint : MonoBehaviour, IInteractable, IHighlightStateRe
     }
 }
 
+

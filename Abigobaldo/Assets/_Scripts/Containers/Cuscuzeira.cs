@@ -2,7 +2,7 @@
 using System.Text;
 using UnityEngine;
 
-public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, ObjectReturnStateReceiver
+public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, ObjectReturnStateReceiver
 {
     private enum ResultState { Raw, Ready, Overcooked, Burned, Carbonized }
 
@@ -14,7 +14,7 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
 
     [Header("Holdable Object")]
     [SerializeField] private bool canBePickedUp = true;
-    [SerializeField] private ObjectData couscousPotData;
+    [SerializeField] private ObjectData cuscuzeiraData;
     [SerializeField] private bool createReturnPoint = true;
     [SerializeField] private Vector3 returnPointSize = Vector3.one * 0.7f;
 
@@ -38,6 +38,7 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
     private Rigidbody rb;
     private HoldableObject holdableObject;
 
+    public bool HasStoredObjects => contents.Count > 0 || pendingByproducts.Count > 0;
     public bool HasReadyOutput => cookingProcess != null && cookingProcess.IsReady && contents.Count == 1;
 
     private void Awake()
@@ -63,7 +64,7 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
 
         if (player.Holder.IsEmpty())
         {
-            if (!TryTakeOutput(player.Holder) && !TryTakePendingByproduct(player.Holder))
+            if (!TryTakeLastContent(player.Holder) && !TryTakePendingByproduct(player.Holder))
                 LogContents();
             return;
         }
@@ -135,6 +136,28 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
         return true;
     }
 
+    private bool TryTakeLastContent(Holder holder)
+    {
+        if (holder == null || !holder.IsEmpty() || contents.Count == 0)
+            return false;
+
+        int lastIndex = contents.Count - 1;
+        ObjectData output = contents.Count == 1 ? GetCurrentOutputObject() : contents[lastIndex];
+        ObjectCookState cookState = contents.Count == 1 ? GetCurrentCookState() : ObjectCookState.Raw;
+        Material outputMaterial = contents.Count == 1 ? GetCurrentOutputMaterial() : null;
+
+        if (output == null || output.Prefab == null)
+            return false;
+
+        if (!ObjectDeliveryUtility.TryDeliverToHolder(output, holder, cookState, null, outputMaterial))
+            return false;
+
+        contents.RemoveAt(lastIndex);
+        CancelActiveRecipe();
+        LogContents();
+        return true;
+    }
+
     private void TryStartRecipe()
     {
         if (cookingProcess != null || !TryFindRecipe(out RecipeData recipe))
@@ -152,14 +175,14 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
         if (cookingEnabled)
             cookingProcess.Start();
 
-        Log($"{name}: couscous pot recipe started. Time: {recipe.CookingTime:0}s.");
+        Log($"{name}: cuscuzeira recipe started. Time: {recipe.CookingTime:0}s.");
     }
 
     private bool TryFindRecipe(out RecipeData recipe)
     {
         foreach (RecipeData localRecipe in localRecipes)
         {
-            if (localRecipe != null && localRecipe.Matches(ContainerType.CouscousPot, contents))
+            if (localRecipe != null && localRecipe.Matches(ContainerType.Cuscuzeira, contents))
             {
                 recipe = localRecipe;
                 return true;
@@ -167,7 +190,7 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
         }
 
         if (recipeDatabase != null)
-            return recipeDatabase.TryFindRecipe(ContainerType.CouscousPot, contents, out recipe);
+            return recipeDatabase.TryFindRecipe(ContainerType.Cuscuzeira, contents, out recipe);
 
         recipe = null;
         return false;
@@ -325,6 +348,16 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
         loggedAlmostReady = false;
     }
 
+    private void CancelActiveRecipe()
+    {
+        cookingProcess?.Stop();
+        cookingProcess = null;
+        activeRecipe = null;
+        resultState = ResultState.Raw;
+        lastLoggedSecond = -1;
+        loggedAlmostReady = false;
+    }
+
     private void LogTimer()
     {
         if (!showDebugLogs || cookingProcess == null)
@@ -353,7 +386,7 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
 
         if (contents.Count == 0)
         {
-            Debug.Log($"{name}: couscous pot is empty.");
+            Debug.Log($"{name}: cuscuzeira is empty.");
             return;
         }
 
@@ -385,7 +418,7 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
         if (holdableObject == null)
             holdableObject = gameObject.AddComponent<HoldableObject>();
 
-        holdableObject.Configure(couscousPotData, true, false);
+        holdableObject.Configure(cuscuzeiraData, true, false);
     }
 
     public void OnPickedUp() => SetCookingEnabled(false);
@@ -432,4 +465,5 @@ public class CouscousPot : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obj
         returnPointSize.z = Mathf.Max(0.05f, returnPointSize.z);
     }
 }
+
 

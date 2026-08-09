@@ -24,6 +24,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, HoldStateReceiver
     private Collider[] colliders;
 
     public IReadOnlyList<ObjectData> Contents => contents;
+    public int ContentCount => contents.Count;
     public bool IsAttached => attachedBase != null;
     public bool HasSingleOutput => contents.Count == 1;
 
@@ -212,7 +213,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, HoldStateReceiver
             if (visual == null)
                 continue;
 
-            visual.transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime, Space.Self);
+            visual.transform.Rotate(Vector3.forward, spinSpeed * Time.deltaTime, Space.Self);
         }
     }
 
@@ -337,4 +338,5 @@ public class BlenderCup : MonoBehaviour, IInteractable, HoldStateReceiver
         maxObjects = 1;
     }
 }
+
 

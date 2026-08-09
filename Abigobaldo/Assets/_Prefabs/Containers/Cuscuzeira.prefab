@@ -4846,7 +4846,7 @@ GameObject:
   - component: {fileID: 7375951540228772414}
   - component: {fileID: 1353770615764364035}
   m_Layer: 0
-  m_Name: CouscousPot
+  m_Name: Cuscuzeira
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4993,6 +4993,7 @@ MonoBehaviour:
   target: {fileID: 7032208452335695643}
   preset: 1
   applyPresetOnAwake: 1
+
 
 
 

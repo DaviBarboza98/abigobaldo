@@ -22,3 +22,4 @@ public class ObjectData : ScriptableObject
     public ObjectCookState CookState => cookState;
 }
 
+

@@ -1,6 +1,7 @@
 ﻿public enum ContainerType
 {
     FryingPan,
-    CouscousPot,
+    Cuscuzeira,
     Blender
 }
+
