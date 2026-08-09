@@ -25,6 +25,11 @@ public class Objeto : MonoBehaviour
 
     private Rigidbody rb;
     private MonoBehaviour[] holdStateBehaviours;
+    private bool hasRuntimeCookState;
+    private ItemCookState runtimeCookState;
+    private bool hasRuntimeTint;
+    private Color runtimeTint;
+    private Material runtimeMaterial;
 
     public ItemData Data => objetoData;
     public ObjetoRole Role => role;
@@ -32,6 +37,10 @@ public class Objeto : MonoBehaviour
     public string ObjetoName => objetoData != null ? objetoData.DisplayName : gameObject.name;
     public bool CanBeHeld => canBeHeld;
     public bool CanBeThrown => canBeThrown;
+    public ItemCookState CookState => hasRuntimeCookState ? runtimeCookState : objetoData != null ? objetoData.CookState : ItemCookState.Cru;
+    public bool HasRuntimeTint => hasRuntimeTint;
+    public Color RuntimeTint => runtimeTint;
+    public Material RuntimeMaterial => runtimeMaterial;
 
     protected virtual void Awake()
     {
@@ -49,6 +58,31 @@ public class Objeto : MonoBehaviour
         canBeThrown = thrown;
     }
 
+    public void SetRuntimeCookVisual(ItemCookState state, Color? tint)
+    {
+        SetRuntimeCookVisual(state, tint, null);
+    }
+
+    public void SetRuntimeCookVisual(ItemCookState state, Color? tint, Material material)
+    {
+        hasRuntimeCookState = true;
+        runtimeCookState = state;
+        hasRuntimeTint = tint.HasValue;
+        runtimeMaterial = material;
+
+        if (runtimeMaterial != null)
+        {
+            ApplyMaterial(runtimeMaterial);
+            return;
+        }
+
+        if (!tint.HasValue)
+            return;
+
+        runtimeTint = tint.Value;
+        ApplyTint(runtimeTint);
+    }
+
     public virtual void PickUp(Vector3 position, Quaternion rotation)
     {
         transform.SetParent(null);
@@ -58,6 +92,7 @@ public class Objeto : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.useGravity = false;
+        rb.detectCollisions = true;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
@@ -70,6 +105,7 @@ public class Objeto : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         rb.isKinematic = false;
         rb.useGravity = true;
+        rb.detectCollisions = true;
 
         transform.SetParent(null);
         NotifyDropped();
@@ -81,6 +117,7 @@ public class Objeto : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         rb.isKinematic = false;
         rb.useGravity = true;
+        rb.detectCollisions = true;
 
         transform.SetParent(null);
         rb.AddForce(direction.normalized * force, ForceMode.Impulse);
@@ -99,6 +136,7 @@ public class Objeto : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
         rb.isKinematic = true;
         rb.useGravity = false;
+        rb.detectCollisions = true;
         NotifyDropped();
     }
 
@@ -139,6 +177,29 @@ public class Objeto : MonoBehaviour
     {
         if (holdStateBehaviours == null || holdStateBehaviours.Length == 0)
             holdStateBehaviours = GetComponents<MonoBehaviour>();
+    }
+
+    private void ApplyTint(Color tint)
+    {
+        foreach (Renderer targetRenderer in GetComponentsInChildren<Renderer>())
+        {
+            foreach (Material material in targetRenderer.materials)
+            {
+                if (material.HasProperty("_BaseColor"))
+                    material.SetColor("_BaseColor", tint);
+                else if (material.HasProperty("_Color"))
+                    material.color = tint;
+            }
+        }
+    }
+
+    private void ApplyMaterial(Material material)
+    {
+        if (material == null)
+            return;
+
+        foreach (Renderer targetRenderer in GetComponentsInChildren<Renderer>())
+            targetRenderer.material = material;
     }
 
     private void EnsureDynamicMeshCollidersAreConvex()

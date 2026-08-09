@@ -10,6 +10,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, 
     [SerializeField] private RecipeDatabase recipeDatabase;
     [SerializeField] private List<RecipeData> localRecipes = new List<RecipeData>();
     [SerializeField] private int maxItems = 3;
+    [SerializeField] private ItemData carbonizedItem;
 
     [Header("Objeto pegavel")]
     [SerializeField] private bool canBePickedUp = true;
@@ -86,7 +87,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, 
 
         if (cookingProcess != null && cookingProcess.IsReady && contents.Count == 1)
         {
-            if (!plate.TryAddItem(contents[0]))
+            if (!plate.TryAddItem(GetCurrentOutputItem(), null, GetCurrentOutputMaterial()))
                 return false;
 
             FinishAndClearRecipe();
@@ -123,11 +124,11 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, 
         if (holder == null || !holder.IsEmpty() || cookingProcess == null || !cookingProcess.IsReady || contents.Count != 1)
             return false;
 
-        ItemData output = contents[0];
+        ItemData output = GetCurrentOutputItem();
         if (output == null || output.Prefab == null)
             return false;
 
-        if (!ObjetoDeliveryUtility.TryDeliverToHolder(output, holder))
+        if (!ObjetoDeliveryUtility.TryDeliverToHolder(output, holder, GetCurrentCookState(), null, GetCurrentOutputMaterial()))
             return false;
 
         FinishAndClearRecipe();
@@ -205,24 +206,59 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, 
 
         float over = cookingProcess.OvercookTime;
         if (over >= activeRecipe.CarbonizedDelay)
-            SetResultState(ResultState.Carbonized, activeRecipe.CarbonizedResultItem);
+            SetResultState(ResultState.Carbonized);
         else if (over >= activeRecipe.BurnedDelay)
-            SetResultState(ResultState.Burned, activeRecipe.BurnedResultItem);
+            SetResultState(ResultState.Burned);
         else if (over >= activeRecipe.SlightlyBurnedDelay)
-            SetResultState(ResultState.Overcooked, activeRecipe.SlightlyBurnedResultItem);
+            SetResultState(ResultState.Overcooked);
     }
 
-    private void SetResultState(ResultState state, ItemData data)
+    private void SetResultState(ResultState state)
     {
         if (resultState == state)
             return;
 
         resultState = state;
-        if (data != null)
+
+        if (state == ResultState.Carbonized && carbonizedItem != null)
         {
             contents.Clear();
-            contents.Add(data);
+            contents.Add(carbonizedItem);
         }
+    }
+
+    private ItemData GetCurrentOutputItem()
+    {
+        if (resultState == ResultState.Carbonized && carbonizedItem != null)
+            return carbonizedItem;
+
+        return contents.Count > 0 ? contents[0] : null;
+    }
+
+    private ItemCookState GetCurrentCookState()
+    {
+        return resultState switch
+        {
+            ResultState.Ready => ItemCookState.AoPonto,
+            ResultState.Overcooked => ItemCookState.Passado,
+            ResultState.Burned => ItemCookState.Queimado,
+            ResultState.Carbonized => ItemCookState.Carbonizado,
+            _ => ItemCookState.Cru
+        };
+    }
+
+    private Material GetCurrentOutputMaterial()
+    {
+        if (activeRecipe == null)
+            return null;
+
+        return resultState switch
+        {
+            ResultState.Overcooked => activeRecipe.OvercookedMaterial,
+            ResultState.Burned => activeRecipe.BurnedMaterial,
+            ResultState.Carbonized => activeRecipe.CarbonizedMaterial,
+            _ => null
+        };
     }
 
     private void QueueByproducts(IReadOnlyList<ItemData> byproducts)

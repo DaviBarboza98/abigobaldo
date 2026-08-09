@@ -216,6 +216,7 @@ MonoBehaviour:
   recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
   localRecipes: []
   maxItems: 2
+  carbonizedItem: {fileID: 11400000, guid: 0a8e93dfb2d24df0a5cf13310f651f22, type: 2}
   canBePickedUp: 1
   panData: {fileID: 11400000, guid: e0e97e7811f34d839e7107ab45b126bd, type: 2}
   itemSurface: {fileID: 5972399723644317329}

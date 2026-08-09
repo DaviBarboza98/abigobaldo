@@ -15,11 +15,10 @@ MonoBehaviour:
   requiredContainer: 2
   ingredients:
   - {fileID: 11400000, guid: eda4a8b2bf953204793f0ba03cc9b882, type: 2}
-  - {fileID: 11400000, guid: 6bdb2922eb220e748877be0339e24711, type: 2}
   resultItem: {fileID: 11400000, guid: 8f861095d31847098c8db9a47caa6a5a, type: 2}
-  slightlyBurnedResultItem: {fileID: 0}
-  burnedResultItem: {fileID: 0}
-  carbonizedResultItem: {fileID: 0}
+  overcookedMaterial: {fileID: 0}
+  burnedMaterial: {fileID: 0}
+  carbonizedMaterial: {fileID: 0}
   byproducts: []
   spawnByproductsOnStart: 0
   cookingTime: 10

@@ -84,6 +84,12 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
+        if (itemHolder.IsEmpty() && interactable is BlenderCup blenderCup)
+        {
+            blenderCup.Interact(this);
+            return;
+        }
+
         if (TryHandleEmptyHandContainer(interactable))
             return;
 

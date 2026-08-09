@@ -6,31 +6,22 @@ using UnityEngine;
 public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 {
     [Header("Conteudo")]
-    [SerializeField] private int maxItems = 5;
+    [SerializeField] private int maxItems = 1;
     [SerializeField] private Transform contentRoot;
     [SerializeField] private Vector3 contentLocalOffset;
     [SerializeField] private float ingredientVisualScale = 0.18f;
     [SerializeField] private float blendedVisualScale = 0.05f;
-
-    [Header("Fisica visual")]
-    [SerializeField] private bool usePhysicalIngredientVisuals = true;
-    [SerializeField] private float visualMass = 0.04f;
-    [SerializeField] private float randomForce = 2.6f;
-    [SerializeField] private float randomTorque = 8f;
-    [SerializeField] private float forceInterval = 0.08f;
-    [SerializeField] private float fallbackBoundaryRadius = 0.22f;
+    [SerializeField] private bool centerVisualBoundsOnSpawn = true;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
     private readonly List<ItemData> contents = new List<ItemData>();
     private readonly List<GameObject> visuals = new List<GameObject>();
-    private readonly List<Rigidbody> visualBodies = new List<Rigidbody>();
     private Blender attachedBase;
     private Objeto objeto;
     private Rigidbody rb;
     private Collider[] colliders;
-    private float nextForceTime;
 
     public IReadOnlyList<ItemData> Contents => contents;
     public bool IsAttached => attachedBase != null;
@@ -55,6 +46,9 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
         if (holder.IsEmpty())
         {
+            if (TryTakeLastItem(holder))
+                return;
+
             if (attachedBase != null)
                 DetachToHolder(holder);
             else
@@ -93,15 +87,11 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             return false;
 
         Blender previousBase = attachedBase;
-        attachedBase = null;
-        transform.SetParent(null, true);
-        SetPhysicsEnabled(true);
 
         if (!holder.TryPickUp(objeto))
-        {
-            AttachTo(previousBase, previousBase != null ? previousBase.transform : null);
             return false;
-        }
+
+        attachedBase = null;
 
         previousBase?.NotifyCupPickedUp(this);
         return true;
@@ -131,6 +121,23 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         return true;
     }
 
+    public bool TryTakeLastItem(ItemHolder holder)
+    {
+        if (holder == null || !holder.IsEmpty() || contents.Count == 0)
+            return false;
+
+        int lastIndex = contents.Count - 1;
+        ItemData item = contents[lastIndex];
+
+        if (!ObjetoDeliveryUtility.TryDeliverToHolder(item, holder))
+            return false;
+
+        contents.RemoveAt(lastIndex);
+        RemoveLastVisual();
+        LogContents();
+        return true;
+    }
+
     public void ReplaceContentsWithResult(ItemData result)
     {
         contents.Clear();
@@ -138,35 +145,24 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         if (result != null)
             contents.Add(result);
 
-        RefreshVisuals(blendedVisualScale, false);
+        RefreshVisuals(blendedVisualScale);
     }
 
     public void ClearContents()
     {
         contents.Clear();
-        RefreshVisuals(ingredientVisualScale, false);
+        RefreshVisuals(ingredientVisualScale);
     }
 
     public void UpdateBlendVisuals(
         bool isCooking,
-        float spinSpeed,
-        float shakeRadius,
-        float morphStartTime,
-        float morphDuration,
-        CookingProcess cookingProcess,
-        RecipeData activeRecipe,
-        ref bool morphedToResult
+        float spinSpeed
     )
     {
         if (!isCooking || contentRoot == null)
             return;
 
-        if (usePhysicalIngredientVisuals)
-            UpdatePhysicalBlendVisuals();
-        else
-            UpdateTransformBlendVisuals(spinSpeed, shakeRadius);
-
-        TryMorphToResult(morphStartTime, morphDuration, cookingProcess, activeRecipe, ref morphedToResult);
+        UpdateTransformBlendVisuals(spinSpeed);
     }
 
     public void OnPickedUp()
@@ -187,6 +183,9 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     private bool TryStoreHeldObject(ItemHolder holder)
     {
+        if (!IsAttached)
+            return false;
+
         if (contents.Count >= maxItems)
             return false;
 
@@ -200,12 +199,12 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
         contents.Add(removed.Data);
         Destroy(removed.gameObject);
-        RefreshVisuals(ingredientVisualScale, usePhysicalIngredientVisuals);
+        CreateVisual(removed.Data, ingredientVisualScale);
         LogContents();
         return true;
     }
 
-    private void UpdateTransformBlendVisuals(float spinSpeed, float shakeRadius)
+    private void UpdateTransformBlendVisuals(float spinSpeed)
     {
         for (int i = 0; i < visuals.Count; i++)
         {
@@ -213,71 +212,11 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             if (visual == null)
                 continue;
 
-            float phase = Time.time * 18f + i;
-            Vector3 shake = new Vector3(Mathf.Sin(phase), Mathf.Cos(phase * 1.3f), Mathf.Sin(phase * 0.7f));
-            visual.transform.localPosition = GetVisualPosition(i, visuals.Count) + shake * shakeRadius;
             visual.transform.Rotate(Vector3.up, spinSpeed * Time.deltaTime, Space.Self);
         }
     }
 
-    private void UpdatePhysicalBlendVisuals()
-    {
-        if (Time.time < nextForceTime)
-            return;
-
-        nextForceTime = Time.time + forceInterval;
-
-        for (int i = visualBodies.Count - 1; i >= 0; i--)
-        {
-            Rigidbody body = visualBodies[i];
-            if (body == null)
-            {
-                visualBodies.RemoveAt(i);
-                continue;
-            }
-
-            body.AddForce(Random.onUnitSphere * randomForce, ForceMode.Acceleration);
-            body.AddTorque(Random.onUnitSphere * randomTorque, ForceMode.Acceleration);
-
-            Vector3 localPosition = contentRoot.InverseTransformPoint(body.position) - contentLocalOffset;
-            if (localPosition.magnitude <= fallbackBoundaryRadius)
-                continue;
-
-            Vector3 clampedLocal = contentLocalOffset + localPosition.normalized * fallbackBoundaryRadius;
-            Vector3 targetWorld = contentRoot.TransformPoint(clampedLocal);
-            body.AddForce((targetWorld - body.position) * randomForce * 2f, ForceMode.Acceleration);
-        }
-    }
-
-    private void TryMorphToResult(
-        float morphStartTime,
-        float morphDuration,
-        CookingProcess cookingProcess,
-        RecipeData activeRecipe,
-        ref bool morphedToResult
-    )
-    {
-        if (morphedToResult || activeRecipe == null || cookingProcess == null || cookingProcess.Timer < morphStartTime)
-            return;
-
-        float transition = morphDuration <= 0f
-            ? 1f
-            : Mathf.InverseLerp(morphStartTime, morphStartTime + morphDuration, cookingProcess.Timer);
-
-        float visualScale = Mathf.Lerp(ingredientVisualScale, blendedVisualScale, transition);
-        foreach (GameObject visual in visuals)
-            if (visual != null)
-                visual.transform.localScale = Vector3.one * visualScale;
-
-        if (transition < 1f)
-            return;
-
-        morphedToResult = true;
-        ClearVisuals();
-        CreateVisual(activeRecipe.ResultItem, 0, 1, blendedVisualScale, false);
-    }
-
-    private void RefreshVisuals(float scale, bool physical)
+    private void RefreshVisuals(float scale)
     {
         ClearVisuals();
 
@@ -285,49 +224,40 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             return;
 
         for (int i = 0; i < contents.Count; i++)
-            CreateVisual(contents[i], i, contents.Count, scale, physical);
+            CreateVisual(contents[i], scale);
     }
 
-    private void CreateVisual(ItemData data, int index, int count, float scale, bool physical)
+    private void CreateVisual(ItemData data, float scale)
     {
         if (data == null || data.Prefab == null || contentRoot == null)
             return;
 
         GameObject visual = Instantiate(data.Prefab, contentRoot);
         visual.name = $"BlenderCupVisual_{data.DisplayName}";
-        visual.transform.localPosition = GetVisualPosition(index, count);
+        visual.transform.localPosition = contentLocalOffset;
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = Vector3.one * scale;
-        RecipeVisualUtility.DisableGameplayComponents(visual, !physical);
-        ConfigureVisualPhysics(visual, physical);
+        CenterVisualOnContentPoint(visual, contentLocalOffset);
+        RecipeVisualUtility.DisableGameplayComponents(visual);
         visuals.Add(visual);
     }
 
-    private void ConfigureVisualPhysics(GameObject visual, bool physical)
+    private void CenterVisualOnContentPoint(GameObject visual, Vector3 targetLocalPosition)
     {
-        if (!physical)
+        if (!centerVisualBoundsOnSpawn || visual == null || contentRoot == null)
             return;
 
-        Rigidbody body = visual.GetComponent<Rigidbody>();
-        if (body == null)
-            body = visual.AddComponent<Rigidbody>();
+        Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
+        if (renderers.Length == 0)
+            return;
 
-        body.mass = visualMass;
-        body.useGravity = false;
-        body.isKinematic = false;
-        body.detectCollisions = true;
-        body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-        body.interpolation = RigidbodyInterpolation.Interpolate;
-        visualBodies.Add(body);
-    }
+        Bounds bounds = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+            bounds.Encapsulate(renderers[i].bounds);
 
-    private Vector3 GetVisualPosition(int index, int count)
-    {
-        if (count <= 1)
-            return contentLocalOffset;
-
-        float angle = Mathf.PI * 2f * index / count;
-        return contentLocalOffset + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * 0.08f;
+        Vector3 targetWorldPosition = contentRoot.TransformPoint(targetLocalPosition);
+        Vector3 correction = targetWorldPosition - bounds.center;
+        visual.transform.position += correction;
     }
 
     private void ClearVisuals()
@@ -337,7 +267,19 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
                 Destroy(visuals[i]);
 
         visuals.Clear();
-        visualBodies.Clear();
+    }
+
+    private void RemoveLastVisual()
+    {
+        int lastVisualIndex = visuals.Count - 1;
+        if (lastVisualIndex < 0)
+            return;
+
+        GameObject visual = visuals[lastVisualIndex];
+        visuals.RemoveAt(lastVisualIndex);
+
+        if (visual != null)
+            Destroy(visual);
     }
 
     private void SetPhysicsEnabled(bool enabled)
@@ -348,6 +290,7 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             rb.angularVelocity = Vector3.zero;
             rb.isKinematic = !enabled;
             rb.useGravity = enabled;
+            rb.detectCollisions = true;
         }
 
         if (colliders == null || colliders.Length == 0)
@@ -391,11 +334,6 @@ public class BlenderCup : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     private void OnValidate()
     {
-        maxItems = Mathf.Max(1, maxItems);
-        visualMass = Mathf.Max(0.001f, visualMass);
-        randomForce = Mathf.Max(0f, randomForce);
-        randomTorque = Mathf.Max(0f, randomTorque);
-        forceInterval = Mathf.Max(0.02f, forceInterval);
-        fallbackBoundaryRadius = Mathf.Max(0.01f, fallbackBoundaryRadius);
+        maxItems = 1;
     }
 }

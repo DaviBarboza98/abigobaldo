@@ -4970,6 +4970,7 @@ MonoBehaviour:
   recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
   localRecipes: []
   maxItems: 1
+  carbonizedItem: {fileID: 11400000, guid: 0a8e93dfb2d24df0a5cf13310f651f22, type: 2}
   canBePickedUp: 1
   cuscuzeiraData: {fileID: 11400000, guid: 48cc31d8a45e4375990770b71ceaa5f7, type: 2}
   steamParticles: {fileID: 7744332107996721740}

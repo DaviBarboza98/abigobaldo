@@ -10,6 +10,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
     [SerializeField] private RecipeDatabase recipeDatabase;
     [SerializeField] private List<RecipeData> localRecipes = new List<RecipeData>();
     [SerializeField] private int maxItems = 3;
+    [SerializeField] private ItemData carbonizedItem;
 
     [Header("Objeto pegavel")]
     [SerializeField] private bool canBePickedUp = true;
@@ -28,10 +29,6 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
     [SerializeField] private float visualMass = 0.08f;
     [SerializeField] private float visualDrag = 0.05f;
     [SerializeField] private PhysicMaterial lowFrictionMaterial;
-    [SerializeField] private Color overcookedTint = new Color(0.55f, 0.42f, 0.28f, 1f);
-    [SerializeField] private Color burnedTint = new Color(0.18f, 0.16f, 0.14f, 1f);
-    [SerializeField] private Color carbonizedTint = Color.black;
-
     [Header("Particulas")]
     [SerializeField] private ParticleEmitterController steamParticles;
     [SerializeField] private Color steamColor = new Color(0.85f, 0.85f, 0.85f, 0.45f);
@@ -106,7 +103,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
 
         if (cookingProcess != null && cookingProcess.IsReady && contents.Count == 1)
         {
-            if (!plate.TryAddItem(contents[0]))
+            if (!plate.TryAddItem(GetCurrentOutputItem(), null, GetCurrentOutputMaterial()))
                 return false;
 
             FinishAndClearRecipe();
@@ -145,11 +142,11 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
         if (holder == null || !holder.IsEmpty() || cookingProcess == null || !cookingProcess.IsReady || contents.Count != 1)
             return false;
 
-        ItemData output = contents[0];
+        ItemData output = GetCurrentOutputItem();
         if (output == null || output.Prefab == null)
             return false;
 
-        if (!ObjetoDeliveryUtility.TryDeliverToHolder(output, holder))
+        if (!ObjetoDeliveryUtility.TryDeliverToHolder(output, holder, GetCurrentCookState(), null, GetCurrentOutputMaterial()))
             return false;
 
         FinishAndClearRecipe();
@@ -229,20 +226,29 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
 
         float over = cookingProcess.OvercookTime;
         if (over >= activeRecipe.CarbonizedDelay)
-            SetResultState(ResultState.Carbonized, activeRecipe.CarbonizedResultItem);
+            SetResultState(ResultState.Carbonized);
         else if (over >= activeRecipe.BurnedDelay)
-            SetResultState(ResultState.Burned, activeRecipe.BurnedResultItem);
+            SetResultState(ResultState.Burned);
         else if (over >= activeRecipe.SlightlyBurnedDelay)
-            SetResultState(ResultState.Overcooked, activeRecipe.SlightlyBurnedResultItem);
+            SetResultState(ResultState.Overcooked);
     }
 
-    private void SetResultState(ResultState state, ItemData data)
+    private void SetResultState(ResultState state)
     {
         if (resultState == state)
             return;
 
         resultState = state;
-        ApplyBurnTintForCurrentState();
+
+        if (state == ResultState.Carbonized && carbonizedItem != null)
+        {
+            contents.Clear();
+            contents.Add(carbonizedItem);
+            RefreshVisuals();
+            return;
+        }
+
+        ApplyCookMaterialForCurrentState();
     }
 
     private void QueueByproducts(IReadOnlyList<ItemData> byproducts)
@@ -305,7 +311,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
         RecipeVisualUtility.DisableGameplayComponents(visual, !usePhysicalItemVisual);
         ConfigureVisualPhysics(visual);
         visuals.Add(visual);
-        ApplyBurnTintForCurrentState();
+        ApplyCookMaterialForCurrentState();
     }
 
     private void ConfigureVisualPhysics(GameObject visual)
@@ -371,17 +377,11 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
         visuals.Clear();
     }
 
-    private void ApplyBurnTintForCurrentState()
+    private void ApplyCookMaterialForCurrentState()
     {
-        Color? tint = resultState switch
-        {
-            ResultState.Overcooked => overcookedTint,
-            ResultState.Burned => burnedTint,
-            ResultState.Carbonized => carbonizedTint,
-            _ => null
-        };
+        Material material = GetCurrentOutputMaterial();
 
-        if (!tint.HasValue)
+        if (material == null)
             return;
 
         foreach (GameObject visual in visuals)
@@ -390,16 +390,42 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, O
                 continue;
 
             foreach (Renderer targetRenderer in visual.GetComponentsInChildren<Renderer>())
-            {
-                foreach (Material material in targetRenderer.materials)
-                {
-                    if (material.HasProperty("_BaseColor"))
-                        material.SetColor("_BaseColor", tint.Value);
-                    else if (material.HasProperty("_Color"))
-                        material.color = tint.Value;
-                }
-            }
+                targetRenderer.material = material;
         }
+    }
+
+    private ItemData GetCurrentOutputItem()
+    {
+        if (resultState == ResultState.Carbonized && carbonizedItem != null)
+            return carbonizedItem;
+
+        return contents.Count > 0 ? contents[0] : null;
+    }
+
+    private ItemCookState GetCurrentCookState()
+    {
+        return resultState switch
+        {
+            ResultState.Ready => ItemCookState.AoPonto,
+            ResultState.Overcooked => ItemCookState.Passado,
+            ResultState.Burned => ItemCookState.Queimado,
+            ResultState.Carbonized => ItemCookState.Carbonizado,
+            _ => ItemCookState.Cru
+        };
+    }
+
+    private Material GetCurrentOutputMaterial()
+    {
+        if (activeRecipe == null)
+            return null;
+
+        return resultState switch
+        {
+            ResultState.Overcooked => activeRecipe.OvercookedMaterial,
+            ResultState.Burned => activeRecipe.BurnedMaterial,
+            ResultState.Carbonized => activeRecipe.CarbonizedMaterial,
+            _ => null
+        };
     }
 
     private void UpdateSteam()

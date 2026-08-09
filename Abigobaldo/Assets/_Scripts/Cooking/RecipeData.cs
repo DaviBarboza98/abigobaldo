@@ -15,9 +15,9 @@ public class RecipeData : ScriptableObject
 
     [Header("Resultado")]
     [SerializeField] private ItemData resultItem;
-    [SerializeField] private ItemData slightlyBurnedResultItem;
-    [SerializeField] private ItemData burnedResultItem;
-    [SerializeField] private ItemData carbonizedResultItem;
+    [SerializeField] private Material overcookedMaterial;
+    [SerializeField] private Material burnedMaterial;
+    [SerializeField] private Material carbonizedMaterial;
     [SerializeField] private List<ItemData> byproducts = new List<ItemData>();
     [SerializeField] private bool spawnByproductsOnStart;
 
@@ -31,9 +31,9 @@ public class RecipeData : ScriptableObject
     public ContainerType RequiredContainer => requiredContainer;
     public IReadOnlyList<ItemData> Ingredients => ingredients;
     public ItemData ResultItem => resultItem;
-    public ItemData SlightlyBurnedResultItem => slightlyBurnedResultItem;
-    public ItemData BurnedResultItem => burnedResultItem;
-    public ItemData CarbonizedResultItem => carbonizedResultItem;
+    public Material OvercookedMaterial => overcookedMaterial;
+    public Material BurnedMaterial => burnedMaterial;
+    public Material CarbonizedMaterial => carbonizedMaterial;
     public IReadOnlyList<ItemData> Byproducts => byproducts;
     public bool SpawnByproductsOnStart => spawnByproductsOnStart;
     public float CookingTime => cookingTime;

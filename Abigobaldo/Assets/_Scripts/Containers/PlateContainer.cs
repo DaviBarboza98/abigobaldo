@@ -11,6 +11,8 @@ public class PlateContainer : MonoBehaviour, IInteractable
     [SerializeField] private bool showDebugLogs = true;
 
     private readonly List<ItemData> platedItems = new List<ItemData>();
+    private readonly List<Color?> platedTints = new List<Color?>();
+    private readonly List<Material> platedMaterials = new List<Material>();
     private readonly List<GameObject> contentVisuals = new List<GameObject>();
 
     public IReadOnlyList<ItemData> PlatedItems => platedItems;
@@ -55,7 +57,8 @@ public class PlateContainer : MonoBehaviour, IInteractable
         if (heldItem.GetComponent<PlateContainer>() != null)
             return false;
 
-        if (!TryAddItem(heldItem.Data))
+        Color? tint = heldItem.HasRuntimeTint ? heldItem.RuntimeTint : null;
+        if (!TryAddItem(heldItem.Data, tint, heldItem.RuntimeMaterial))
             return false;
 
         Objeto removedItem = holder.RemoveObjeto();
@@ -74,7 +77,8 @@ public class PlateContainer : MonoBehaviour, IInteractable
         if (item.GetComponent<PlateContainer>() != null)
             return false;
 
-        if (!TryAddItem(item.Data))
+        Color? tint = item.HasRuntimeTint ? item.RuntimeTint : null;
+        if (!TryAddItem(item.Data, tint, item.RuntimeMaterial))
             return false;
 
         Destroy(item.gameObject);
@@ -82,6 +86,16 @@ public class PlateContainer : MonoBehaviour, IInteractable
     }
 
     public bool TryAddItem(ItemData itemData)
+    {
+        return TryAddItem(itemData, null);
+    }
+
+    public bool TryAddItem(ItemData itemData, Color? tint)
+    {
+        return TryAddItem(itemData, tint, null);
+    }
+
+    public bool TryAddItem(ItemData itemData, Color? tint, Material material)
     {
         if (itemData == null)
             return false;
@@ -93,6 +107,8 @@ public class PlateContainer : MonoBehaviour, IInteractable
         }
 
         platedItems.Add(itemData);
+        platedTints.Add(tint);
+        platedMaterials.Add(material);
         Log($"{itemData.DisplayName} foi colocado no prato. Total: {platedItems.Count}");
         RefreshContentVisuals();
 
@@ -112,6 +128,8 @@ public class PlateContainer : MonoBehaviour, IInteractable
     public void ClearPlate()
     {
         platedItems.Clear();
+        platedTints.Clear();
+        platedMaterials.Clear();
         RefreshContentVisuals();
     }
 
@@ -141,7 +159,35 @@ public class PlateContainer : MonoBehaviour, IInteractable
             visual.transform.localRotation = Quaternion.identity;
             visual.transform.localScale = Vector3.one * contentVisualScale;
             RecipeVisualUtility.DisableGameplayComponents(visual);
+            ApplyMaterial(visual, i < platedMaterials.Count ? platedMaterials[i] : null);
+            ApplyTint(visual, i < platedTints.Count ? platedTints[i] : null);
             contentVisuals.Add(visual);
+        }
+    }
+
+    private static void ApplyMaterial(GameObject visual, Material material)
+    {
+        if (material == null || visual == null)
+            return;
+
+        foreach (Renderer targetRenderer in visual.GetComponentsInChildren<Renderer>())
+            targetRenderer.material = material;
+    }
+
+    private static void ApplyTint(GameObject visual, Color? tint)
+    {
+        if (!tint.HasValue || visual == null)
+            return;
+
+        foreach (Renderer targetRenderer in visual.GetComponentsInChildren<Renderer>())
+        {
+            foreach (Material material in targetRenderer.materials)
+            {
+                if (material.HasProperty("_BaseColor"))
+                    material.SetColor("_BaseColor", tint.Value);
+                else if (material.HasProperty("_Color"))
+                    material.color = tint.Value;
+            }
         }
     }
 

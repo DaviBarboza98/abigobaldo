@@ -10,12 +10,11 @@ public class Blender : MonoBehaviour, IRecipeStation
     [Header("Copo")]
     [SerializeField] private Transform cupAnchor;
     [SerializeField] private BlenderCup startingCup;
+    [SerializeField] private bool autoAttachNearbyCup = true;
+    [SerializeField] private float autoAttachRadius = 1.25f;
 
     [Header("Mistura")]
     [SerializeField] private float spinSpeed = 720f;
-    [SerializeField] private float shakeRadius = 0.035f;
-    [SerializeField] private float morphStartTime = 2f;
-    [SerializeField] private float morphDuration = 3f;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -25,7 +24,6 @@ public class Blender : MonoBehaviour, IRecipeStation
     private RecipeData activeRecipe;
     private int lastLoggedSecond = -1;
     private bool powered;
-    private bool morphedToResult;
     private bool outputPrepared;
 
     public bool HasReadyOutput => currentCup != null && cookingProcess != null && cookingProcess.IsReady && outputPrepared && currentCup.HasSingleOutput;
@@ -41,8 +39,12 @@ public class Blender : MonoBehaviour, IRecipeStation
 
     private void Start()
     {
-        if (startingCup != null)
-            AttachCup(startingCup);
+        BlenderCup initialCup = startingCup != null
+            ? startingCup
+            : FindInitialCup();
+
+        if (initialCup != null)
+            AttachCup(initialCup);
     }
 
     private void Update()
@@ -50,7 +52,7 @@ public class Blender : MonoBehaviour, IRecipeStation
         UpdateCooking();
 
         if (currentCup != null)
-            currentCup.UpdateBlendVisuals(IsCooking, spinSpeed, shakeRadius, morphStartTime, morphDuration, cookingProcess, activeRecipe, ref morphedToResult);
+            currentCup.UpdateBlendVisuals(IsCooking, spinSpeed);
     }
 
     public void Interact(PlayerInteraction player)
@@ -140,6 +142,35 @@ public class Blender : MonoBehaviour, IRecipeStation
             TryStartRecipe();
     }
 
+    private BlenderCup FindInitialCup()
+    {
+        BlenderCup childCup = GetComponentInChildren<BlenderCup>(true);
+        if (childCup != null)
+            return childCup;
+
+        if (!autoAttachNearbyCup || cupAnchor == null)
+            return null;
+
+        BlenderCup[] cups = FindObjectsOfType<BlenderCup>(true);
+        BlenderCup closestCup = null;
+        float closestDistance = autoAttachRadius;
+
+        foreach (BlenderCup cup in cups)
+        {
+            if (cup == null || cup.IsAttached)
+                continue;
+
+            float distance = Vector3.Distance(cup.transform.position, cupAnchor.position);
+            if (distance > closestDistance)
+                continue;
+
+            closestCup = cup;
+            closestDistance = distance;
+        }
+
+        return closestCup;
+    }
+
     private void TogglePower()
     {
         SetPower(!powered);
@@ -187,7 +218,6 @@ public class Blender : MonoBehaviour, IRecipeStation
         activeRecipe = recipe;
         cookingProcess = new CookingProcess(recipe.CookingTime);
         lastLoggedSecond = -1;
-        morphedToResult = false;
         outputPrepared = false;
         cookingProcess.Start();
 
@@ -245,7 +275,6 @@ public class Blender : MonoBehaviour, IRecipeStation
         cookingProcess = null;
         activeRecipe = null;
         lastLoggedSecond = -1;
-        morphedToResult = false;
         outputPrepared = false;
 
         if (clearCupOutput && currentCup != null)
@@ -274,7 +303,7 @@ public class Blender : MonoBehaviour, IRecipeStation
 
     private void OnValidate()
     {
-        morphStartTime = Mathf.Max(0f, morphStartTime);
-        morphDuration = Mathf.Max(0f, morphDuration);
+        spinSpeed = Mathf.Max(0f, spinSpeed);
+        autoAttachRadius = Mathf.Max(0.01f, autoAttachRadius);
     }
 }
