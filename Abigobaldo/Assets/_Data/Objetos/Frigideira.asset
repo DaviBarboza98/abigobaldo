@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: frigideira
   displayName: Frigideira
-  prefab: {fileID: 0}
+  prefab: {fileID: 2905880716864456172, guid: ed29e0cbe6ed4eb44b214afd3acee9c1, type: 3}
   cookState: 0

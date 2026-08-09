@@ -150,7 +150,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
         foreach (Objeto item in visual.GetComponentsInChildren<Objeto>())
             item.enabled = false;
 
-        foreach (ItemContainer container in visual.GetComponentsInChildren<ItemContainer>())
+        foreach (RecipeContainer container in visual.GetComponentsInChildren<RecipeContainer>())
             container.enabled = false;
 
         foreach (PlateContainer plate in visual.GetComponentsInChildren<PlateContainer>())

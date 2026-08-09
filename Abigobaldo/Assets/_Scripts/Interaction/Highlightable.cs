@@ -5,6 +5,12 @@ public class Highlightable : MonoBehaviour
     [Header("Renderers")]
     [SerializeField] private bool includeInactiveRenderers;
 
+    [Header("Override opcional")]
+    [SerializeField] private bool useLocalColors;
+    [SerializeField] private Color localHighlightColor = new Color(1f, 0.85f, 0.2f, 1f);
+    [SerializeField] private Color localEmissionColor = new Color(1f, 0.65f, 0.05f, 1f);
+    [SerializeField] private float localEmissionIntensity = 1.1f;
+
     private static readonly int ColorId = Shader.PropertyToID("_Color");
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
@@ -108,6 +114,9 @@ public class Highlightable : MonoBehaviour
 
     private Color GetHighlightColor()
     {
+        if (useLocalColors)
+            return localHighlightColor;
+
         return GameInteractionManager.Instance != null
             ? GameInteractionManager.Instance.HighlightColor
             : Color.yellow;
@@ -115,6 +124,9 @@ public class Highlightable : MonoBehaviour
 
     private Color GetEmissionColor()
     {
+        if (useLocalColors)
+            return localEmissionColor;
+
         return GameInteractionManager.Instance != null
             ? GameInteractionManager.Instance.EmissionColor
             : new Color(1f, 0.65f, 0.05f, 1f);
@@ -122,6 +134,9 @@ public class Highlightable : MonoBehaviour
 
     private float GetEmissionIntensity()
     {
+        if (useLocalColors)
+            return localEmissionIntensity;
+
         return GameInteractionManager.Instance != null
             ? GameInteractionManager.Instance.EmissionIntensity
             : 1.1f;

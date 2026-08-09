@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 6454923667016432768}
   - component: {fileID: 9472229359193548}
   m_Layer: 0
-  m_Name: Garrafa
+  m_Name: SpGarrafa
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

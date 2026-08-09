@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4656908793035526665}
   - component: {fileID: 1876089273821551998}
   - component: {fileID: 7504799428335400582}
+  - component: {fileID: 6090035575394353762}
   m_Layer: 0
   m_Name: Liquidificador
   m_TagString: Untagged
@@ -105,6 +106,43 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.059527796, y: 0.05952779, z: 0.055357978}
   m_Center: {x: 0.000000007450581, y: -0.000000004656612, z: 0.027678989}
+--- !u!114 &6090035575394353762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1921708490778559871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  containerType: 2
+  maxItems: 2
+  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
+  localRecipes: []
+  outputSpawnPoint: {fileID: 0}
+  canBePickedUp: 0
+  containerItemData: {fileID: 11400000, guid: be98938383819b346b0cee6d262f4ad0, type: 2}
+  createStoveSlotOnAwake: 0
+  stoveSlotSize: {x: 0.75, y: 0.35, z: 0.75}
+  useContentVisuals: 0
+  contentVisualRoot: {fileID: 0}
+  contentVisualLocalOffset: {x: 0, y: 0.12, z: 0}
+  contentVisualScale: 0.22
+  fryingMotionRadius: 0.025
+  fryingMotionSpeed: 18
+  blenderMorphStartTime: 2
+  blenderMorphDuration: 3
+  blenderShrinkScale: 0.03
+  steamParticles: {fileID: 0}
+  steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.45}
+  burnedSteamColor: {r: 0.25, g: 0.22, b: 0.2, a: 0.6}
+  steamRate: 8
+  requiresManualActivation: 1
+  requiredCupSlot: {fileID: 0}
+  showDebugLogs: 1
 --- !u!1 &2236462464961967877
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,7 +293,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 0}
+  objetoData: {fileID: 11400000, guid: be98938383819b346b0cee6d262f4ad0, type: 2}
+  role: 0
   canBeHeld: 1
   canBeThrown: 1
   createHomeSlotFromInitialPose: 1
@@ -273,6 +312,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   includeInactiveRenderers: 0
+  useLocalColors: 0
+  localHighlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  localEmissionColor: {r: 1, g: 0.65, b: 0.05, a: 1}
+  localEmissionIntensity: 1.1
 --- !u!1 &5177875323033087264
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,7 +325,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8407842926700314527}
-  - component: {fileID: 5048989254039545334}
   m_Layer: 0
   m_Name: Blender
   m_TagString: Untagged
@@ -306,42 +348,6 @@ Transform:
   - {fileID: 4789982095019116538}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5048989254039545334
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5177875323033087264}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  containerType: 2
-  maxItems: 2
-  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
-  localRecipes: []
-  outputSpawnPoint: {fileID: 0}
-  canBePickedUp: 0
-  containerItemData: {fileID: 0}
-  createStoveSlotOnAwake: 0
-  stoveSlotSize: {x: 0.75, y: 0.35, z: 0.75}
-  useContentVisuals: 1
-  contentVisualRoot: {fileID: 7734615098903062563}
-  contentVisualLocalOffset: {x: 0, y: 0.12, z: 0}
-  contentVisualScale: 0.22
-  fryingMotionRadius: 0.025
-  fryingMotionSpeed: 18
-  blenderMorphStartTime: 2
-  blenderMorphDuration: 3
-  blenderShrinkScale: 0.03
-  steamParticles: {fileID: 0}
-  steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.45}
-  burnedSteamColor: {r: 0.25, g: 0.22, b: 0.2, a: 0.6}
-  steamRate: 8
-  requiresManualActivation: 1
-  showDebugLogs: 1
 --- !u!1 &5773963540352589027
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,6 +379,7 @@ Transform:
   m_Children:
   - {fileID: 3496953566413904384}
   - {fileID: 1100484822275909798}
+  - {fileID: 2892243110203651973}
   m_Father: {fileID: 8407842926700314527}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9164863757576093517
@@ -406,3 +413,65 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3496953566413904384}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &3585430162757583734
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4789982095019116538}
+    m_Modifications:
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 25.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 10.725861
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071067
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3548452663797230322, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+      propertyPath: m_Name
+      value: LiquidificadorCopo
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+--- !u!4 &2892243110203651973 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1864857982473434355, guid: a35803a4056ffeb448e5ea686f2f40c2, type: 3}
+  m_PrefabInstance: {fileID: 3585430162757583734}
+  m_PrefabAsset: {fileID: 0}

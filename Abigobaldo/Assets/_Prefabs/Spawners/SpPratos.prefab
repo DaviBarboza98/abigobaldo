@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3723640390255230866}
   - component: {fileID: 994411522842038308}
   m_Layer: 0
-  m_Name: Pratos
+  m_Name: SpPratos
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab9aeac609c42a688424a9c416a29f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoPrefab: {fileID: 0}
+  objetoPrefab: {fileID: 1122777838689699106, guid: ae57b13d7ba935c4891e7e7d0400f687, type: 3}
   spawnPoint: {fileID: 0}
   pickUpOnSpawn: 1
 --- !u!1 &3477129410948730483

@@ -153,6 +153,11 @@ public class ItemHolder : MonoBehaviour
 
     public bool ThrowItem()
     {
+        return ThrowItem(transform.forward);
+    }
+
+    public bool ThrowItem(Vector3 direction)
+    {
         if (currentObjeto == null)
             return false;
 
@@ -160,7 +165,7 @@ public class ItemHolder : MonoBehaviour
             return false;
 
         Objeto item = RemoveObjeto();
-        item.Throw(transform.forward, throwForce);
+        item.Throw(direction, throwForce);
 
         return true;
     }

@@ -4843,6 +4843,7 @@ GameObject:
   - component: {fileID: 3744146834144345762}
   - component: {fileID: 7896190603467699005}
   - component: {fileID: 152155980148496705}
+  - component: {fileID: 7744332107996721740}
   m_Layer: 0
   m_Name: Cuscuzeira
   m_TagString: Untagged
@@ -4968,9 +4969,24 @@ MonoBehaviour:
   blenderMorphStartTime: 2
   blenderMorphDuration: 3
   blenderShrinkScale: 0.03
-  steamParticles: {fileID: 0}
+  steamParticles: {fileID: 7744332107996721740}
   steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.55}
   burnedSteamColor: {r: 0.22, g: 0.2, b: 0.18, a: 0.75}
   steamRate: 20
   requiresManualActivation: 0
   showDebugLogs: 1
+--- !u!114 &7744332107996721740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3453932074998779857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42446fd66e4d4ccdae8c160b47f7b889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 7032208452335695643}
+  preset: 1
+  applyPresetOnAwake: 0

@@ -3,12 +3,26 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Objeto : MonoBehaviour
 {
+    public enum ObjetoRole
+    {
+        Comum,
+        Ingrediente,
+        Ferramenta,
+        Container,
+        CopoLiquidificador,
+        Prato
+    }
+
     [Header("Dados")]
     [SerializeField] private ItemData objetoData;
+
+    [Header("Classificacao")]
+    [SerializeField] private ObjetoRole role = ObjetoRole.Comum;
 
     [Header("Propriedades")]
     [SerializeField] private bool canBeHeld = true;
     [SerializeField] private bool canBeThrown = true;
+    [Tooltip("Legado. Use slots especificos, como BlenderCupSlot, para encaixes novos.")]
     [SerializeField] private bool createHomeSlotFromInitialPose;
     [SerializeField] private Vector3 homeSlotPadding = new Vector3(0.15f, 0.15f, 0.15f);
 
@@ -17,6 +31,7 @@ public class Objeto : MonoBehaviour
     private ObjetoHomeSlot homeSlot;
 
     public ItemData Data => objetoData;
+    public ObjetoRole Role => role;
     public Rigidbody Rigidbody => rb;
     public string ObjetoName => objetoData != null ? objetoData.DisplayName : gameObject.name;
     public bool CanBeHeld => canBeHeld;
@@ -28,10 +43,10 @@ public class Objeto : MonoBehaviour
         GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Objeto);
 
         rb = GetComponent<Rigidbody>();
+        EnsureDynamicMeshCollidersAreConvex();
         holdStateBehaviours = GetComponents<MonoBehaviour>();
 
-        if (createHomeSlotFromInitialPose)
-            homeSlot = ObjetoHomeSlot.CreateFor(this, homeSlotPadding);
+        createHomeSlotFromInitialPose = false;
     }
 
     public void Configure(ItemData data, bool held, bool thrown)
@@ -51,9 +66,9 @@ public class Objeto : MonoBehaviour
         transform.SetParent(null);
         transform.SetPositionAndRotation(position, rotation);
 
+        rb.isKinematic = false;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = false;
         rb.useGravity = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -143,5 +158,19 @@ public class Objeto : MonoBehaviour
         homeSlotPadding.x = Mathf.Max(0f, homeSlotPadding.x);
         homeSlotPadding.y = Mathf.Max(0f, homeSlotPadding.y);
         homeSlotPadding.z = Mathf.Max(0f, homeSlotPadding.z);
+    }
+
+    private void EnsureDynamicMeshCollidersAreConvex()
+    {
+        if (rb == null || rb.isKinematic)
+            return;
+
+        foreach (MeshCollider meshCollider in GetComponentsInChildren<MeshCollider>())
+        {
+            if (meshCollider == null || meshCollider.convex)
+                continue;
+
+            meshCollider.convex = true;
+        }
     }
 }

@@ -224,6 +224,12 @@ public class PlayerInteraction : MonoBehaviour
         IInteractable interactable = hitCollider.GetComponentInParent<IInteractable>();
         Component interactableComponent = interactable as Component;
 
+        if (interactableComponent == null)
+        {
+            IHoldInteractable holdInteractable = hitCollider.GetComponentInParent<IHoldInteractable>();
+            interactableComponent = holdInteractable as Component;
+        }
+
         return interactableComponent != null
             ? interactableComponent.gameObject
             : null;
@@ -258,7 +264,7 @@ public class PlayerInteraction : MonoBehaviour
         if (heldPlate == null)
             return false;
 
-        if (interactable is ItemContainer container)
+        if (interactable is RecipeContainer container)
         {
             container.TryMoveOutputToPlate(heldPlate);
             return true;
@@ -272,7 +278,7 @@ public class PlayerInteraction : MonoBehaviour
         if (!itemHolder.IsEmpty())
             return false;
 
-        ItemContainer container = interactable as ItemContainer;
+        RecipeContainer container = interactable as RecipeContainer;
 
         if (container == null)
             return false;
@@ -301,7 +307,7 @@ public class PlayerInteraction : MonoBehaviour
         if (!itemHolder.IsEmpty())
             return;
 
-        Objeto objeto = spawner.SpawnObjeto();
+        Objeto objeto = spawner.SpawnObjeto(itemHolder);
 
         if (objeto == null)
             return;
@@ -364,7 +370,11 @@ public class PlayerInteraction : MonoBehaviour
         if (!input.ThrowPressed)
             return;
 
-        itemHolder.ThrowItem();
+        Vector3 throwDirection = playerCamera != null
+            ? playerCamera.transform.forward
+            : transform.forward;
+
+        itemHolder.ThrowItem(throwDirection);
     }
 
     private void HandleRotation()

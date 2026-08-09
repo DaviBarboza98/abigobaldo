@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2665877465853350600}
   - component: {fileID: 2273813917692837636}
   - component: {fileID: 6738478158329779524}
-  - component: {fileID: 8650356891492234558}
   - component: {fileID: 4013877461547430437}
   m_Layer: 9
   m_Name: Saleiro
@@ -51,7 +50,7 @@ MonoBehaviour:
   objetoData: {fileID: 0}
   canBeHeld: 1
   canBeThrown: 1
-  createHomeSlotFromInitialPose: 1
+  createHomeSlotFromInitialPose: 0
   homeSlotPadding: {x: 0.15, y: 0.15, z: 0.15}
 --- !u!114 &6738478158329779524
 MonoBehaviour:
@@ -66,28 +65,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   includeInactiveRenderers: 0
---- !u!64 &8650356891492234558
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2267783359611206193}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  useLocalColors: 0
+  localHighlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  localEmissionColor: {r: 1, g: 0.65, b: 0.05, a: 1}
+  localEmissionIntensity: 1.1
 --- !u!54 &4013877461547430437
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -218,6 +199,6 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1864298411305476890, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}

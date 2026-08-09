@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
+public class RecipeContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 {
     private enum CookingResultState
     {
@@ -14,7 +14,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     }
 
     [Header("Container")]
-    [SerializeField] private ContainerType containerType;
+    [SerializeField, HideInInspector] private ContainerType containerType;
 
     [Header("Capacidade")]
     [SerializeField] private int maxItems = 5;
@@ -29,19 +29,6 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     [Header("Objeto pegavel")]
     [SerializeField] private bool canBePickedUp;
     [SerializeField] private ItemData containerItemData;
-    [SerializeField] private bool createStoveSlotOnAwake;
-    [SerializeField] private Vector3 stoveSlotSize = new Vector3(0.75f, 0.35f, 0.75f);
-
-    [Header("Visual de conteudo opcional")]
-    [SerializeField] private bool useContentVisuals;
-    [SerializeField] private Transform contentVisualRoot;
-    [SerializeField] private Vector3 contentVisualLocalOffset = new Vector3(0f, 0.12f, 0f);
-    [SerializeField] private float contentVisualScale = 0.22f;
-    [SerializeField] private float fryingMotionRadius = 0.025f;
-    [SerializeField] private float fryingMotionSpeed = 18f;
-    [SerializeField] private float blenderMorphStartTime = 2f;
-    [SerializeField] private float blenderMorphDuration = 3f;
-    [SerializeField] private float blenderShrinkScale = 0.03f;
 
     [Header("Particulas configuradas no prefab")]
     [SerializeField] private ParticleEmitterController steamParticles;
@@ -51,6 +38,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     [Header("Ativacao")]
     [SerializeField] private bool requiresManualActivation;
+    [SerializeField] private BlenderCupSlot requiredCupSlot;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -60,14 +48,10 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     private RecipeData activeRecipe;
     private CookingResultState resultState;
     private int lastLoggedSecond = -1;
-    private readonly List<GameObject> contentVisuals = new List<GameObject>();
     private bool cookingEnabled = true;
-    private bool isInstalledOnHeat;
     private Rigidbody containerBody;
     private Objeto containerItem;
-    private StoveSlot homeSlot;
     private bool loggedAlmostReady;
-    private bool blenderVisualMorphed;
 
     public ContainerType Type => containerType;
     public IReadOnlyList<ItemData> StoredItems => storedItems;
@@ -78,28 +62,18 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     public bool HasReadyOutput => cookingProcess != null && cookingProcess.IsReady && storedItems.Count == 1;
     public float CookingProgress => cookingProcess != null ? cookingProcess.Progress : 0f;
     public bool CanBePickedUp => canBePickedUp;
-    public bool IsInstalledOnHeat => isInstalledOnHeat;
-    public bool NeedsHeat => containerType == ContainerType.Frigideira || containerType == ContainerType.Cuscuzeira;
+    protected IReadOnlyList<ItemData> CurrentContents => storedItems;
+    protected CookingProcess CurrentCookingProcess => cookingProcess;
+    protected RecipeData CurrentRecipe => activeRecipe;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Container);
 
         if (canBePickedUp)
             EnsurePickupComponents();
 
-        if (containerType == ContainerType.Liquidificador)
-            TryMakeBlenderJarTransparent();
-
-        if (createStoveSlotOnAwake && NeedsHeat)
-        {
-            homeSlot = StoveSlot.CreateFor(this, stoveSlotSize);
-            DockToSlot(homeSlot);
-        }
-        else
-        {
-            cookingEnabled = !NeedsHeat && !requiresManualActivation;
-        }
+        cookingEnabled = !requiresManualActivation;
     }
 
     private void Update()
@@ -108,8 +82,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             return;
 
         UpdateCookingProcess();
-        UpdateContentVisualMotion();
-        UpdateBlenderVisualTransition();
+        UpdateSpecificVisuals();
         UpdateSteam();
     }
 
@@ -164,7 +137,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
         if (heldItem.Data == null)
         {
-            Debug.LogWarning($"{heldItem.name} nao possui ItemData.");
+            Debug.LogWarning($"{heldItem.name} nao possui dado de receita. Ele pode existir no mundo, mas nao entra em receita ainda.");
             return false;
         }
 
@@ -178,7 +151,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         Destroy(removedItem.gameObject);
 
         Log($"{storedData.DisplayName} foi colocado em {containerType}. Total: {storedItems.Count}");
-        RefreshContentVisuals();
+        RefreshVisuals();
         TryStartRecipe();
 
         return true;
@@ -198,6 +171,12 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     {
         if (!requiresManualActivation)
             return false;
+
+        if (requiredCupSlot != null && !requiredCupSlot.IsOccupied)
+        {
+            Log($"{name}: encaixe o copo antes de ligar.");
+            return true;
+        }
 
         bool nextState = !cookingEnabled;
         SetCookingEnabled(nextState);
@@ -246,7 +225,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         }
 
         FinishAndClearCooking();
-        RefreshContentVisuals();
+        RefreshVisuals();
         Log($"{outputData.DisplayName} foi retirado de {containerType}.");
 
         return true;
@@ -269,7 +248,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             return false;
 
         FinishAndClearCooking();
-        RefreshContentVisuals();
+        RefreshVisuals();
         Log($"{outputData.DisplayName} foi colocado no prato.");
 
         return true;
@@ -305,7 +284,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
         if (removed)
         {
-            RefreshContentVisuals();
+            RefreshVisuals();
             TryStartRecipe();
         }
 
@@ -320,8 +299,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         resultState = CookingResultState.Raw;
         lastLoggedSecond = -1;
         loggedAlmostReady = false;
-        blenderVisualMorphed = false;
-        RefreshContentVisuals();
+        RefreshVisuals();
 
         Log($"{name}: todos os itens foram removidos.");
     }
@@ -344,7 +322,6 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         resultState = CookingResultState.Raw;
         lastLoggedSecond = -1;
         loggedAlmostReady = false;
-        blenderVisualMorphed = false;
 
         if (recipe.SpawnByproductsOnStart)
             SpawnByproducts(recipe.Byproducts);
@@ -418,7 +395,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             SpawnByproducts(byproducts);
 
         resultState = CookingResultState.Ready;
-        RefreshContentVisuals();
+        RefreshVisuals();
 
         Log(result != null
             ? $"{name}: pronto: {result.DisplayName}. Retire agora ou ele vai passar do ponto."
@@ -436,7 +413,6 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         resultState = CookingResultState.Raw;
         lastLoggedSecond = -1;
         loggedAlmostReady = false;
-        blenderVisualMorphed = false;
     }
 
     private void UpdateOvercookState()
@@ -476,7 +452,7 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         {
             storedItems.Clear();
             storedItems.Add(stateItem);
-            RefreshContentVisuals();
+            RefreshVisuals();
         }
 
         ItemData output = GetCurrentOutputData();
@@ -556,6 +532,14 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     public void SetCookingEnabled(bool enabled)
     {
+        if (enabled && requiredCupSlot != null && !requiredCupSlot.IsOccupied)
+        {
+            cookingEnabled = false;
+            if (cookingProcess != null)
+                cookingProcess.Pause();
+            return;
+        }
+
         cookingEnabled = enabled;
 
         if (cookingProcess == null)
@@ -578,38 +562,13 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         }
     }
 
-    public void DockToSlot(StoveSlot slot)
-    {
-        if (slot == null)
-            return;
-
-        homeSlot = slot;
-        isInstalledOnHeat = true;
-
-        transform.SetParent(null);
-        transform.SetPositionAndRotation(slot.ContainerAnchor.position, slot.ContainerAnchor.rotation);
-
-        EnsurePickupComponents();
-        containerBody.isKinematic = true;
-        containerBody.useGravity = false;
-        containerBody.velocity = Vector3.zero;
-        containerBody.angularVelocity = Vector3.zero;
-
-        SetCookingEnabled(true);
-    }
-
     public void OnPickedUp()
     {
-        isInstalledOnHeat = false;
         SetCookingEnabled(false);
-
-        if (homeSlot != null)
-            homeSlot.ClearIfCurrent(this);
     }
 
     public void OnDropped()
     {
-        isInstalledOnHeat = false;
         SetCookingEnabled(false);
     }
 
@@ -620,10 +579,28 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
 
     private bool CanCookNow()
     {
-        if (NeedsHeat)
-            return cookingEnabled && isInstalledOnHeat;
+        if (requiredCupSlot != null && !requiredCupSlot.IsOccupied)
+            return false;
 
         return cookingEnabled;
+    }
+
+    public void SetRequiredCupSlot(BlenderCupSlot cupSlot)
+    {
+        requiredCupSlot = cupSlot;
+    }
+
+    public void NotifyRequiredCupChanged()
+    {
+        if (requiredCupSlot != null && !requiredCupSlot.IsOccupied)
+            SetCookingEnabled(false);
+        else if (cookingEnabled)
+            TryStartRecipe();
+    }
+
+    protected void ConfigureContainerType(ContainerType type)
+    {
+        containerType = type;
     }
 
     private void EnsurePickupComponents()
@@ -640,116 +617,12 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
         containerItem.Configure(containerItemData, true, false);
     }
 
-    private void RefreshContentVisuals()
+    protected virtual void RefreshVisuals()
     {
-        RefreshContentVisuals(null);
     }
 
-    private void RefreshContentVisuals(ItemData overrideSingleVisual)
+    protected virtual void UpdateSpecificVisuals()
     {
-        for (int i = contentVisuals.Count - 1; i >= 0; i--)
-        {
-            if (contentVisuals[i] != null)
-                Destroy(contentVisuals[i]);
-        }
-
-        contentVisuals.Clear();
-
-        if (!useContentVisuals || contentVisualRoot == null)
-            return;
-
-        if (overrideSingleVisual != null)
-        {
-            CreateContentVisual(overrideSingleVisual, 0, 1);
-            return;
-        }
-
-        int count = storedItems.Count;
-
-        for (int i = 0; i < count; i++)
-        {
-            ItemData item = storedItems[i];
-            CreateContentVisual(item, i, count);
-        }
-    }
-
-    private void CreateContentVisual(ItemData item, int index, int count)
-    {
-        if (item == null || item.Prefab == null)
-            return;
-
-        GameObject visual = Instantiate(item.Prefab, contentVisualRoot);
-        visual.name = $"Visual_{item.DisplayName}";
-        visual.transform.localPosition = GetContentVisualPosition(index, count);
-        visual.transform.localRotation = Quaternion.identity;
-        visual.transform.localScale = Vector3.one * contentVisualScale;
-        DisableGameplayComponents(visual);
-        contentVisuals.Add(visual);
-    }
-
-    private Vector3 GetContentVisualPosition(int index, int count)
-    {
-        if (count <= 1)
-            return contentVisualLocalOffset;
-
-        float angle = Mathf.PI * 2f * index / count;
-        Vector3 radial = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
-        return contentVisualLocalOffset + radial * 0.14f;
-    }
-
-    private void UpdateContentVisualMotion()
-    {
-        if (!IsCooking || contentVisuals.Count == 0)
-            return;
-
-        for (int i = 0; i < contentVisuals.Count; i++)
-        {
-            GameObject visual = contentVisuals[i];
-
-            if (visual == null)
-                continue;
-
-            float phase = Time.time * fryingMotionSpeed + i * 1.73f;
-            Vector3 motion = new Vector3(Mathf.Sin(phase), 0f, Mathf.Cos(phase * 0.8f));
-            visual.transform.localPosition = GetContentVisualPosition(i, contentVisuals.Count)
-                + motion * fryingMotionRadius;
-        }
-    }
-
-    private void UpdateBlenderVisualTransition()
-    {
-        if (containerType != ContainerType.Liquidificador)
-            return;
-
-        if (blenderVisualMorphed || activeRecipe == null || cookingProcess == null)
-            return;
-
-        if (!cookingProcess.IsRunning || cookingProcess.Timer < blenderMorphStartTime)
-            return;
-
-        float morphEndTime = blenderMorphStartTime + blenderMorphDuration;
-        float transition = blenderMorphDuration <= 0f
-            ? 1f
-            : Mathf.InverseLerp(blenderMorphStartTime, morphEndTime, cookingProcess.Timer);
-
-        float visualScale = Mathf.Lerp(contentVisualScale, blenderShrinkScale, transition);
-
-        for (int i = 0; i < contentVisuals.Count; i++)
-        {
-            GameObject visual = contentVisuals[i];
-
-            if (visual != null)
-                visual.transform.localScale = Vector3.one * visualScale;
-        }
-
-        if (transition < 1f)
-            return;
-
-        blenderVisualMorphed = true;
-        RefreshContentVisuals(activeRecipe.ResultItem);
-
-        if (activeRecipe.ResultItem != null)
-            Log($"{name}: os ingredientes comecaram a virar {activeRecipe.ResultItem.DisplayName}.");
     }
 
     private void UpdateSteam()
@@ -834,12 +707,12 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
             material.SetFloat(propertyName, value);
     }
 
-    private static void DisableGameplayComponents(GameObject visual)
+    protected static void DisableGameplayComponents(GameObject visual)
     {
         foreach (Objeto item in visual.GetComponentsInChildren<Objeto>())
             item.enabled = false;
 
-        foreach (ItemContainer container in visual.GetComponentsInChildren<ItemContainer>())
+        foreach (RecipeContainer container in visual.GetComponentsInChildren<RecipeContainer>())
             container.enabled = false;
 
         foreach (PlateContainer plate in visual.GetComponentsInChildren<PlateContainer>())
@@ -893,8 +766,5 @@ public class ItemContainer : MonoBehaviour, IInteractable, ItemHoldStateReceiver
     {
         maxItems = Mathf.Max(1, maxItems);
         steamRate = Mathf.Max(0f, steamRate);
-        blenderMorphStartTime = Mathf.Max(0f, blenderMorphStartTime);
-        blenderMorphDuration = Mathf.Max(0f, blenderMorphDuration);
-        blenderShrinkScale = Mathf.Max(0.001f, blenderShrinkScale);
     }
 }

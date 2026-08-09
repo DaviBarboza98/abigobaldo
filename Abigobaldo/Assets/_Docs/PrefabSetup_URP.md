@@ -8,7 +8,7 @@ Materiais de particula devem usar `Universal Render Pipeline/Particles/Unlit` ou
 - **Objeto**: tudo que pode ser pego na mao e tem fisica. Ex: milho, ovo, prato, saleiro, pimenteiro, tabua, copo do liquidificador, frigideira, cuscuzeira.
 - **Container**: objeto ou movel que recebe objetos e pode processar receita. Ex: frigideira, cuscuzeira, liquidificador, prato.
 - **Spawner de Objeto**: ponto que cria um objeto prefab e entrega para a mao do player.
-- **Home Slot**: clone invisivel do objeto na posicao original. Quando voce segura o objeto certo e olha para esse ponto, o clone aparece transparente; ao apertar `E`, o objeto encaixa ali e o clone some.
+- **Dock Slot**: ponto de encaixe para objetos especiais. Ex: copo do liquidificador na base.
 - **Porta**: parte rotacionavel de armario/geladeira/bancada.
 
 `Item` ainda existe so como compatibilidade. Prefabs novos devem usar `Objeto`.
@@ -24,9 +24,27 @@ Crie um GameObject vazio em `Managers`:
    - `Highlight Color`: cor do objeto selecionado.
    - `Emission Color`: cor do brilho no URP.
    - `Emission Intensity`: intensidade do brilho.
-   - `Placement Ghost Color`: cor/transparencia do clone que aparece no ponto original.
 
 O `Highlightable` nao tem mais cor propria para voce configurar em dois lugares. Ele so aplica o efeito usando as cores do `GameInteractionManager`.
+
+Se quiser cor individual em algum objeto especifico, ligue `Use Local Colors` no `Highlightable` desse prefab. Se ficar desligado, ele usa o manager global.
+
+## Botao de normalizacao
+
+Na Unity, use o menu:
+
+`Abigobaldo/Gameplay/Normalizar cena e prefabs`
+
+Ele faz o trabalho chato automaticamente:
+
+- adiciona `Highlightable` onde faltar;
+- coloca layers corretas;
+- transforma `MeshCollider` de objeto fisico em `Convex`;
+- adiciona collider basico quando faltar;
+- aplica presets bons de particula;
+- salva prefabs nas pastas `Assets/_Prefabs/Objects`, `Assets/_Prefabs/Containers` e `Assets/_Prefabs/Spawners`.
+
+Use esse menu depois de organizar objetos na cena e antes de testar o Play.
 
 ## Layers do projeto
 
@@ -67,11 +85,11 @@ Use esta base para milho, ovo, agua, fuba, cuscuz, saleiro, pimenteiro, tabua, p
    - `Use Gravity`: ligado quando solto; o script ajusta ao pegar.
    - `Collision Detection`: `Continuous Speculative` ou `Continuous Dynamic` para objetos pequenos.
 3. No `Objeto`:
-   - `Objeto Data`: arraste o asset de `Assets/_Data/Objetos`.
+   - `Objeto Data`: opcional. Use apenas em objetos que participam de receitas antigas baseadas em `ItemData`.
    - `Can Be Held`: ligado.
    - `Can Be Thrown`: desligue em containers que nao podem ser jogados, como frigideira/cuscuzeira/copo do liquidificador se desejar.
-   - `Create Home Slot From Initial Pose`: ligue em objetos que devem voltar para o ponto original.
-   - `Home Slot Padding`: folga extra em cima do tamanho visual real do objeto. O slot pega a posicao/rotacao inicial e cria um clone transparente invisivel ali.
+   - `Create Home Slot From Initial Pose`: deixe desligado no fluxo atual.
+   - `Home Slot Padding`: legado do encaixe antigo.
 
 ## Spawner de Objeto
 
@@ -81,12 +99,12 @@ Para milho, ovo, agua etc:
 2. Adicione `BoxCollider` com `Is Trigger` ligado.
 3. Adicione `ObjetoSpawner`.
 4. Em `Objeto Prefab`, arraste o prefab do objeto.
-5. `Spawn Point` e opcional. Se vazio, usa o proprio transform.
-6. `Pick Up On Spawn`: ligado para nascer direto na mao.
-7. Adicione `Highlightable`.
-8. Layer pode ficar `Default`; o `ObjetoSpawner` troca para `Spawner`.
+5. Adicione `Highlightable`.
+6. Layer pode ficar `Default`; o `ObjetoSpawner` troca para `Spawner`.
 
-Para o spawner de agua, crie um prefab `Objeto_Agua` com `Objeto` e `ObjetoData Agua`, e use esse prefab no `ObjetoSpawner`.
+O spawner sempre entrega o objeto direto no `ItemHolder` quando a mao esta vazia.
+
+Para o spawner de agua, crie um prefab `Objeto_Agua` com `Objeto` e use esse prefab no `ObjetoSpawner`. Data so e necessaria se a agua entrar em receita.
 
 ## Portas
 
@@ -98,6 +116,7 @@ Use em portas de armario, geladeira, freezer e bancadas:
 4. Adicione `Highlightable`.
 5. Configure:
    - `Pivot`: vazio se o script estiver no proprio objeto com pivot correto.
+   - `Rotation Axis`: normalmente `Z` nas portas atuais.
    - `Max Open Angle`: normalmente `90`.
    - `Follow Speed`: quanto mais alto, mais rapido segue a camera.
    - `Invert Direction`: ligue se a porta estiver abrindo para o lado errado.
@@ -122,16 +141,21 @@ Estrutura recomendada:
    - Material URP de particula
 4. No objeto que precisa controlar particula, adicione `ParticleEmitterController`.
 5. Arraste o `ParticleSystem` para o campo `Target`.
-6. Scripts como `ItemContainer` chamam:
+6. Escolha um `Preset`:
+   - `SoftSteam`: vapor leve para frigideira.
+   - `HeavySteam`: vapor forte para cuscuzeira.
+   - `DarkBurnSmoke`: fumaca escura.
+   - `BlueCooktopFlame`: chama azul do cooktop.
+7. Clique no menu de contexto do componente e use `Apply Preset`, ou use `Abigobaldo/Gameplay/Normalizar cena e prefabs` para escolher automaticamente pelo nome na hierarquia.
+8. Scripts como `FryingPan`, `Cuscuzeira` e `Blender` chamam:
    - `Play()`
    - `Stop()`
    - `SetColor(Color)`
    - `SetRate(float)`
 
-## ItemContainer explicado
+## Base de receita
 
-`Container Type`:
-Tipo do container usado para achar receitas. Ex: `Frigideira`, `Cuscuzeira`, `Liquidificador`.
+`RecipeContainer` e a base compartilhada dos scripts `FryingPan`, `Cuscuzeira` e `Blender`. Voce nao precisa colocar `RecipeContainer` direto nos prefabs novos.
 
 `Max Items`:
 Quantidade maxima de ingredientes guardados antes de bloquear entrada.
@@ -150,27 +174,6 @@ Liga se o container inteiro pode ser pego na mao. Use em `Frigideira` e `Cuscuze
 
 `Container Item Data`:
 ObjetoData que representa o proprio container quando ele e pegavel. Ex: `Frigideira.asset`, `Cuscuzeira.asset`.
-
-`Create Stove Slot On Awake`:
-Cria automaticamente o ponto de fogao na posicao inicial. Use em frigideira/cuscuzeira se quiser encaixe automatico no local original.
-
-`Stove Slot Size`:
-Tamanho da area clicavel para recolocar o container no fogao.
-
-`Use Content Visuals`:
-Liga quando o container deve mostrar visualmente o conteudo. Use:
-- Frigideira: sim, para ovo/milho aparecer em cima.
-- Liquidificador: sim, para ingredientes aparecerem dentro do copo.
-- Cuscuzeira: normalmente nao, porque o vapor ja indica cozimento.
-
-`Content Visual Root`:
-Transform onde os modelos visuais dos ingredientes/resultados serao instanciados. So precisa se `Use Content Visuals` estiver ligado.
-
-`Content Visual Local Offset`:
-Posicao local do visual em relacao ao root.
-
-`Content Visual Scale`:
-Escala do visual gerado dentro/em cima do container.
 
 `Frying Motion Radius` / `Frying Motion Speed`:
 Movimento visual pequeno enquanto cozinha. Na frigideira parece fritura; no liquidificador parece mexer.
@@ -208,7 +211,7 @@ Liga mensagens no Console com tempo e estado da receita.
 
 Root:
 - `Objeto`
-- `ItemContainer`
+- `FryingPan`
 - `Highlightable`
 - `Rigidbody`
 - Collider
@@ -216,38 +219,40 @@ Root:
 `Objeto`:
 - `Can Be Held`: ligado
 - `Can Be Thrown`: desligado
-- `Create Home Slot From Initial Pose`: ligado
+- `Create Home Slot From Initial Pose`: desligado
 
-`ItemContainer`:
-- `Container Type`: `Frigideira`
+`FryingPan`:
 - `Can Be Picked Up`: ligado
 - `Container Item Data`: `Frigideira`
-- `Create Stove Slot On Awake`: ligado
-- `Use Content Visuals`: ligado
-- `Content Visual Root`: filho vazio em cima da panela
+- `Item Surface`: filho vazio em cima da panela
 - `Steam Particles`: `ParticleEmitterController` do filho `Particles`
 
 ### Cuscuzeira
 
 Parecida com frigideira, mas:
-- `Container Type`: `Cuscuzeira`
-- `Use Content Visuals`: desligado, a nao ser que voce queira ver cuscuz dentro.
+- Use o script `Cuscuzeira`, nao `FryingPan`.
 - Vapor mais forte no `ParticleSystem`.
 
 ### Liquidificador base/motor
 
 Root da base:
 - Collider
-- `ItemContainer`
+- `Blender`
 - `Highlightable`
 
-`ItemContainer`:
-- `Container Type`: `Liquidificador`
+Crie tambem um filho vazio/collider no ponto onde o copo encaixa. O transform desse proprio objeto ja e o encaixe:
+- Nome sugerido: `CopoSlot`
+- `BoxCollider` com `Is Trigger` ligado
+- `BlenderCupSlot`
+- `Accepted Data`: data do copo do liquidificador
+- `Linked Blender`: pode deixar vazio se o slot for filho da base; ele acha o `Blender` automaticamente.
+
+`Blender`:
 - `Can Be Picked Up`: desligado
 - `Requires Manual Activation`: ligado
-- `Use Content Visuals`: ligado
-- `Content Visual Root`: vazio dentro do copo encaixado
+- `Cup Content Root`: vazio dentro do copo encaixado
 - `Steam Particles`: vazio/null
+- `Required Cup Slot`: o `BlenderCupSlot` do copo. Com isso a base so liga/processa com o copo encaixado.
 
 ### Copo do liquidificador
 
@@ -257,7 +262,8 @@ Prefab separado:
 - Collider
 - `Highlightable`
 - Material transparente URP/Lit com `Surface Type: Transparent`
-- `Create Home Slot From Initial Pose`: ligado, se quiser encaixar de volta.
+- `Role`: `CopoLiquidificador`
+- `Create Home Slot From Initial Pose`: desligado. O encaixe fica no `BlenderCupSlot` da base.
 
 ### Prato
 
@@ -280,7 +286,7 @@ Por enquanto:
 - Collider
 - `Highlightable`
 
-Nao coloque `ItemContainer` ainda.
+Nao coloque script de receita/container ainda.
 
 ### Saleiro e pimenteiro
 
@@ -293,13 +299,8 @@ Nao coloque `ItemContainer` ainda.
 
 ### Cooktop / bocas do fogao
 
-Como agora cada cooktop esta separado:
-- Em cada boca, coloque `StoveSlot` se ela aceitar containers no fogo.
-- Adicione `BoxCollider` trigger no ponto clicavel.
-- Configure `Accepted Type` para a panela esperada, se estiver usando slots separados.
-- Para fogo azul, crie um filho `Particles` com `ParticleSystem` e `ParticleEmitterController`.
-- Arraste esse `ParticleEmitterController` para `Flame Particles` no `StoveSlot`.
-- Configure cor, shape, range, quantidade e lifetime direto no `ParticleSystem`.
+Por enquanto o cooktop fica como objeto de cena/visual, sem script proprio.
+Para fogo azul, crie um filho `Particles` com `ParticleSystem` e `ParticleEmitterController`, usando o preset `BlueCooktopFlame`.
 
 ### Armarios, geladeira, freezer
 
@@ -308,4 +309,4 @@ Cada porta separada:
 - `OpenableDoor`
 - `Highlightable`
 
-Se abrir para o lado errado, marque `Invert Direction`.
+Use `Rotation Axis: Z` nas portas atuais. Se abrir para o lado errado, marque `Invert Direction`.

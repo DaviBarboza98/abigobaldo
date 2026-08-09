@@ -4,8 +4,6 @@ public class ObjetoSpawner : MonoBehaviour, IInteractable
 {
     [Header("Objeto")]
     [SerializeField] private GameObject objetoPrefab;
-    [SerializeField] private Transform spawnPoint;
-    [SerializeField] private bool pickUpOnSpawn = true;
 
     private void Awake()
     {
@@ -18,15 +16,27 @@ public class ObjetoSpawner : MonoBehaviour, IInteractable
         return objeto;
     }
 
+    public Objeto SpawnObjeto(ItemHolder holder)
+    {
+        TrySpawnObjeto(holder, out Objeto objeto);
+        return objeto;
+    }
+
     public bool TrySpawnObjeto(out Objeto objeto)
+    {
+        return TrySpawnObjeto(null, out objeto);
+    }
+
+    public bool TrySpawnObjeto(ItemHolder holder, out Objeto objeto)
     {
         objeto = null;
 
         if (objetoPrefab == null)
             return false;
 
-        Transform target = spawnPoint != null ? spawnPoint : transform;
-        GameObject objetoObject = Instantiate(objetoPrefab, target.position, target.rotation);
+        Vector3 position = holder != null ? holder.transform.position : transform.position;
+        Quaternion rotation = holder != null ? holder.transform.rotation : transform.rotation;
+        GameObject objetoObject = Instantiate(objetoPrefab, position, rotation);
         objeto = objetoObject.GetComponent<Objeto>();
 
         if (objeto != null)
@@ -41,13 +51,13 @@ public class ObjetoSpawner : MonoBehaviour, IInteractable
         if (player == null || player.ItemHolder == null)
             return;
 
-        if (pickUpOnSpawn && !player.ItemHolder.IsEmpty())
+        if (!player.ItemHolder.IsEmpty())
             return;
 
-        if (!TrySpawnObjeto(out Objeto objeto))
+        if (!TrySpawnObjeto(player.ItemHolder, out Objeto objeto))
             return;
 
-        if (pickUpOnSpawn && !player.ItemHolder.TryPickUp(objeto))
+        if (!player.ItemHolder.TryPickUp(objeto))
             Destroy(objeto.gameObject);
     }
 }
