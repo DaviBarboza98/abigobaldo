@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: cumbuca
   displayName: Cumbuca
-  prefab: {fileID: 0}
+  prefab: {fileID: 5347512670799250452, guid: 739b0da9566988b448fd7bf34b45d2bd, type: 3}
   cookState: 0

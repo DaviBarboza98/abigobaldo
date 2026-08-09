@@ -4842,8 +4842,9 @@ GameObject:
   - component: {fileID: 2059452665760952013}
   - component: {fileID: 3744146834144345762}
   - component: {fileID: 7896190603467699005}
-  - component: {fileID: 152155980148496705}
   - component: {fileID: 7744332107996721740}
+  - component: {fileID: 7375951540228772414}
+  - component: {fileID: 1353770615764364035}
   m_Layer: 0
   m_Name: Cuscuzeira
   m_TagString: Untagged
@@ -4939,42 +4940,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -8910843481037586497, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}
---- !u!114 &152155980148496705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3453932074998779857}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  containerType: 1
-  maxItems: 2
-  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
-  localRecipes: []
-  outputSpawnPoint: {fileID: 0}
-  canBePickedUp: 1
-  containerItemData: {fileID: 11400000, guid: 48cc31d8a45e4375990770b71ceaa5f7, type: 2}
-  createStoveSlotOnAwake: 1
-  stoveSlotSize: {x: 0.9, y: 0.4, z: 0.9}
-  useContentVisuals: 0
-  contentVisualRoot: {fileID: 0}
-  contentVisualLocalOffset: {x: 0, y: 0.18, z: 0}
-  contentVisualScale: 0.18
-  fryingMotionRadius: 0.015
-  fryingMotionSpeed: 12
-  blenderMorphStartTime: 2
-  blenderMorphDuration: 3
-  blenderShrinkScale: 0.03
-  steamParticles: {fileID: 7744332107996721740}
-  steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.55}
-  burnedSteamColor: {r: 0.22, g: 0.2, b: 0.18, a: 0.75}
-  steamRate: 20
-  requiresManualActivation: 0
-  showDebugLogs: 1
 --- !u!114 &7744332107996721740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4990,3 +4955,40 @@ MonoBehaviour:
   target: {fileID: 7032208452335695643}
   preset: 1
   applyPresetOnAwake: 0
+--- !u!114 &7375951540228772414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3453932074998779857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7109c533a95876c4e900aae1995d1e05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
+  localRecipes: []
+  maxItems: 1
+  canBePickedUp: 1
+  cuscuzeiraData: {fileID: 11400000, guid: 48cc31d8a45e4375990770b71ceaa5f7, type: 2}
+  steamParticles: {fileID: 7744332107996721740}
+  steamColor: {r: 0.9, g: 0.9, b: 0.86, a: 0.55}
+  burnedSteamColor: {r: 0.22, g: 0.2, b: 0.18, a: 0.75}
+  steamRate: 20
+  showDebugLogs: 1
+--- !u!114 &1353770615764364035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3453932074998779857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42446fd66e4d4ccdae8c160b47f7b889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 7032208452335695643}
+  preset: 1
+  applyPresetOnAwake: 1

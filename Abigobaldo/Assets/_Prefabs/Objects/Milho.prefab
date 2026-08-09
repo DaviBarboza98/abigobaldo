@@ -27,10 +27,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2813320483235236368}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 25.29, y: 0, z: 10.725861}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2682344666477187024}
   m_Father: {fileID: 0}
@@ -75,10 +75,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objetoData: {fileID: 11400000, guid: eda4a8b2bf953204793f0ba03cc9b882, type: 2}
+  role: 0
   canBeHeld: 1
   canBeThrown: 1
-  createHomeSlotFromInitialPose: 0
-  homeSlotPadding: {x: 0.15, y: 0.15, z: 0.15}
 --- !u!114 &6249097551242426066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,8 +122,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3508454075913246149}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.4614769, y: 1.158455, z: 0.26498184}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -15,7 +15,6 @@ MonoBehaviour:
   requiredContainer: 1
   ingredients:
   - {fileID: 11400000, guid: 8f861095d31847098c8db9a47caa6a5a, type: 2}
-  - {fileID: 11400000, guid: e642d9d3edb940b88df71252f7508d90, type: 2}
   resultItem: {fileID: 11400000, guid: 1b8d682102657bd4cb2bec57cfe787a4, type: 2}
   slightlyBurnedResultItem: {fileID: 11400000, guid: 7d79513ab5f54a65a4c99a6df808cfa3, type: 2}
   burnedResultItem: {fileID: 11400000, guid: 7434fed99e3c4ac9b3a7d7fa11845120, type: 2}

@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: garrafa
   displayName: Garrafa
-  prefab: {fileID: 0}
+  prefab: {fileID: 1159535525918946566, guid: 7dda4bf009d4d6e498f189506af9bd88, type: 3}
   cookState: 0

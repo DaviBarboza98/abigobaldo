@@ -47,11 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 0}
+  objetoData: {fileID: 11400000, guid: 7699bfcd9bc411442a78fdafb63860c8, type: 2}
+  role: 0
   canBeHeld: 1
   canBeThrown: 1
-  createHomeSlotFromInitialPose: 0
-  homeSlotPadding: {x: 0.15, y: 0.15, z: 0.15}
 --- !u!114 &3729332238479081127
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,13 +122,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6062847189589263168}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 16.601307, y: 2.8682432, z: -2.0749636}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6749480514293732173}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!33 &7873391043534815771
 MeshFilter:
   m_ObjectHideFlags: 0

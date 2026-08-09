@@ -27,10 +27,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5347512670799250452}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 25.29, y: 0, z: 10.725861}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8123582043806878585}
   m_Father: {fileID: 0}
@@ -91,11 +91,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b2faa40681d4c38b28b5fbab16ac13d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objetoData: {fileID: 0}
+  objetoData: {fileID: 11400000, guid: 5c6633a86b7568741bc24bc59535b232, type: 2}
+  role: 0
   canBeHeld: 1
   canBeThrown: 1
-  createHomeSlotFromInitialPose: 0
-  homeSlotPadding: {x: 0.15, y: 0.15, z: 0.15}
 --- !u!1 &8932628694974435779
 GameObject:
   m_ObjectHideFlags: 0

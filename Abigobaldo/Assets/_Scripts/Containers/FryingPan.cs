@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
+public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, ObjetoReturnStateReceiver
 {
     private enum ResultState { Raw, Ready, Overcooked, Burned, Carbonized }
 
@@ -14,6 +14,8 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
     [Header("Objeto pegavel")]
     [SerializeField] private bool canBePickedUp = true;
     [SerializeField] private ItemData panData;
+    [SerializeField] private bool createReturnPoint = true;
+    [SerializeField] private Vector3 returnPointSize = Vector3.one * 0.7f;
 
     [Header("Visual da frigideira")]
     [SerializeField] private Transform itemSurface;
@@ -21,6 +23,14 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
     [SerializeField] private float itemVisualScale = 0.22f;
     [SerializeField] private float fryingMotionRadius = 0.025f;
     [SerializeField] private float fryingMotionSpeed = 18f;
+    [SerializeField] private bool usePhysicalItemVisual = true;
+    [SerializeField] private float visualDropHeight = 0.18f;
+    [SerializeField] private float visualMass = 0.08f;
+    [SerializeField] private float visualDrag = 0.05f;
+    [SerializeField] private PhysicMaterial lowFrictionMaterial;
+    [SerializeField] private Color overcookedTint = new Color(0.55f, 0.42f, 0.28f, 1f);
+    [SerializeField] private Color burnedTint = new Color(0.18f, 0.16f, 0.14f, 1f);
+    [SerializeField] private Color carbonizedTint = Color.black;
 
     [Header("Particulas")]
     [SerializeField] private ParticleEmitterController steamParticles;
@@ -50,7 +60,10 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
     {
         GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Container);
         if (canBePickedUp)
+        {
             EnsurePickupComponents();
+            CreateReturnPoint();
+        }
     }
 
     private void Update()
@@ -229,12 +242,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
             return;
 
         resultState = state;
-        if (data != null)
-        {
-            contents.Clear();
-            contents.Add(data);
-            RefreshVisuals();
-        }
+        ApplyBurnTintForCurrentState();
     }
 
     private void QueueByproducts(IReadOnlyList<ItemData> byproducts)
@@ -291,11 +299,38 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
 
         GameObject visual = Instantiate(data.Prefab, itemSurface);
         visual.name = $"FrigideiraVisual_{data.DisplayName}";
-        visual.transform.localPosition = GetVisualPosition(index, count);
+        visual.transform.localPosition = GetVisualPosition(index, count) + Vector3.up * (usePhysicalItemVisual ? visualDropHeight : 0f);
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = Vector3.one * itemVisualScale;
-        RecipeVisualUtility.DisableGameplayComponents(visual);
+        RecipeVisualUtility.DisableGameplayComponents(visual, !usePhysicalItemVisual);
+        ConfigureVisualPhysics(visual);
         visuals.Add(visual);
+        ApplyBurnTintForCurrentState();
+    }
+
+    private void ConfigureVisualPhysics(GameObject visual)
+    {
+        if (!usePhysicalItemVisual)
+            return;
+
+        Rigidbody body = visual.GetComponent<Rigidbody>();
+        if (body == null)
+            body = visual.AddComponent<Rigidbody>();
+
+        body.mass = visualMass;
+        body.drag = visualDrag;
+        body.angularDrag = visualDrag;
+        body.useGravity = true;
+        body.isKinematic = false;
+        body.detectCollisions = true;
+        body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        body.interpolation = RigidbodyInterpolation.Interpolate;
+
+        if (lowFrictionMaterial == null)
+            return;
+
+        foreach (Collider targetCollider in visual.GetComponentsInChildren<Collider>())
+            targetCollider.material = lowFrictionMaterial;
     }
 
     private Vector3 GetVisualPosition(int index, int count)
@@ -310,6 +345,9 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
     private void UpdateVisualMotion()
     {
         if (!IsCooking)
+            return;
+
+        if (usePhysicalItemVisual)
             return;
 
         for (int i = 0; i < visuals.Count; i++)
@@ -331,6 +369,37 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
                 Destroy(visuals[i]);
 
         visuals.Clear();
+    }
+
+    private void ApplyBurnTintForCurrentState()
+    {
+        Color? tint = resultState switch
+        {
+            ResultState.Overcooked => overcookedTint,
+            ResultState.Burned => burnedTint,
+            ResultState.Carbonized => carbonizedTint,
+            _ => null
+        };
+
+        if (!tint.HasValue)
+            return;
+
+        foreach (GameObject visual in visuals)
+        {
+            if (visual == null)
+                continue;
+
+            foreach (Renderer targetRenderer in visual.GetComponentsInChildren<Renderer>())
+            {
+                foreach (Material material in targetRenderer.materials)
+                {
+                    if (material.HasProperty("_BaseColor"))
+                        material.SetColor("_BaseColor", tint.Value);
+                    else if (material.HasProperty("_Color"))
+                        material.color = tint.Value;
+                }
+            }
+        }
     }
 
     private void UpdateSteam()
@@ -422,13 +491,50 @@ public class FryingPan : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
         objeto.Configure(panData, true, false);
     }
 
-    public void OnPickedUp() => cookingEnabled = false;
+    public void OnPickedUp() => SetCookingEnabled(false);
     public void OnDropped() => cookingEnabled = false;
     public void OnThrown() => OnDropped();
+    public void OnReturnedToOrigin() => SetCookingEnabled(true);
+
+    private void SetCookingEnabled(bool enabled)
+    {
+        cookingEnabled = enabled;
+
+        if (cookingProcess == null)
+        {
+            if (enabled)
+                TryStartRecipe();
+
+            return;
+        }
+
+        if (enabled)
+            cookingProcess.Resume();
+        else
+            cookingProcess.Pause();
+    }
+
+    private void CreateReturnPoint()
+    {
+        if (!createReturnPoint || objeto == null)
+            return;
+
+        GameObject point = new GameObject($"{name}_ReturnPoint");
+        point.transform.SetPositionAndRotation(transform.position, transform.rotation);
+
+        ObjetoReturnPoint returnPoint = point.AddComponent<ObjetoReturnPoint>();
+        returnPoint.Initialize(objeto, returnPointSize);
+    }
 
     private void OnValidate()
     {
         maxItems = Mathf.Max(1, maxItems);
         steamRate = Mathf.Max(0f, steamRate);
+        visualDropHeight = Mathf.Max(0f, visualDropHeight);
+        visualMass = Mathf.Max(0.001f, visualMass);
+        visualDrag = Mathf.Max(0f, visualDrag);
+        returnPointSize.x = Mathf.Max(0.05f, returnPointSize.x);
+        returnPointSize.y = Mathf.Max(0.05f, returnPointSize.y);
+        returnPointSize.z = Mathf.Max(0.05f, returnPointSize.z);
     }
 }

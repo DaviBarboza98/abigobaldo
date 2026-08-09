@@ -88,8 +88,6 @@ Use esta base para milho, ovo, agua, fuba, cuscuz, saleiro, pimenteiro, tabua, p
    - `Objeto Data`: opcional. Use apenas em objetos que participam de receitas antigas baseadas em `ItemData`.
    - `Can Be Held`: ligado.
    - `Can Be Thrown`: desligue em containers que nao podem ser jogados, como frigideira/cuscuzeira/copo do liquidificador se desejar.
-   - `Create Home Slot From Initial Pose`: deixe desligado no fluxo atual.
-   - `Home Slot Padding`: legado do encaixe antigo.
 
 ## Spawner de Objeto
 
@@ -171,8 +169,8 @@ Banco global de receitas. Use `Assets/_Data/Receitas/RecipeDatabase_MVP.asset`.
 `Local Recipes`:
 Lista opcional de receitas so daquele container. Pode deixar vazio se usar o database.
 
-`Output Spawn Point`:
-Ponto onde o resultado aparece se o player retirar o item pronto com a mao vazia. Tambem e usado para subprodutos, tipo cascas de ovo. Se vazio, usa a posicao do container + um offset para cima.
+Resultados de receita:
+O resultado nao spawna no mundo. Ele vai direto para a mao vazia do player ou para o prato que o player estiver segurando.
 
 `Can Be Picked Up`:
 Existe na `FryingPan` e na `Cuscuzeira`. Liga se o container inteiro pode ser pego na mao. No liquidificador novo, quem e pegavel e o `CopoDoLiquidificador`, nao a base/motor.
@@ -224,7 +222,6 @@ Root:
 `Objeto`:
 - `Can Be Held`: ligado
 - `Can Be Thrown`: desligado
-- `Create Home Slot From Initial Pose`: desligado
 
 `FryingPan`:
 - `Can Be Picked Up`: ligado
@@ -238,34 +235,49 @@ Parecida com frigideira, mas:
 - Use o script `Cuscuzeira`, nao `FryingPan`.
 - Vapor mais forte no `ParticleSystem`.
 
-### Liquidificador base/motor
+### Liquidificador
 
-Root da base:
-- Collider
-- `Blender`
-- `Highlightable`
+O liquidificador e dividido em duas partes interativas:
+- Base fixa: funciona como botao de ligar/desligar e encaixe do copo.
+- Copo: unico objeto pegavel do liquidificador, recebe ingredientes e mostra conteudo dentro.
 
-Crie tambem um filho vazio/collider no ponto onde o copo encaixa. O transform desse proprio objeto ja e o encaixe:
-- Nome sugerido: `CopoSlot`
-- `BoxCollider` com `Is Trigger` ligado
-- `BlenderCupSlot`
-- `Accepted Data`: data do copo do liquidificador
-- `Linked Blender`: pode deixar vazio se o slot for filho da base; ele acha o `Blender` automaticamente.
+Estrutura recomendada:
+- Root vazio `Blender`
+- Filho `Base`
+  - Mesh/collider da base
+  - `Blender`
+  - `Highlightable`
+- Filho vazio `CupAnchor`
+  - fica exatamente onde o copo deve encaixar
+- Filho `LiquidificadorCopo`
+  - `Objeto`
+  - `BlenderCup`
+  - `Rigidbody`
+  - Collider
+  - `Highlightable`
+  - filho vazio `CupContentRoot` dentro do volume do copo
 
 `Blender`:
-- `Cup Content Root`: vazio dentro do copo encaixado
-- `Required Cup Slot`: o `BlenderCupSlot` do copo. Com isso a base so liga/processa com o copo encaixado.
+- `Cup Anchor`: arraste o filho `CupAnchor`.
+- `Starting Cup`: arraste o `LiquidificadorCopo` se quiser que comece encaixado ao dar Play.
+- `Recipe Database`: banco de receitas.
 
-### Copo do liquidificador
+`BlenderCup`:
+- `Content Root`: arraste `CupContentRoot`.
+- `Max Items`: quantidade maxima de ingredientes.
+- `Ingredient Visual Scale`: escala dos ingredientes dentro do copo.
+- `Blended Visual Scale`: escala do resultado depois de bater.
+- `Use Physical Ingredient Visuals`: ligado para os ingredientes pequenos receberem forcas aleatorias.
+- `Fallback Boundary Radius`: limite de seguranca caso voce ainda nao tenha paredes internas no copo.
 
-Prefab separado:
-- `Objeto`
-- `Rigidbody`
-- Collider
-- `Highlightable`
-- Material transparente URP/Lit com `Surface Type: Transparent`
-- `Role`: `CopoLiquidificador`
-- `Create Home Slot From Initial Pose`: desligado. O encaixe fica no `BlenderCupSlot` da base.
+Para colisao visual dentro do copo, nao dependa de MeshCollider oco. Crie filhos invisiveis dentro do copo com `BoxCollider` simples formando paredes internas: fundo e laterais. Esses colliders podem ficar sem renderer. Os ingredientes visuais pequenos colidem com eles enquanto o liquidificador bate.
+
+Interacoes:
+- Olhar para a base com mao vazia: liga/desliga.
+- Olhar para a base segurando o copo: encaixa o copo.
+- Olhar para a base segurando ingrediente: liga/desliga.
+- Olhar para o copo com mao vazia: pega/tira o copo.
+- Olhar para o copo segurando ingrediente: coloca ingrediente no copo.
 
 ### Prato
 

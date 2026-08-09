@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
+public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver, ObjetoReturnStateReceiver
 {
     private enum ResultState { Raw, Ready, Overcooked, Burned, Carbonized }
 
@@ -14,6 +14,8 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
     [Header("Objeto pegavel")]
     [SerializeField] private bool canBePickedUp = true;
     [SerializeField] private ItemData cuscuzeiraData;
+    [SerializeField] private bool createReturnPoint = true;
+    [SerializeField] private Vector3 returnPointSize = Vector3.one * 0.7f;
 
     [Header("Particulas")]
     [SerializeField] private ParticleEmitterController steamParticles;
@@ -41,7 +43,10 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
     {
         GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Container);
         if (canBePickedUp)
+        {
             EnsurePickupComponents();
+            CreateReturnPoint();
+        }
     }
 
     private void Update()
@@ -346,13 +351,47 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, ItemHoldStateReceiver
         objeto.Configure(cuscuzeiraData, true, false);
     }
 
-    public void OnPickedUp() => cookingEnabled = false;
+    public void OnPickedUp() => SetCookingEnabled(false);
     public void OnDropped() => cookingEnabled = false;
     public void OnThrown() => OnDropped();
+    public void OnReturnedToOrigin() => SetCookingEnabled(true);
+
+    private void SetCookingEnabled(bool enabled)
+    {
+        cookingEnabled = enabled;
+
+        if (cookingProcess == null)
+        {
+            if (enabled)
+                TryStartRecipe();
+
+            return;
+        }
+
+        if (enabled)
+            cookingProcess.Resume();
+        else
+            cookingProcess.Pause();
+    }
+
+    private void CreateReturnPoint()
+    {
+        if (!createReturnPoint || objeto == null)
+            return;
+
+        GameObject point = new GameObject($"{name}_ReturnPoint");
+        point.transform.SetPositionAndRotation(transform.position, transform.rotation);
+
+        ObjetoReturnPoint returnPoint = point.AddComponent<ObjetoReturnPoint>();
+        returnPoint.Initialize(objeto, returnPointSize);
+    }
 
     private void OnValidate()
     {
         maxItems = Mathf.Max(1, maxItems);
         steamRate = Mathf.Max(0f, steamRate);
+        returnPointSize.x = Mathf.Max(0.05f, returnPointSize.x);
+        returnPointSize.y = Mathf.Max(0.05f, returnPointSize.y);
+        returnPointSize.z = Mathf.Max(0.05f, returnPointSize.z);
     }
 }

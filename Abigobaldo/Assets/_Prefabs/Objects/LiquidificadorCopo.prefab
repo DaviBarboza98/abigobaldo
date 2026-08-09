@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2705778960343096921}
   - component: {fileID: 8680899098386369196}
   - component: {fileID: 5856529572549924346}
+  - component: {fileID: 312233700227800006}
   m_Layer: 0
   m_Name: LiquidificadorCopo
   m_TagString: Untagged
@@ -27,10 +28,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3548452663797230322}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 25.29, y: 0, z: 10.725861}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2221564290528384406}
   m_Father: {fileID: 0}
@@ -78,8 +79,6 @@ MonoBehaviour:
   role: 4
   canBeHeld: 1
   canBeThrown: 1
-  createHomeSlotFromInitialPose: 1
-  homeSlotPadding: {x: 0.15, y: 0.15, z: 0.15}
 --- !u!114 &5856529572549924346
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,6 +96,24 @@ MonoBehaviour:
   localHighlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   localEmissionColor: {r: 1, g: 0.65, b: 0.05, a: 1}
   localEmissionIntensity: 1.1
+--- !u!114 &312233700227800006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3548452663797230322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37d36914fe790324db9f07ac6c7e814a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxItems: 5
+  contentRoot: {fileID: 9198940960261186637}
+  contentLocalOffset: {x: 0, y: 0, z: 0}
+  ingredientVisualScale: 0.18
+  blendedVisualScale: 0.05
+  showDebugLogs: 1
 --- !u!1 &5318840860247532392
 GameObject:
   m_ObjectHideFlags: 0
@@ -110,7 +127,6 @@ GameObject:
   - component: {fileID: 4424599236077611023}
   - component: {fileID: 5423356249096825038}
   - component: {fileID: 4216408505644591357}
-  - component: {fileID: 1223427096378027903}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -204,7 +220,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 8468029456956400472, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}
 --- !u!54 &4216408505644591357
@@ -234,21 +250,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1223427096378027903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5318840860247532392}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c6bbbfeea54a064fb66cd21984b908c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  acceptedData: {fileID: 11400000, guid: be98938383819b346b0cee6d262f4ad0, type: 2}
-  linkedBlender: {fileID: 0}
-  disableDockedColliders: 1
 --- !u!1 &8619342588424746532
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +260,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9198940960261186637}
   m_Layer: 0
-  m_Name: Spawn
+  m_Name: CupContentRoot
   m_TagString: Untagged
   m_Icon: {fileID: -5397416234189338067, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0

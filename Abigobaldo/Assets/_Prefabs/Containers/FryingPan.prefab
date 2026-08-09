@@ -117,8 +117,8 @@ GameObject:
   - component: {fileID: 5460079838629584050}
   - component: {fileID: 915563183544905154}
   - component: {fileID: 8247668048281258325}
-  - component: {fileID: 792480272349384464}
   - component: {fileID: 4187168233138214693}
+  - component: {fileID: 8179910150367999219}
   m_Layer: 0
   m_Name: FryingPan
   m_TagString: Untagged
@@ -186,43 +186,6 @@ MonoBehaviour:
   localHighlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   localEmissionColor: {r: 1, g: 0.65, b: 0.05, a: 1}
   localEmissionIntensity: 1.1
---- !u!114 &792480272349384464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2905880716864456172}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e560ba2c01e14e4ab3d0cdeadba78dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  containerType: 0
-  maxItems: 5
-  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
-  localRecipes: []
-  outputSpawnPoint: {fileID: 0}
-  canBePickedUp: 1
-  containerItemData: {fileID: 11400000, guid: e0e97e7811f34d839e7107ab45b126bd, type: 2}
-  createStoveSlotOnAwake: 0
-  stoveSlotSize: {x: 0.75, y: 0.35, z: 0.75}
-  useContentVisuals: 1
-  contentVisualRoot: {fileID: 5972399723644317329}
-  contentVisualLocalOffset: {x: 0, y: 0.12, z: 0}
-  contentVisualScale: 0.22
-  fryingMotionRadius: 0.025
-  fryingMotionSpeed: 18
-  blenderMorphStartTime: 2
-  blenderMorphDuration: 3
-  blenderShrinkScale: 0.03
-  steamParticles: {fileID: 4187168233138214693}
-  steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.45}
-  burnedSteamColor: {r: 0.25, g: 0.22, b: 0.2, a: 0.6}
-  steamRate: 8
-  requiresManualActivation: 0
-  requiredCupSlot: {fileID: 0}
-  showDebugLogs: 1
 --- !u!114 &4187168233138214693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,6 +201,33 @@ MonoBehaviour:
   target: {fileID: 1089710046497220566}
   preset: 1
   applyPresetOnAwake: 0
+--- !u!114 &8179910150367999219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2905880716864456172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe54accaaf52f149ba4bac43aaad5ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
+  localRecipes: []
+  maxItems: 2
+  canBePickedUp: 1
+  panData: {fileID: 11400000, guid: e0e97e7811f34d839e7107ab45b126bd, type: 2}
+  itemSurface: {fileID: 5972399723644317329}
+  itemLocalOffset: {x: 0, y: 0.08, z: 0}
+  itemVisualScale: 0.22
+  fryingMotionRadius: 0.025
+  fryingMotionSpeed: 18
+  steamParticles: {fileID: 4187168233138214693}
+  steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.45}
+  burnedSteamColor: {r: 0.25, g: 0.22, b: 0.2, a: 0.6}
+  steamRate: 8
+  showDebugLogs: 1
 --- !u!1 &4515485291238910584
 GameObject:
   m_ObjectHideFlags: 0

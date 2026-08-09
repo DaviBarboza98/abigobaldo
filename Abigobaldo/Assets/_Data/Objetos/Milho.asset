@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: milho
   displayName: Milho
-  prefab: {fileID: 8374132353690403299, guid: e89c04a704b1b064eb15d83ea7516917, type: 3}
+  prefab: {fileID: 2813320483235236368, guid: 9a807e1d2851c584aa85a85e7f727c64, type: 3}
+  cookState: 0

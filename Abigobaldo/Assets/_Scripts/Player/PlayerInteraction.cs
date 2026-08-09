@@ -190,6 +190,17 @@ public class PlayerInteraction : MonoBehaviour
 
     private GameObject GetHighlightRoot(Collider hitCollider)
     {
+        ObjetoReturnPoint returnPoint = hitCollider.GetComponentInParent<ObjetoReturnPoint>();
+        if (returnPoint != null)
+        {
+            Objeto heldObjeto = itemHolder != null ? itemHolder.CurrentObjeto : null;
+            return returnPoint.ShouldHighlightFor(heldObjeto) ? returnPoint.gameObject : null;
+        }
+
+        Highlightable explicitHighlight = hitCollider.GetComponentInParent<Highlightable>();
+        if (explicitHighlight != null)
+            return explicitHighlight.gameObject;
+
         Objeto objeto = hitCollider.GetComponentInParent<Objeto>();
 
         if (objeto != null)
@@ -244,10 +255,7 @@ public class PlayerInteraction : MonoBehaviour
             return false;
 
         if (interactable is IRecipeStation station)
-        {
-            station.TryMoveOutputToPlate(heldPlate);
-            return true;
-        }
+            return station.TryMoveOutputToPlate(heldPlate);
 
         return false;
     }

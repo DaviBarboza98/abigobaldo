@@ -28,10 +28,10 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3832088550422518647}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 23.98927, y: 6.8829985, z: -2.1950204}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3122299303897839368}
   m_Father: {fileID: 0}
@@ -49,10 +49,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objetoData: {fileID: 0}
+  role: 0
   canBeHeld: 1
   canBeThrown: 1
-  createHomeSlotFromInitialPose: 0
-  homeSlotPadding: {x: 0.15, y: 0.15, z: 0.15}
 --- !u!114 &6257751771569702920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66,6 +65,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   includeInactiveRenderers: 0
+  useLocalColors: 0
+  localHighlightColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  localEmissionColor: {r: 1, g: 0.65, b: 0.05, a: 1}
+  localEmissionIntensity: 1.1
 --- !u!64 &6212984959295721029
 MeshCollider:
   m_ObjectHideFlags: 0
