@@ -15,7 +15,7 @@ MonoBehaviour:
   requiredContainer: 0
   ingredients:
   - {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
-  resultObject: {fileID: 11400000, guid: 5adb49f5e53470943bead9792b857b8b, type: 2}
+  resultObject: {fileID: 11400000, guid: 234c79fd39c65b340b79af1d586fd02c, type: 2}
   readyMaterial: {fileID: 2100000, guid: 10aa9424ce9d0324c8d1c11ed57d53b9, type: 2}
   overcookedMaterial: {fileID: 2100000, guid: 2f386ec8f2765db4d8f14783a36fb004, type: 2}
   burnedMaterial: {fileID: 2100000, guid: f7b146681783d9745b49c33b9a40738c, type: 2}

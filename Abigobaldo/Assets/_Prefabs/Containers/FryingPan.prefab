@@ -216,21 +216,11 @@ MonoBehaviour:
   recipeDatabase: {fileID: 11400000, guid: 43014f19c1be4b0a9f4bd2185748e0dc, type: 2}
   localRecipes: []
   maxObjects: 2
-  carbonizedObject: {fileID: 11400000, guid: 0a8e93dfb2d24df0a5cf13310f651f22, type: 2}
   canBePickedUp: 1
   fryingPanData: {fileID: 11400000, guid: e0e97e7811f34d839e7107ab45b126bd, type: 2}
   createReturnPoint: 1
   returnPointSize: {x: 0.7, y: 0.7, z: 0.7}
   objectSurface: {fileID: 5972399723644317329}
-  objectLocalOffset: {x: 0, y: 0.08, z: 0}
-  objectVisualScale: 0.22
-  fryingMotionRadius: 0.025
-  fryingMotionSpeed: 18
-  usePhysicalObjectVisual: 1
-  visualDropHeight: 0.18
-  visualMass: 0.08
-  visualDrag: 0.05
-  lowFrictionMaterial: {fileID: 0}
   steamParticles: {fileID: 4187168233138214693}
   steamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.45}
   burnedSteamColor: {r: 0.25, g: 0.22, b: 0.2, a: 0.6}
@@ -295,9 +285,9 @@ Transform:
   m_GameObject: {fileID: 4634723118734105941}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.0000000029802323, z: 0.024999999}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: -0.0382, z: 0.0123}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2364052170174537263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

@@ -217,4 +217,30 @@ public class HoldableObject : MonoBehaviour
     }
 }
 
+public readonly struct RuntimeObjectState
+{
+    public RuntimeObjectState(ObjectData data, ObjectCookState cookState, Material material)
+    {
+        Data = data;
+        CookState = cookState;
+        Material = material;
+    }
+
+    public ObjectData Data { get; }
+    public ObjectCookState CookState { get; }
+    public Material Material { get; }
+
+    public static RuntimeObjectState FromObject(HoldableObject holdableObject)
+    {
+        if (holdableObject == null)
+            return default;
+
+        return new RuntimeObjectState(
+            holdableObject.Data,
+            holdableObject.CookState,
+            holdableObject.RuntimeMaterial
+        );
+    }
+}
+
 

@@ -8,10 +8,8 @@ public class BlenderCup : MonoBehaviour, IInteractable, HoldStateReceiver
     [Header("Contents")]
     [SerializeField] private int maxObjects = 1;
     [SerializeField] private Transform contentRoot;
-    [SerializeField] private Vector3 contentLocalOffset;
     [SerializeField] private float ingredientVisualScale = 0.18f;
     [SerializeField] private float blendedVisualScale = 0.05f;
-    [SerializeField] private bool centerVisualBoundsOnSpawn = true;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -235,30 +233,11 @@ public class BlenderCup : MonoBehaviour, IInteractable, HoldStateReceiver
 
         GameObject visual = Instantiate(data.Prefab, contentRoot);
         visual.name = $"BlenderCupVisual_{data.DisplayName}";
-        visual.transform.localPosition = contentLocalOffset;
+        visual.transform.localPosition = Vector3.zero;
         visual.transform.localRotation = Quaternion.identity;
         visual.transform.localScale = Vector3.one * scale;
-        CenterVisualOnContentPoint(visual, contentLocalOffset);
         RecipeVisualUtility.DisableGameplayComponents(visual);
         visuals.Add(visual);
-    }
-
-    private void CenterVisualOnContentPoint(GameObject visual, Vector3 targetLocalPosition)
-    {
-        if (!centerVisualBoundsOnSpawn || visual == null || contentRoot == null)
-            return;
-
-        Renderer[] renderers = visual.GetComponentsInChildren<Renderer>(true);
-        if (renderers.Length == 0)
-            return;
-
-        Bounds bounds = renderers[0].bounds;
-        for (int i = 1; i < renderers.Length; i++)
-            bounds.Encapsulate(renderers[i].bounds);
-
-        Vector3 targetWorldPosition = contentRoot.TransformPoint(targetLocalPosition);
-        Vector3 correction = targetWorldPosition - bounds.center;
-        visual.transform.position += correction;
     }
 
     private void ClearVisuals()

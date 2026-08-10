@@ -63,12 +63,6 @@ public class Blender : MonoBehaviour, IRecipeStation
 
         Holder holder = player.Holder;
 
-        if (holder.IsEmpty() && currentCup != null && currentCup.TryTakeLastObject(holder))
-        {
-            CancelActiveRecipe("contents changed.");
-            return;
-        }
-
         if (!holder.IsEmpty())
         {
             BlenderCup heldCup = holder.CurrentObject != null

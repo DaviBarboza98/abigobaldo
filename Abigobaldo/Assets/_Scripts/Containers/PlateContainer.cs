@@ -6,11 +6,10 @@ public class PlateContainer : MonoBehaviour, IInteractable
 {
     [SerializeField] private int maxObjects = 1;
     [SerializeField] private Transform contentVisualRoot;
-    [SerializeField] private Vector3 contentVisualLocalOffset = new Vector3(0f, 0.08f, 0f);
-    [SerializeField] private float contentVisualScale = 0.25f;
     [SerializeField] private bool showDebugLogs = true;
 
     private readonly List<ObjectData> platedObjects = new List<ObjectData>();
+    private readonly List<ObjectCookState> platedCookStates = new List<ObjectCookState>();
     private readonly List<Color?> platedTints = new List<Color?>();
     private readonly List<Material> platedMaterials = new List<Material>();
     private readonly List<GameObject> contentVisuals = new List<GameObject>();
@@ -58,7 +57,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
             return false;
 
         Color? tint = heldObject.HasRuntimeTint ? heldObject.RuntimeTint : null;
-        if (!TryAddObject(heldObject.Data, tint, heldObject.RuntimeMaterial))
+        if (!TryAddObject(heldObject.Data, heldObject.CookState, tint, heldObject.RuntimeMaterial))
             return false;
 
         HoldableObject removedObject = holder.RemoveObject();
@@ -78,7 +77,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
             return false;
 
         Color? tint = looseObject.HasRuntimeTint ? looseObject.RuntimeTint : null;
-        if (!TryAddObject(looseObject.Data, tint, looseObject.RuntimeMaterial))
+        if (!TryAddObject(looseObject.Data, looseObject.CookState, tint, looseObject.RuntimeMaterial))
             return false;
 
         Destroy(looseObject.gameObject);
@@ -87,15 +86,20 @@ public class PlateContainer : MonoBehaviour, IInteractable
 
     public bool TryAddObject(ObjectData objectData)
     {
-        return TryAddObject(objectData, null);
+        return TryAddObject(objectData, objectData != null ? objectData.CookState : ObjectCookState.Raw, null, null);
     }
 
     public bool TryAddObject(ObjectData objectData, Color? tint)
     {
-        return TryAddObject(objectData, tint, null);
+        return TryAddObject(objectData, objectData != null ? objectData.CookState : ObjectCookState.Raw, tint, null);
     }
 
     public bool TryAddObject(ObjectData objectData, Color? tint, Material material)
+    {
+        return TryAddObject(objectData, objectData != null ? objectData.CookState : ObjectCookState.Raw, tint, material);
+    }
+
+    public bool TryAddObject(ObjectData objectData, ObjectCookState cookState, Color? tint, Material material)
     {
         if (objectData == null)
             return false;
@@ -107,6 +111,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
         }
 
         platedObjects.Add(objectData);
+        platedCookStates.Add(cookState);
         platedTints.Add(tint);
         platedMaterials.Add(material);
         Log($"{objectData.DisplayName} was plated. Total: {platedObjects.Count}");
@@ -128,6 +133,7 @@ public class PlateContainer : MonoBehaviour, IInteractable
     public void ClearPlate()
     {
         platedObjects.Clear();
+        platedCookStates.Clear();
         platedTints.Clear();
         platedMaterials.Clear();
         RefreshContentVisuals();
@@ -155,9 +161,9 @@ public class PlateContainer : MonoBehaviour, IInteractable
 
             GameObject visual = Instantiate(platedObject.Prefab, contentVisualRoot);
             visual.name = $"Plate_{platedObject.DisplayName}";
-            visual.transform.localPosition = contentVisualLocalOffset;
+            visual.transform.localPosition = Vector3.zero;
             visual.transform.localRotation = Quaternion.identity;
-            visual.transform.localScale = Vector3.one * contentVisualScale;
+            visual.transform.localScale = platedObject.Prefab.transform.localScale;
             RecipeVisualUtility.DisableGameplayComponents(visual);
             ApplyMaterial(visual, i < platedMaterials.Count ? platedMaterials[i] : null);
             ApplyTint(visual, i < platedTints.Count ? platedTints[i] : null);

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FriedEgg
   m_EditorClassIdentifier: 
   objectId: fried_egg
-  displayName: Egg
-  prefab: {fileID: 0}
+  displayName: Fried Egg
+  prefab: {fileID: 314137365574173124, guid: ac1471357814a6345b541944bcdafb53, type: 3}
   cookState: 0
 

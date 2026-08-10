@@ -10,7 +10,6 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
     [SerializeField] private RecipeDatabase recipeDatabase;
     [SerializeField] private List<RecipeData> localRecipes = new List<RecipeData>();
     [SerializeField] private int maxObjects = 3;
-    [SerializeField] private ObjectData carbonizedObject;
 
     [Header("Holdable Object")]
     [SerializeField] private bool canBePickedUp = true;
@@ -27,7 +26,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    private readonly List<ObjectData> contents = new List<ObjectData>();
+    private readonly List<RuntimeObjectState> contents = new List<RuntimeObjectState>();
     private CookingProcess cookingProcess;
     private RecipeData activeRecipe;
     private ResultState resultState;
@@ -74,7 +73,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
 
     public bool TryPickUpContainer(Holder holder)
     {
-        if (!canBePickedUp || holder == null || !holder.IsEmpty())
+        if (!canBePickedUp || HasStoredObjects || holder == null || !holder.IsEmpty())
             return false;
 
         EnsurePickupComponents();
@@ -86,9 +85,10 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
         if (plate == null)
             return false;
 
-        if (cookingProcess != null && cookingProcess.IsReady && contents.Count == 1)
+        if (contents.Count == 1 && (cookingProcess == null || cookingProcess.IsReady))
         {
-            if (!plate.TryAddObject(GetCurrentOutputObject(), null, GetCurrentOutputMaterial()))
+            RuntimeObjectState output = contents[0];
+            if (!plate.TryAddObject(output.Data, output.CookState, null, output.Material))
                 return false;
 
             FinishAndClearRecipe();
@@ -114,7 +114,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
         if (removed == null)
             return false;
 
-        contents.Add(removed.Data);
+        contents.Add(RuntimeObjectState.FromObject(removed));
         Destroy(removed.gameObject);
         TryStartRecipe();
         return true;
@@ -142,9 +142,10 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
             return false;
 
         int lastIndex = contents.Count - 1;
-        ObjectData output = contents.Count == 1 ? GetCurrentOutputObject() : contents[lastIndex];
-        ObjectCookState cookState = contents.Count == 1 ? GetCurrentCookState() : ObjectCookState.Raw;
-        Material outputMaterial = contents.Count == 1 ? GetCurrentOutputMaterial() : null;
+        RuntimeObjectState storedObject = contents[lastIndex];
+        ObjectData output = storedObject.Data;
+        ObjectCookState cookState = storedObject.CookState;
+        Material outputMaterial = storedObject.Material;
 
         if (output == null || output.Prefab == null)
             return false;
@@ -160,7 +161,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
 
     private void TryStartRecipe()
     {
-        if (cookingProcess != null || !TryFindRecipe(out RecipeData recipe))
+        if (cookingProcess != null || HasCookedContents() || !TryFindRecipe(out RecipeData recipe))
             return;
 
         activeRecipe = recipe;
@@ -172,6 +173,8 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
         if (recipe.SpawnByproductsOnStart)
             QueueByproducts(recipe.Byproducts);
 
+        ReplaceContentsWithCurrentRecipeObject();
+
         if (cookingEnabled)
             cookingProcess.Start();
 
@@ -182,7 +185,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
     {
         foreach (RecipeData localRecipe in localRecipes)
         {
-            if (localRecipe != null && localRecipe.Matches(ContainerType.Cuscuzeira, contents))
+            if (localRecipe != null && localRecipe.Matches(ContainerType.Cuscuzeira, GetContentData()))
             {
                 recipe = localRecipe;
                 return true;
@@ -190,7 +193,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
         }
 
         if (recipeDatabase != null)
-            return recipeDatabase.TryFindRecipe(ContainerType.Cuscuzeira, contents, out recipe);
+            return recipeDatabase.TryFindRecipe(ContainerType.Cuscuzeira, GetContentData(), out recipe);
 
         recipe = null;
         return false;
@@ -212,14 +215,10 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
 
     private void PrepareOutput()
     {
-        contents.Clear();
-        if (activeRecipe.ResultObject != null)
-            contents.Add(activeRecipe.ResultObject);
-
         if (!activeRecipe.SpawnByproductsOnStart)
             QueueByproducts(activeRecipe.Byproducts);
 
-        resultState = ResultState.Ready;
+        SetResultState(ResultState.Ready);
     }
 
     private void UpdateOvercook()
@@ -243,19 +242,49 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
 
         resultState = state;
 
-        if (state == ResultState.Carbonized && carbonizedObject != null)
-        {
-            contents.Clear();
-            contents.Add(carbonizedObject);
-        }
+        ReplaceContentsWithCurrentRecipeObject();
     }
 
     private ObjectData GetCurrentOutputObject()
     {
-        if (resultState == ResultState.Carbonized && carbonizedObject != null)
-            return carbonizedObject;
+        if (activeRecipe != null)
+            return activeRecipe.GetObjectForCookState(GetCurrentCookState());
 
-        return contents.Count > 0 ? contents[0] : null;
+        return contents.Count > 0 ? contents[0].Data : null;
+    }
+
+    private List<ObjectData> GetContentData()
+    {
+        List<ObjectData> data = new List<ObjectData>(contents.Count);
+
+        foreach (RuntimeObjectState content in contents)
+            data.Add(content.Data);
+
+        return data;
+    }
+
+    private bool HasCookedContents()
+    {
+        foreach (RuntimeObjectState content in contents)
+        {
+            if (content.CookState != ObjectCookState.Raw)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void ReplaceContentsWithCurrentRecipeObject()
+    {
+        if (activeRecipe == null)
+            return;
+
+        ObjectData stateObject = GetCurrentOutputObject();
+        if (stateObject == null)
+            return;
+
+        contents.Clear();
+        contents.Add(new RuntimeObjectState(stateObject, GetCurrentCookState(), GetCurrentOutputMaterial()));
     }
 
     private ObjectCookState GetCurrentCookState()
@@ -327,7 +356,7 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
         if (steamParticles == null)
             return;
 
-        bool emit = cookingProcess != null && cookingProcess.IsRunning && cookingProcess.Timer > 0.5f;
+        bool emit = cookingProcess != null && cookingProcess.IsRunning;
         steamParticles.SetRate(steamRate);
         steamParticles.SetColor(resultState == ResultState.Burned || resultState == ResultState.Carbonized ? burnedSteamColor : steamColor);
 
@@ -393,7 +422,8 @@ public class Cuscuzeira : MonoBehaviour, IRecipeStation, HoldStateReceiver, Obje
         StringBuilder text = new StringBuilder();
         for (int i = 0; i < contents.Count; i++)
         {
-            text.Append(contents[i] != null ? contents[i].DisplayName : "Null data");
+            ObjectData data = contents[i].Data;
+            text.Append(data != null ? $"{data.DisplayName} ({contents[i].CookState})" : "Null data");
             if (i < contents.Count - 1)
                 text.Append(", ");
         }

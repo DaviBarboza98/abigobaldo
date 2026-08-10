@@ -46,6 +46,7 @@ public class PlayerInteraction : MonoBehaviour
         UpdateHighlight();
         HandleHeldInteraction();
         TryInteract();
+        TryPick();
         HandleDrop();
         HandleThrow();
         HandleHoldZoom();
@@ -86,11 +87,33 @@ public class PlayerInteraction : MonoBehaviour
 
         if (holder.IsEmpty() && interactable is BlenderCup blenderCup)
         {
-            blenderCup.Interact(this);
+            if (blenderCup.ContentCount > 0)
+                blenderCup.Interact(this);
+
             return;
         }
 
         if (TryHandleEmptyHandContainer(interactable))
+            return;
+
+        if (interactable is ObjectSpawner)
+            return;
+
+        if (interactable != null)
+            interactable.Interact(this);
+    }
+
+    private void TryPick()
+    {
+        if (!input.PickPressed)
+            return;
+
+        if (playerCamera == null)
+            return;
+
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+
+        if (!TryGetInteractionHit(ray, out RaycastHit hit))
             return;
 
         ObjectSpawner objectSpawner = hit.collider.GetComponentInParent<ObjectSpawner>();
@@ -101,16 +124,29 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
+        IRecipeStation station = hit.collider.GetComponentInParent<IRecipeStation>();
+        if (station != null)
+        {
+            station.TryPickUpContainer(holder);
+            return;
+        }
+
         HoldableObject targetObject = hit.collider.GetComponentInParent<HoldableObject>();
 
         if (targetObject != null)
         {
+            BlenderCup blenderCup = targetObject.GetComponent<BlenderCup>();
+            if (blenderCup != null)
+            {
+                if (holder.IsEmpty())
+                    blenderCup.Interact(this);
+
+                return;
+            }
+
             HandleObject(targetObject);
             return;
         }
-
-        if (interactable != null)
-            interactable.Interact(this);
     }
 
     private bool TryGetInteractionHit(Ray ray, out RaycastHit bestHit)
@@ -282,17 +318,13 @@ public class PlayerInteraction : MonoBehaviour
             return true;
         }
 
-        if (station.TryPickUpContainer(holder))
-            return true;
-
         station.Interact(this);
         return true;
     }
 
     private void HandleSpawner(ObjectSpawner spawner)
     {
-        if (!holder.IsEmpty())
-            return;
+        DropHeldObjectForReplacement();
 
         spawner.SpawnObject(holder);
     }
@@ -301,11 +333,24 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (!holder.IsEmpty())
         {
-            TryPlateLooseObject(targetObject);
-            return;
+            if (TryPlateLooseObject(targetObject))
+                return;
+
+            if (targetObject == holder.CurrentObject)
+                return;
+
+            DropHeldObjectForReplacement();
         }
 
         holder.TryPickUp(targetObject);
+    }
+
+    private void DropHeldObjectForReplacement()
+    {
+        if (holder == null || holder.IsEmpty())
+            return;
+
+        holder.DropItem();
     }
 
     private bool TryPlateLooseObject(HoldableObject targetObject)

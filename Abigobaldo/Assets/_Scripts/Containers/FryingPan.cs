@@ -10,7 +10,6 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     [SerializeField] private RecipeDatabase recipeDatabase;
     [SerializeField] private List<RecipeData> localRecipes = new List<RecipeData>();
     [SerializeField] private int maxObjects = 3;
-    [SerializeField] private ObjectData carbonizedObject;
 
     [Header("Holdable Object")]
     [SerializeField] private bool canBePickedUp = true;
@@ -20,8 +19,6 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
     [Header("Pan Visuals")]
     [SerializeField] private Transform objectSurface;
-    [SerializeField] private Vector3 objectLocalOffset = new Vector3(0f, 0.08f, 0f);
-    [SerializeField] private float objectVisualScale = 0.22f;
 
     [Header("Particles")]
     [SerializeField] private ParticleEmitterController steamParticles;
@@ -32,7 +29,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    private readonly List<ObjectData> contents = new List<ObjectData>();
+    private readonly List<RuntimeObjectState> contents = new List<RuntimeObjectState>();
     private readonly List<GameObject> visuals = new List<GameObject>();
     private CookingProcess cookingProcess;
     private RecipeData activeRecipe;
@@ -82,7 +79,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
     public bool TryPickUpContainer(Holder holder)
     {
-        if (!canBePickedUp || holder == null || !holder.IsEmpty())
+        if (!canBePickedUp || HasStoredObjects || holder == null || !holder.IsEmpty())
             return false;
 
         EnsurePickupComponents();
@@ -94,9 +91,10 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         if (plate == null)
             return false;
 
-        if (cookingProcess != null && cookingProcess.IsReady && contents.Count == 1)
+        if (contents.Count == 1 && (cookingProcess == null || cookingProcess.IsReady))
         {
-            if (!plate.TryAddObject(GetCurrentOutputObject(), null, GetCurrentOutputMaterial()))
+            RuntimeObjectState output = contents[0];
+            if (!plate.TryAddObject(output.Data, output.CookState, null, output.Material))
                 return false;
 
             FinishAndClearRecipe();
@@ -123,7 +121,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         if (removed == null)
             return false;
 
-        contents.Add(removed.Data);
+        contents.Add(RuntimeObjectState.FromObject(removed));
         Destroy(removed.gameObject);
         RefreshVisuals();
         TryStartRecipe();
@@ -153,9 +151,10 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
             return false;
 
         int lastIndex = contents.Count - 1;
-        ObjectData output = contents.Count == 1 ? GetCurrentOutputObject() : contents[lastIndex];
-        ObjectCookState cookState = contents.Count == 1 ? GetCurrentCookState() : ObjectCookState.Raw;
-        Material outputMaterial = contents.Count == 1 ? GetCurrentOutputMaterial() : null;
+        RuntimeObjectState storedObject = contents[lastIndex];
+        ObjectData output = storedObject.Data;
+        ObjectCookState cookState = storedObject.CookState;
+        Material outputMaterial = storedObject.Material;
 
         if (output == null || output.Prefab == null)
             return false;
@@ -172,7 +171,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
     private void TryStartRecipe()
     {
-        if (cookingProcess != null || !TryFindRecipe(out RecipeData recipe))
+        if (cookingProcess != null || HasCookedContents() || !TryFindRecipe(out RecipeData recipe))
             return;
 
         activeRecipe = recipe;
@@ -184,6 +183,8 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         if (recipe.SpawnByproductsOnStart)
             QueueByproducts(recipe.Byproducts);
 
+        ReplaceContentsWithCurrentRecipeObject();
+
         if (cookingEnabled)
             cookingProcess.Start();
 
@@ -194,7 +195,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     {
         foreach (RecipeData localRecipe in localRecipes)
         {
-            if (localRecipe != null && localRecipe.Matches(ContainerType.FryingPan, contents))
+            if (localRecipe != null && localRecipe.Matches(ContainerType.FryingPan, GetContentData()))
             {
                 recipe = localRecipe;
                 return true;
@@ -202,7 +203,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         }
 
         if (recipeDatabase != null)
-            return recipeDatabase.TryFindRecipe(ContainerType.FryingPan, contents, out recipe);
+            return recipeDatabase.TryFindRecipe(ContainerType.FryingPan, GetContentData(), out recipe);
 
         recipe = null;
         return false;
@@ -224,15 +225,10 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
     private void PrepareOutput()
     {
-        contents.Clear();
-        if (activeRecipe.ResultObject != null)
-            contents.Add(activeRecipe.ResultObject);
-
         if (!activeRecipe.SpawnByproductsOnStart)
             QueueByproducts(activeRecipe.Byproducts);
 
-        resultState = ResultState.Ready;
-        RefreshVisuals();
+        SetResultState(ResultState.Ready);
     }
 
     private void UpdateOvercook()
@@ -256,14 +252,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
 
         resultState = state;
 
-        if (state == ResultState.Carbonized && carbonizedObject != null)
-        {
-            contents.Clear();
-            contents.Add(carbonizedObject);
-            RefreshVisuals();
-            return;
-        }
-
+        ReplaceContentsWithCurrentRecipeObject();
         ApplyCookMaterialForCurrentState();
     }
 
@@ -311,31 +300,22 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
             return;
 
         for (int i = 0; i < contents.Count; i++)
-            CreateVisual(contents[i], i, contents.Count);
+            CreateVisual(contents[i]);
     }
 
-    private void CreateVisual(ObjectData data, int index, int count)
+    private void CreateVisual(RuntimeObjectState state)
     {
+        ObjectData data = state.Data;
         if (data == null || data.Prefab == null)
             return;
 
         GameObject visual = Instantiate(data.Prefab, objectSurface);
         visual.name = $"FryingPanVisual_{data.DisplayName}";
-        visual.transform.localPosition = GetVisualPosition(index, count);
+        visual.transform.localPosition = Vector3.zero;
         visual.transform.localRotation = Quaternion.identity;
-        visual.transform.localScale = Vector3.one * objectVisualScale;
         RecipeVisualUtility.DisableGameplayComponents(visual);
         visuals.Add(visual);
-        ApplyCookMaterialForCurrentState();
-    }
-
-    private Vector3 GetVisualPosition(int index, int count)
-    {
-        if (count <= 1)
-            return objectLocalOffset;
-
-        float angle = Mathf.PI * 2f * index / count;
-        return objectLocalOffset + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * 0.12f;
+        ApplyMaterialToVisual(visual, state.Material);
     }
 
     private void ClearVisuals()
@@ -364,12 +344,56 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         }
     }
 
+    private static void ApplyMaterialToVisual(GameObject visual, Material material)
+    {
+        if (visual == null || material == null)
+            return;
+
+        foreach (Renderer targetRenderer in visual.GetComponentsInChildren<Renderer>())
+            targetRenderer.material = material;
+    }
+
     private ObjectData GetCurrentOutputObject()
     {
-        if (resultState == ResultState.Carbonized && carbonizedObject != null)
-            return carbonizedObject;
+        if (activeRecipe != null)
+            return activeRecipe.GetObjectForCookState(GetCurrentCookState());
 
-        return contents.Count > 0 ? contents[0] : null;
+        return contents.Count > 0 ? contents[0].Data : null;
+    }
+
+    private List<ObjectData> GetContentData()
+    {
+        List<ObjectData> data = new List<ObjectData>(contents.Count);
+
+        foreach (RuntimeObjectState content in contents)
+            data.Add(content.Data);
+
+        return data;
+    }
+
+    private bool HasCookedContents()
+    {
+        foreach (RuntimeObjectState content in contents)
+        {
+            if (content.CookState != ObjectCookState.Raw)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void ReplaceContentsWithCurrentRecipeObject()
+    {
+        if (activeRecipe == null)
+            return;
+
+        ObjectData stateObject = GetCurrentOutputObject();
+        if (stateObject == null)
+            return;
+
+        contents.Clear();
+        contents.Add(new RuntimeObjectState(stateObject, GetCurrentCookState(), GetCurrentOutputMaterial()));
+        RefreshVisuals();
     }
 
     private ObjectCookState GetCurrentCookState()
@@ -404,7 +428,7 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         if (steamParticles == null)
             return;
 
-        bool emit = cookingProcess != null && cookingProcess.IsRunning && cookingProcess.Timer > 0.5f;
+        bool emit = cookingProcess != null && cookingProcess.IsRunning;
         steamParticles.SetRate(steamRate);
         steamParticles.SetColor(resultState == ResultState.Burned || resultState == ResultState.Carbonized ? burnedSteamColor : steamColor);
 
@@ -470,7 +494,8 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
         StringBuilder text = new StringBuilder();
         for (int i = 0; i < contents.Count; i++)
         {
-            text.Append(contents[i] != null ? contents[i].DisplayName : "Null data");
+            ObjectData data = contents[i].Data;
+            text.Append(data != null ? $"{data.DisplayName} ({contents[i].CookState})" : "Null data");
             if (i < contents.Count - 1)
                 text.Append(", ");
         }
@@ -537,7 +562,6 @@ public class FryingPan : MonoBehaviour, IRecipeStation, HoldStateReceiver, Objec
     {
         maxObjects = Mathf.Max(1, maxObjects);
         steamRate = Mathf.Max(0f, steamRate);
-        objectVisualScale = Mathf.Max(0.01f, objectVisualScale);
         returnPointSize.x = Mathf.Max(0.05f, returnPointSize.x);
         returnPointSize.y = Mathf.Max(0.05f, returnPointSize.y);
         returnPointSize.z = Mathf.Max(0.05f, returnPointSize.z);

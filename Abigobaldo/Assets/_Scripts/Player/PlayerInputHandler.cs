@@ -1,14 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 [DefaultExecutionOrder(-100)]
 public class PlayerInputHandler : MonoBehaviour
 {
+    [SerializeField] private float throwHoldTime = 0.35f;
+
     public Vector2 Movement { get; private set; }
     public Vector2 Look { get; private set; }
     public float HoldZoom { get; private set; }
 
     public bool RunPressed { get; private set; }
+    public bool PickPressed { get; private set; }
     public bool InteractHeld { get; private set; }
     public bool InteractPressed { get; private set; }
     public bool InteractReleased { get; private set; }
@@ -18,6 +22,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool RotateHeld { get; private set; }
 
     private bool isPaused;
+    private float dropThrowHoldTimer;
+    private bool throwTriggered;
 
     private void Update()
     {
@@ -82,19 +88,54 @@ public class PlayerInputHandler : MonoBehaviour
             return;
 
         RunPressed = Keyboard.current.leftShiftKey.isPressed;
+        PickPressed = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
         InteractHeld = Keyboard.current.eKey.isPressed;
         InteractPressed = Keyboard.current.eKey.wasPressedThisFrame;
         InteractReleased = Keyboard.current.eKey.wasReleasedThisFrame;
-        DropPressed = Keyboard.current.gKey.wasPressedThisFrame;
-        ThrowPressed = Keyboard.current.tKey.wasPressedThisFrame;
+        ReadDropThrow();
         ToggleCursorPressed = Keyboard.current.vKey.wasPressedThisFrame;
         RotateHeld = Keyboard.current.rKey.isPressed;
+    }
+
+    private void ReadDropThrow()
+    {
+        DropPressed = false;
+        ThrowPressed = false;
+
+        KeyControl dropThrowKey = Keyboard.current.gKey;
+
+        if (dropThrowKey.wasPressedThisFrame)
+        {
+            dropThrowHoldTimer = 0f;
+            throwTriggered = false;
+        }
+
+        if (dropThrowKey.isPressed)
+        {
+            dropThrowHoldTimer += Time.unscaledDeltaTime;
+
+            if (!throwTriggered && dropThrowHoldTimer >= throwHoldTime)
+            {
+                ThrowPressed = true;
+                throwTriggered = true;
+            }
+        }
+
+        if (dropThrowKey.wasReleasedThisFrame)
+        {
+            if (!throwTriggered)
+                DropPressed = true;
+
+            dropThrowHoldTimer = 0f;
+            throwTriggered = false;
+        }
     }
 
     private void LateUpdate()
     {
         InteractPressed = false;
         InteractReleased = false;
+        PickPressed = false;
         DropPressed = false;
         ThrowPressed = false;
         ToggleCursorPressed = false;
@@ -124,6 +165,7 @@ public class PlayerInputHandler : MonoBehaviour
         Look = Vector2.zero;
 
         RunPressed = false;
+        PickPressed = false;
         InteractHeld = false;
         InteractPressed = false;
         InteractReleased = false;
@@ -132,6 +174,11 @@ public class PlayerInputHandler : MonoBehaviour
         ToggleCursorPressed = false;
         RotateHeld = false;
         HoldZoom = 0f;
+    }
+
+    private void OnValidate()
+    {
+        throwHoldTime = Mathf.Max(0.05f, throwHoldTime);
     }
 }
 

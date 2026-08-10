@@ -15,6 +15,10 @@ public class RecipeData : ScriptableObject
 
     [Header("Result")]
     [SerializeField] private ObjectData resultObject;
+    [SerializeField] private ObjectData readyObject;
+    [SerializeField] private ObjectData overcookedObject;
+    [SerializeField] private ObjectData burnedObject;
+    [SerializeField] private ObjectData carbonizedObject;
     [SerializeField] private Material readyMaterial;
     [SerializeField] private Material overcookedMaterial;
     [SerializeField] private Material burnedMaterial;
@@ -32,6 +36,10 @@ public class RecipeData : ScriptableObject
     public ContainerType RequiredContainer => requiredContainer;
     public IReadOnlyList<ObjectData> Ingredients => ingredients;
     public ObjectData ResultObject => resultObject;
+    public ObjectData ReadyObject => readyObject;
+    public ObjectData OvercookedObject => overcookedObject;
+    public ObjectData BurnedObject => burnedObject;
+    public ObjectData CarbonizedObject => carbonizedObject;
     public Material ReadyMaterial => readyMaterial;
     public Material OvercookedMaterial => overcookedMaterial;
     public Material BurnedMaterial => burnedMaterial;
@@ -72,6 +80,18 @@ public class RecipeData : ScriptableObject
         }
 
         return true;
+    }
+
+    public ObjectData GetObjectForCookState(ObjectCookState state)
+    {
+        return state switch
+        {
+            ObjectCookState.Ready => readyObject != null ? readyObject : resultObject,
+            ObjectCookState.Overcooked => overcookedObject != null ? overcookedObject : GetObjectForCookState(ObjectCookState.Ready),
+            ObjectCookState.Burned => burnedObject != null ? burnedObject : GetObjectForCookState(ObjectCookState.Overcooked),
+            ObjectCookState.Carbonized => carbonizedObject != null ? carbonizedObject : GetObjectForCookState(ObjectCookState.Burned),
+            _ => resultObject
+        };
     }
 
     private void OnValidate()

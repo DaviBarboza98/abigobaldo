@@ -110,8 +110,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxObjects: 1
   contentVisualRoot: {fileID: 2101857986803981692}
-  contentVisualLocalOffset: {x: 0, y: 0.08, z: 0}
-  contentVisualScale: 0.25
   showDebugLogs: 1
 --- !u!1 &5106619506261553730
 GameObject:
@@ -139,8 +137,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0, z: 0.007}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6419841081135426492}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
