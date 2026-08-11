@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &3832088550422518647
 GameObject:
@@ -224,10 +224,3 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 6520794469422360905, guid: 6a2417917cdd9464daebc65084c1e8bd, type: 3}
-
-
-
-
-
-
-
