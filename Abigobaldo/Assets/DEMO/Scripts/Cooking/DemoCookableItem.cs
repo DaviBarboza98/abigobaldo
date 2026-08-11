@@ -16,7 +16,7 @@ namespace Abigobaldo.Demo
 
         public DemoFoodState State => state;
         public float CookedTime => cookedTime;
-        public bool CanBePlated => canBePlated;
+        public bool CanBePlated => canBePlated && state >= DemoFoodState.Ready;
 
         public bool AdvanceCooking(float deltaTime, DemoRecipeData recipe)
         {

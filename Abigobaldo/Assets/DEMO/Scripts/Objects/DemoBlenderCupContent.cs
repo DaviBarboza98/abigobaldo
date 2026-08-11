@@ -9,12 +9,21 @@ namespace Abigobaldo.Demo
 
         private DemoHoldableObject holdableObject;
         private Rigidbody body;
+        private Transform homeParent;
+        private Vector3 homeLocalPosition;
+        private Quaternion homeLocalRotation;
+        private Vector3 homeLocalScale;
 
         public bool HasCrushedCorn => hasCrushedCorn;
         public DemoHoldableObject HoldableObject => holdableObject;
+        public bool IsAttached => transform.parent == homeParent && homeParent != null;
 
         private void Awake()
         {
+            homeParent = transform.parent;
+            homeLocalPosition = transform.localPosition;
+            homeLocalRotation = transform.localRotation;
+            homeLocalScale = transform.localScale;
             CacheReferences();
             RefreshVisual();
         }
@@ -31,6 +40,28 @@ namespace Abigobaldo.Demo
                 return false;
 
             SetCrushedCorn(false);
+            return true;
+        }
+
+        public bool TryAttachHome()
+        {
+            if (homeParent == null)
+                return false;
+
+            CacheReferences();
+            transform.SetParent(homeParent);
+            transform.SetLocalPositionAndRotation(homeLocalPosition, homeLocalRotation);
+            transform.localScale = homeLocalScale;
+
+            if (body != null)
+            {
+                body.velocity = Vector3.zero;
+                body.angularVelocity = Vector3.zero;
+                body.useGravity = false;
+                body.isKinematic = true;
+                body.detectCollisions = true;
+            }
+
             return true;
         }
 

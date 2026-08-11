@@ -76,6 +76,9 @@ namespace Abigobaldo.Demo
                 return;
             }
 
+            if (!target.CanBeHeld)
+                return;
+
             if (holder != null && !holder.IsEmpty && target != holder.CurrentObject)
                 holder.Drop();
 

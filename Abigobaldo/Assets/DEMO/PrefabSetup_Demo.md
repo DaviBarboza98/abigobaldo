@@ -1,17 +1,25 @@
-# Prefab Setup DEMO - Container Simulator
+# Prefab Setup DEMO - Versao Simples
 
-A demo voltou para uma logica simples:
+Esta e a versao para testar logo: container simulator, sem zoom station.
 
-- `E` interage.
-- Todo container guarda no maximo 1 item.
-- Se o container estiver vazio e voce estiver segurando um ingrediente valido, ele recebe o item.
-- Se o container tiver item dentro e voce clicar nele com a mao vazia, voce tira o item.
-- Se o container tiver item dentro e voce clicar nele segurando um prato vazio, ele emprata e remove o item do container.
-- O tempo/estado fica no item com `DemoCookableItem`, nao no container.
-- Frigideira e cuscuzeira so esquentam.
-- Liquidificador processa/gira.
+## Controles
 
-Frigideira, cuscuzeira e blender NAO precisam ser prefabs. Pode usar direto os objetos da cena. Eles so precisariam virar prefab se voce quisesse duplicar a mesma estacao varias vezes ou instanciar por codigo. Para a demo, configure direto na cena.
+- `Mouse Esquerdo`: pegar objeto.
+- `E`: interagir com spawner/container/porta.
+- `G` clicado: soltar.
+- `G` segurado: arremessar para onde a camera olha.
+- `R` segurado + mouse: rotacionar item na mao. Isso tambem mistura o ovo quase pronto para virar omelete.
+- Scroll: aproxima/afasta item na mao.
+
+## Regra Geral
+
+- Todo container aceita 1 item por vez.
+- Se o container esta vazio e o item combina com uma receita, ele entra.
+- Se o container tem item e voce esta de mao vazia, voce tira o item.
+- Se o container tem item pronto e voce segura um prato vazio, ele emprata.
+- O timer fica no item com `DemoCookableItem`, nao no container.
+- Tirar e recolocar o item continua de onde parou.
+- Itens so podem ser empratados quando chegam em `Ready` ou pior. `Raw` e `AlmostReady` nao entram no prato.
 
 ## Pastas
 
@@ -26,237 +34,144 @@ Assets/DEMO
   Shaders
 ```
 
-## Item Pegavel
+## Objeto Pegavel
 
-Todo item pegavel usa:
-
-```text
-Object_AlgumaCoisa
-  Model
-  GripPoint opcional
-```
-
-No root:
+No root do prefab:
 
 - `DemoHoldableObject`
 - `DemoObjectIdentity`
 - `Rigidbody`
 - Collider
-- `DemoCookableItem` apenas se esse item guarda tempo/estado de cozinha
 
-`DemoObjectIdentity.Kind` define o tipo: `Egg`, `FriedEgg`, `Corn`, `CornFlakes`, `Cuscuz`, `Omelet`, `RoastedCorn`, `Charcoal`, etc.
+Opcional:
 
-## Estados
+- `GripPoint`: filho vazio para ajustar como o objeto fica na mao.
+- `DemoCookableItem`: nao precisa colocar manualmente em comida de receita; o container adiciona quando necessario.
 
-Estados de comida:
+## Recipes
 
-- `Raw`
-- `AlmostReady`
-- `Ready`
-- `Overdone`
-- `Burned`
-- `Carbonized`
+Ja existem:
 
-Tempo padrao sugerido:
+- `Recipe_FryingPan_FriedEgg`: `Egg` vira `FriedEgg` cru, solta cascas, cozinha e pode queimar.
+- `Recipe_FryingPan_Omelet`: `Omelet` cozinha e pode queimar.
+- `Recipe_FryingPan_RoastedCorn`: `Corn` vira `RoastedCorn` cru, cozinha e pode queimar.
+- `Recipe_Blender_CornFlakes`: `Corn` gira no eixo Z por 5s e vira `CornFlakes`. Nao queima.
+- `Recipe_Cuscuzeira_Cuscuz`: `CornFlakes` vira `Cuscuz` cru, cozinha e pode queimar.
 
-- `AlmostReady Time`: 5
-- `Ready Time`: 10
-- `Overdone Time`: 15
-- `Burned Time`: 20
-- `Carbonized Time`: 25
+Estados:
 
-Se `Carbonized Turns Into Charcoal` estiver ligado, o container troca o item por `Object_Charcoal`.
-
-## Receita
-
-As receitas base ja foram criadas em:
-
-```text
-Assets/DEMO/Data/Recipes
-```
-
-Arquivos:
-
-- `Recipe_FryingPan_FriedEgg`
-- `Recipe_FryingPan_Omelet`
-- `Recipe_FryingPan_RoastedCorn`
-- `Recipe_Blender_CornFlakes`
-- `Recipe_Cuscuzeira_Cuscuz`
-
-Se precisar criar outra receita: `Create > Abigobaldo Demo > Recipe`.
-
-Campos importantes:
-
-- `Container Kind`: onde a receita funciona.
-- `Input Kind`: ingrediente inicial.
-- `Resume Input Kinds`: tipos que podem voltar para o container sem resetar.
-- `Output On Insert Prefab`: prefab que substitui o ingrediente assim que entra.
-- `Output When Ready Prefab`: prefab que substitui quando chega em `Ready`.
-- `Charcoal Prefab`: `Object_Charcoal`.
-- `Contained Visual Prefab`: opcional, visual separado dentro do container.
-- `State Visuals`: material/modelo opcional por estado.
-- `Spawned On Insert Prefabs`: coisas que nascem ao colocar ingrediente, tipo cascas de ovo.
-
-Se nao tiver `Contained Visual Prefab`, o proprio item fica no `ItemAnchor`.
+- `Raw`: 0s
+- `AlmostReady`: 5s
+- `Ready`: 10s
+- `Overdone`: 15s
+- `Burned`: 20s
+- `Carbonized`: 25s, vira `Object_Charcoal` se a receita mandar.
 
 ## Frigideira
 
-Objeto da cena:
+Objeto da cena com `DemoFryingPanStation`.
 
-```text
-Station_FryingPan
-  ItemAnchor
-  SideEffectSpawnRoot
-  Model
-```
-
-No root:
-
-- Collider
-- `DemoContainerStation`
-
-Config:
+Campos:
 
 - `Container Kind`: `FryingPan`
-- `Item Anchor`: ponto em cima da frigideira
-- `Side Effect Spawn Root`: ponto onde as cascas aparecem
-- `Recipes`: receitas da frigideira
+- `Item Anchor`: ponto em cima da frigideira onde o item aparece.
+- `Side Effect Spawn Root`: ponto onde cascas de ovo aparecem.
+- `Show Contained Object`: ligado.
+- `Create Fallback Particles`: ligado.
+- `Recipes`: ovo frito, omelete e milho assado.
 
-Receitas:
+Fluxo ovo:
 
-### Ovo Frito
+1. Pega `Object_Egg`.
+2. `E` na frigideira.
+3. O ovo some, nasce `Object_FriedEgg` cru em cima da frigideira.
+4. Cascas nascem fora.
+5. Depois de 10s fica pronto.
+6. Pode tirar com mao vazia ou empratar com prato.
 
-- `Container Kind`: `FryingPan`
-- `Input Kind`: `Egg`
-- `Resume Input Kinds`: `FriedEgg`
-- `Output On Insert Prefab`: `Object_FriedEgg`
-- `Charcoal Prefab`: `Object_Charcoal`
-- `Contained Visual Prefab`: opcional, visual do ovo em cima da frigideira
-- `Spawned On Insert Prefabs`: `Object_EggShellA`, `Object_EggShellB`
-- `State Visuals`: coloque materiais por estado para mudar cor
+Fluxo omelete:
 
-### Milho Assado
-
-- `Container Kind`: `FryingPan`
-- `Input Kind`: `Corn`
-- `Resume Input Kinds`: `RoastedCorn` ou `Corn`, dependendo do prefab que voce usar
-- `Output On Insert Prefab`: vazio se quiser usar o proprio milho
-- `Charcoal Prefab`: `Object_Charcoal`
-- `State Visuals`: materiais por estado
-
-## Omelete
-
-No `Object_FriedEgg`, adicione `DemoCookableItem` e configure:
-
-- `Hand Mix Output Prefab`: `Object_Omelet`
-- `Hand Mix Required State`: `AlmostReady`
-- `Hand Mix Required Intensity`: algo entre 60 e 100
-
-Fluxo:
-
-1. Ovo entra na frigideira e vira `Object_FriedEgg`.
-2. Antes/depois de chegar em `AlmostReady`, tire o `Object_FriedEgg`.
+1. Faca o ovo entrar na frigideira.
+2. Tire quando estiver `AlmostReady`.
 3. Segure `R` e mexa o mouse bastante.
 4. Ele vira `Object_Omelet` cru.
-5. Coloque o omelete na frigideira para cozinhar.
+5. Coloque de volta na frigideira ate ficar pronto.
 
-Receita do omelete:
+## Blender
 
-- `Container Kind`: `FryingPan`
-- `Input Kind`: `Omelet`
-- `Resume Input Kinds`: `Omelet`
-- `Output On Insert Prefab`: vazio
-- `Charcoal Prefab`: `Object_Charcoal`
-- `State Visuals`: materiais por estado
+O blender da cena usa `DemoBlenderStation`. O copo e prefab separado: `BlenderCup`.
 
-## Liquidificador
+`BlenderCup` precisa ter:
 
-Objeto da cena:
-
-```text
-Station_Blender
-  ItemAnchor
-  Model
-```
-
-No root:
-
+- `DemoHoldableObject`
+- `DemoObjectIdentity` com `Kind = BlenderCup`
+- `DemoBlenderCupContent`
+- `Rigidbody`
 - Collider
-- `DemoContainerStation`
+- Filho `ContentRoot`
 
-Config:
+O `ContentRoot` fica dentro do copo e e o `Item Anchor` do `DemoBlenderStation`.
 
-- `Container Kind`: `Blender`
-- `Item Anchor`: ponto dentro do copo
-- `Recipes`: receita do milho para flocao
+Regras:
 
-Receita milho -> flocao:
-
-- `Container Kind`: `Blender`
-- `Input Kind`: `Corn`
-- `Output When Ready Prefab`: prefab do flocao, por exemplo `Object_CornFlakes`
-- `Contained Visual Prefab`: opcional, milho pequeno dentro do copo
-- `Spins In Container`: ligado
-- `Spin Speed`: 720
-- `Ready Time`: 5
-- `Carbonized Turns Into Charcoal`: desligado
-- `Can Burn`: desligado
+- O copo comeca encaixado na base porque esta como filho dela na cena.
+- Se pegar o copo e apertar `E` na base com ele na mao, ele volta para a posicao original.
+- Se tiver comida dentro, o copo fica travado e nao pode ser pego.
+- Para testar: coloque `Corn`, espere 5s, ele vira `CornFlakes`.
 
 ## Cuscuzeira
 
-Objeto da cena:
+Objeto da cena com `DemoCuscuzeiraStation`.
 
-```text
-Station_Cuscuzeira
-  ItemAnchor
-  Model
-```
-
-No root:
-
-- Collider
-- `DemoContainerStation`
-
-Config:
+Campos:
 
 - `Container Kind`: `Cuscuzeira`
-- `Item Anchor`: pode ser um ponto dentro/centro dela, mesmo que o modelo nao mostre nada
-- `Recipes`: receita do flocao para cuscuz
+- `Item Anchor`: pode ficar vazio.
+- `Side Effect Spawn Root`: pode ficar vazio.
+- `Show Contained Object`: desligado.
+- `Create Fallback Particles`: ligado.
+- `Recipes`: cuscuz.
 
-Receita flocao -> cuscuz:
-
-- `Container Kind`: `Cuscuzeira`
-- `Input Kind`: `CornFlakes`
-- `Resume Input Kinds`: `Cuscuz`
-- `Output On Insert Prefab`: `Object_Cuscuz`
-- `Charcoal Prefab`: `Object_Charcoal`
-- `Contained Visual Prefab`: vazio
-- `State Visuals`: materiais por estado
-
-A cuscuzeira nao precisa mudar visualmente. Depois a gente coloca particula de vapor/fumaca.
+Ela nao mostra item dentro. Ela so guarda estado, cozinha, solta fumaca e deixa empratar/tirar quando fizer sentido.
 
 ## Prato
 
-```text
-Object_Plate
-  Model
-  FoodRoot
-```
-
-No root:
+Prefab `Object_Plate`:
 
 - `DemoHoldableObject`
 - `DemoObjectIdentity` com `Kind = Plate`
 - `DemoPlate`
 - `Rigidbody`
 - Collider
+- Filho `Root` ou `FoodRoot` para posicionar comida
 
-`DemoPlate.Plated Food Visuals`:
+`DemoPlate.Plated Food Visuals` deve mapear:
 
 - `FriedEgg` -> `Visual_FriedEgg_Plated`
 - `Omelet` -> `Visual_Omelet_Plated`
 - `Cuscuz` -> `Visual_Cuscuz_Plated`
-- `RoastedCorn` -> visual do milho assado, se criar
 - `Charcoal` -> `Visual_Charcoal_Plated`
 
-Visual de prato nao deve ter script, rigidbody ou collider. E so mesh/renderers.
+## Particulas
+
+Jeito rapido:
+
+- Nao configure nada. Frigideira/cuscuzeira criam uma fumaca simples em runtime.
+
+Jeito bonito:
+
+1. Crie um filho chamado `Particles` no container.
+2. Adicione `ParticleSystem`.
+3. Adicione `DemoStationParticles` no mesmo objeto.
+4. Configure forma, quantidade, tamanho e lifetime no ParticleSystem da Unity.
+5. O codigo liga/desliga e troca a cor conforme o estado da comida.
+
+## Console
+
+Os containers logam:
+
+- item recebido;
+- estado novo com tempo;
+- item pronto/processado;
+- item empratado;
+- falhas simples, tipo item errado ou comida ainda crua.

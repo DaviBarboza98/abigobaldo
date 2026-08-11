@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &2042234503077477011
 GameObject:
@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 5741073488804351718}
   - component: {fileID: 4478006253136407516}
   - component: {fileID: 1743989861417854935}
+  - component: {fileID: 6147133056123456789}
   m_Layer: 0
   m_Name: BlenderCup
   m_TagString: Untagged
@@ -157,8 +158,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26402ef57d1906d4698c8d04eb8e956b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   canBeHeld: 1
   canBeThrown: 1
   startAttached: 1
@@ -173,10 +174,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   kind: 60
   displayName: Blender Cup
+--- !u!114 &6147133056123456789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5956107677550488869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b5ab1ed22f22d246b68f13009bacfea, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  hasCrushedCorn: 0
+  crushedCornVisual: {fileID: 0}
 --- !u!1 &7175827627267087376
 GameObject:
   m_ObjectHideFlags: 0

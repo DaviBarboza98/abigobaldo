@@ -21,7 +21,25 @@ MonoBehaviour:
   charcoalPrefab: {fileID: 9102420138286949324, guid: ae001e7f8cf4ad94ca633529299e050a, type: 3}
   carbonizedTurnsIntoCharcoal: 1
   containedVisualPrefab: {fileID: 0}
-  stateVisuals: []
+  stateVisuals:
+  - state: 0
+    material: {fileID: 2100000, guid: de773f173acfdcb4a9515f8146482741, type: 2}
+    modelPrefab: {fileID: 0}
+  - state: 1
+    material: {fileID: 2100000, guid: de773f173acfdcb4a9515f8146482741, type: 2}
+    modelPrefab: {fileID: 0}
+  - state: 2
+    material: {fileID: 2100000, guid: de773f173acfdcb4a9515f8146482741, type: 2}
+    modelPrefab: {fileID: 0}
+  - state: 3
+    material: {fileID: 2100000, guid: 07cc9815bbf597447bd4395730e54663, type: 2}
+    modelPrefab: {fileID: 0}
+  - state: 4
+    material: {fileID: 2100000, guid: e0a76244844b4884fab1f425dae2552a, type: 2}
+    modelPrefab: {fileID: 0}
+  - state: 5
+    material: {fileID: 2100000, guid: 12f6c29ed43930a4ca771e95161969f8, type: 2}
+    modelPrefab: {fileID: 0}
   usesHeat: 1
   canBurn: 1
   spinsInContainer: 0

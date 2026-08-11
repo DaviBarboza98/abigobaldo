@@ -9,18 +9,32 @@ namespace Abigobaldo.Demo
         [SerializeField] private Transform sideEffectSpawnRoot;
         [SerializeField] private DemoRecipeData[] recipes;
         [SerializeField] private float sideEffectSpacing = 0.12f;
+        [SerializeField] private bool showContainedObject = true;
+        [SerializeField] private bool logCooking = true;
+        [SerializeField] private DemoStationParticles particles;
+        [SerializeField] private bool createFallbackParticles = true;
 
-        private DemoHoldableObject containedObject;
-        private DemoRecipeData activeRecipe;
+        protected DemoHoldableObject containedObject;
+        protected DemoRecipeData activeRecipe;
         private GameObject containedVisual;
         private Renderer[] hiddenContainedRenderers;
+        private DemoFoodState lastLoggedState;
+
+        private void Awake()
+        {
+            if (particles == null)
+                particles = GetComponentInChildren<DemoStationParticles>(true);
+
+            if (particles == null && createFallbackParticles && containerKind != DemoContainerKind.Blender)
+                particles = DemoStationParticles.CreateDefault(GetAnchor(), "Particles");
+        }
 
         private void Update()
         {
             UpdateContainedObject();
         }
 
-        public void Interact(DemoPlayerInteractor player)
+        public virtual void Interact(DemoPlayerInteractor player)
         {
             if (player == null || player.Holder == null)
                 return;
@@ -37,10 +51,35 @@ namespace Abigobaldo.Demo
             TryInsertHeldObject(player);
         }
 
+        public bool HasContainedObject => containedObject != null;
+        public DemoContainerKind ContainerKind => containerKind;
+
+        protected virtual bool CanInsertObject(DemoPlayerInteractor player, DemoObjectIdentity identity, DemoRecipeData recipe)
+        {
+            return true;
+        }
+
+        protected virtual void OnContainedObjectInserted(DemoHoldableObject insertedObject, DemoRecipeData recipe)
+        {
+        }
+
+        protected virtual void OnContainedObjectRemoved(DemoHoldableObject removedObject)
+        {
+        }
+
+        protected virtual void OnContainedObjectReplaced(DemoHoldableObject previousObject, DemoHoldableObject newObject)
+        {
+        }
+
         private void UpdateContainedObject()
         {
             if (containedObject == null || activeRecipe == null)
+            {
+                if (particles != null)
+                    particles.SetState(false, DemoFoodState.Raw);
+
                 return;
+            }
 
             if (activeRecipe.SpinsInContainer)
             {
@@ -54,6 +93,8 @@ namespace Abigobaldo.Demo
                 return;
 
             bool carbonizedNow = cookable.AdvanceCooking(Time.deltaTime, activeRecipe);
+            UpdateParticles(cookable.State);
+            LogStateIfChanged(cookable);
 
             if (carbonizedNow && activeRecipe.CarbonizedTurnsIntoCharcoal && activeRecipe.CharcoalPrefab != null)
                 ReplaceContainedObject(activeRecipe.CharcoalPrefab, null);
@@ -69,6 +110,14 @@ namespace Abigobaldo.Demo
             DemoRecipeData recipe = FindRecipe(identity.Kind);
 
             if (recipe == null)
+            {
+                if (logCooking)
+                    Debug.Log($"{name}: {identity.Kind} nao combina com este container.", this);
+
+                return false;
+            }
+
+            if (!CanInsertObject(player, identity, recipe))
                 return false;
 
             activeRecipe = recipe;
@@ -92,21 +141,32 @@ namespace Abigobaldo.Demo
             containedObject.PlaceInContainer(GetAnchor());
             ConfigureContainedObject(recipe, createdOutputObject);
             SpawnContainedVisual(recipe);
+            ApplyContainedVisibility();
             containedObject.GetComponent<DemoCookableItem>()?.ApplyRecipeVisual(recipe);
             SpawnSideEffects(recipe);
+            OnContainedObjectInserted(containedObject, recipe);
+            LogInserted(identity.Kind, containedObject);
             return true;
         }
 
         private bool TryTakeContainedObject(DemoPlayerInteractor player)
         {
             if (!player.Holder.IsEmpty || containedObject == null)
+            {
+                if (logCooking && containedObject != null)
+                    Debug.Log($"{name}: mao precisa estar vazia para tirar o item.", this);
+
                 return false;
+            }
 
             ClearContainedVisual();
             DemoHoldableObject target = containedObject;
             containedObject = null;
             activeRecipe = null;
             target.RemoveFromContainer();
+            RestoreContainedVisibility(target);
+            OnContainedObjectRemoved(target);
+            particles?.SetState(false, DemoFoodState.Raw);
             return player.Holder.TryPickUp(target);
         }
 
@@ -118,7 +178,12 @@ namespace Abigobaldo.Demo
             DemoCookableItem cookable = containedObject.GetComponent<DemoCookableItem>();
 
             if (cookable != null && !cookable.CanBePlated)
+            {
+                if (logCooking)
+                    Debug.Log($"{name}: {containedObject.name} ainda nao esta pronto para empratar ({cookable.State}).", this);
+
                 return false;
+            }
 
             DemoObjectIdentity identity = containedObject.GetComponent<DemoObjectIdentity>();
 
@@ -129,6 +194,8 @@ namespace Abigobaldo.Demo
             containedObject = null;
             activeRecipe = null;
             ClearContainedVisual();
+            particles?.SetState(false, DemoFoodState.Raw);
+            Debug.Log($"{name}: item empratado.", this);
             return true;
         }
 
@@ -148,15 +215,21 @@ namespace Abigobaldo.Demo
             if (prefab == null || containedObject == null)
                 return;
 
-            Destroy(containedObject.gameObject);
+            DemoHoldableObject previousObject = containedObject;
+            Destroy(previousObject.gameObject);
             containedObject = Instantiate(prefab, GetAnchorPosition(), GetAnchorRotation());
             containedObject.name = prefab.name;
             containedObject.PlaceInContainer(GetAnchor());
+            RestoreContainedVisibility(containedObject);
             activeRecipe = recipeForNewObject;
             ClearContainedVisual();
 
             if (recipeForNewObject != null)
                 ConfigureContainedObject(recipeForNewObject, true);
+
+            ApplyContainedVisibility();
+            OnContainedObjectReplaced(previousObject, containedObject);
+            Debug.Log($"{name}: virou {containedObject.name}.", this);
         }
 
         private DemoRecipeData FindRecipe(DemoObjectKind inputKind)
@@ -191,6 +264,32 @@ namespace Abigobaldo.Demo
             containedVisual = Instantiate(recipe.ContainedVisualPrefab, containedObject.transform);
             containedVisual.name = recipe.ContainedVisualPrefab.name;
             containedVisual.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
+
+        private void ApplyContainedVisibility()
+        {
+            if (showContainedObject)
+                return;
+
+            hiddenContainedRenderers = containedObject.GetComponentsInChildren<Renderer>();
+
+            foreach (Renderer renderer in hiddenContainedRenderers)
+            {
+                if (renderer != null)
+                    renderer.enabled = false;
+            }
+        }
+
+        private void RestoreContainedVisibility(DemoHoldableObject target)
+        {
+            if (target == null)
+                return;
+
+            foreach (Renderer renderer in target.GetComponentsInChildren<Renderer>())
+            {
+                if (renderer != null)
+                    renderer.enabled = true;
+            }
         }
 
         private void ClearContainedVisual()
@@ -251,6 +350,34 @@ namespace Abigobaldo.Demo
         private void OnValidate()
         {
             sideEffectSpacing = Mathf.Max(0f, sideEffectSpacing);
+        }
+
+        private void UpdateParticles(DemoFoodState state)
+        {
+            if (particles == null || activeRecipe == null)
+                return;
+
+            particles.SetState(activeRecipe.UsesHeat, state);
+        }
+
+        private void LogInserted(DemoObjectKind inputKind, DemoHoldableObject outputObject)
+        {
+            if (!logCooking)
+                return;
+
+            DemoCookableItem cookable = outputObject.GetComponent<DemoCookableItem>();
+            lastLoggedState = cookable != null ? cookable.State : DemoFoodState.Raw;
+            string stateText = cookable != null ? $" estado {cookable.State}" : " sem timer";
+            Debug.Log($"{name}: recebeu {inputKind} -> {outputObject.name}{stateText}.", this);
+        }
+
+        private void LogStateIfChanged(DemoCookableItem cookable)
+        {
+            if (!logCooking || cookable.State == lastLoggedState)
+                return;
+
+            lastLoggedState = cookable.State;
+            Debug.Log($"{name}: {containedObject.name} chegou em {cookable.State} ({cookable.CookedTime:0.0}s).", this);
         }
     }
 }

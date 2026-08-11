@@ -11,9 +11,10 @@ namespace Abigobaldo.Demo
         [SerializeField] private Transform gripPoint;
 
         private Rigidbody body;
+        private bool pickupLocked;
 
         public Rigidbody Rigidbody => body;
-        public bool CanBeHeld => canBeHeld;
+        public bool CanBeHeld => canBeHeld && !pickupLocked;
         public bool CanBeThrown => canBeThrown;
         public Transform GripPoint => gripPoint;
 
@@ -54,6 +55,11 @@ namespace Abigobaldo.Demo
         {
             Drop();
             body.AddForce(direction.normalized * force, ForceMode.Impulse);
+        }
+
+        public void SetPickupLocked(bool locked)
+        {
+            pickupLocked = locked;
         }
 
         public void PlaceInContainer(Transform anchor)
