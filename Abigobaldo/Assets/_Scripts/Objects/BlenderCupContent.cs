@@ -6,6 +6,7 @@ namespace Abigobaldo.Game
     {
         [SerializeField] private bool hasCrushedCorn;
         [SerializeField] private GameObject crushedCornVisual;
+        [SerializeField] private Transform contentRoot;
 
         private HoldableObject holdableObject;
         private Rigidbody body;
@@ -16,6 +17,7 @@ namespace Abigobaldo.Game
 
         public bool HasCrushedCorn => hasCrushedCorn;
         public HoldableObject HoldableObject => holdableObject;
+        public Transform ContentRoot => contentRoot != null ? contentRoot : transform;
         public bool IsAttached => transform.parent == homeParent && homeParent != null;
 
         private void Awake()
@@ -110,6 +112,12 @@ namespace Abigobaldo.Game
         {
             if (crushedCornVisual != null)
                 crushedCornVisual.SetActive(hasCrushedCorn);
+        }
+
+        private void OnValidate()
+        {
+            if (contentRoot == null)
+                contentRoot = transform;
         }
     }
 }

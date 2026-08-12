@@ -16,7 +16,7 @@ Assets/
   Prefabs/        Prefabs usaveis em cena/runtime.
   Scenes/         Cenas Unity.
   _Scripts/        Codigo do jogo.
-  _Scripts/Data/           ScriptableObjects do jogo, principalmente recipes.
+  _Scripts/Data/           ScriptableObjects do jogo, principalmente recipe books e recipes.
   Settings/       URP e configuracoes de render.
   Shaders/        Shaders proprios.
 ```
@@ -42,12 +42,18 @@ Pastas:
 - `_Scripts/Cooking`: recipes, containers, estados de comida e particulas.
 - `_Scripts/Interaction`: portas, highlight e interfaces.
 - `_Scripts/System`: configuracoes globais pequenas, como performance.
+- `_Scripts/Data/RecipeBooks`: assets que agrupam receitas por jogo/modo.
 - `_Scripts/Data/Recipes`: assets de receita do jogo.
 
 ## Prefabs
 
+- `Prefabs/Characters`: personagens e clientes.
+- `Prefabs/Containers`: frigideira, cuscuzeira, liquidificador e futuros containers.
+- `Prefabs/Environment`: foodtruck, moveis, portas, bancadas e cooktops.
 - `Prefabs/Objects`: objetos pegaveis ou spawnaveis.
+- `Prefabs/Props`: decoracoes e objetos genericos.
 - `Prefabs/Spawners`: spawners que entregam objeto direto na mao.
+- `Prefabs/UI`: interface.
 - `Prefabs/Visuals`: visuais usados para comida empratada ou conteudo de container.
 - `Prefabs/Player`: player principal.
 

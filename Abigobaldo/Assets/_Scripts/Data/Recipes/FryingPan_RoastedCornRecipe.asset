@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05200edc31b623d4f8d609a56c8617f3, type: 3}
   m_Name: FryingPan_RoastedCornRecipe
   m_EditorClassIdentifier: 
-  containerKind: 0
   inputKind: 20
   resumeInputKinds:
   - 24

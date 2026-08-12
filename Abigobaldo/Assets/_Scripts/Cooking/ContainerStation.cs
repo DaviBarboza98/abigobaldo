@@ -2,12 +2,12 @@ using UnityEngine;
 
 namespace Abigobaldo.Game
 {
-    public class ContainerStation : MonoBehaviour, IInteractable
+    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(HoldableObject))]
+    public abstract class ContainerStation : MonoBehaviour, IInteractable, IPickupInteractable
     {
-        [SerializeField] private ContainerKind containerKind;
-        [SerializeField] private Transform itemAnchor;
         [SerializeField] private Transform sideEffectSpawnRoot;
-        [SerializeField] private RecipeData[] recipes;
+        [SerializeField] private DemoRecipeBook recipeBook;
         [SerializeField] private float sideEffectSpacing = 0.12f;
         [SerializeField] private bool showContainedObject = true;
         [SerializeField] private bool logCooking = true;
@@ -19,13 +19,21 @@ namespace Abigobaldo.Game
         private GameObject containedVisual;
         private Renderer[] hiddenContainedRenderers;
         private FoodState lastLoggedState;
+        private HoldableObject holdableObject;
+
+        public bool HasContainedObject => containedObject != null;
+        public bool IsHeld => holdableObject != null && holdableObject.IsHeld;
+
+        protected virtual ObjectVisualTarget VisualTarget => ObjectVisualTarget.Default;
 
         private void Awake()
         {
+            holdableObject = GetComponent<HoldableObject>();
+
             if (particles == null)
                 particles = GetComponentInChildren<StationParticles>(true);
 
-            if (particles == null && createFallbackParticles && containerKind != ContainerKind.Blender)
+            if (particles == null && createFallbackParticles && VisualTarget != ObjectVisualTarget.Blender)
                 particles = StationParticles.CreateDefault(GetAnchor(), "Particles");
         }
 
@@ -51,8 +59,21 @@ namespace Abigobaldo.Game
             TryInsertHeldObject(player);
         }
 
-        public bool HasContainedObject => containedObject != null;
-        public ContainerKind ContainerKind => containerKind;
+        public virtual void PickInteract(PlayerInteractor player)
+        {
+            if (player == null || player.Holder == null)
+                return;
+
+            HoldableObject target = GetOrCreateHoldableObject();
+
+            if (target == null || !target.CanBeHeld)
+                return;
+
+            if (!player.Holder.IsEmpty && player.Holder.CurrentObject != target)
+                player.Holder.Drop();
+
+            player.Holder.TryPickUp(target);
+        }
 
         protected virtual bool CanInsertObject(PlayerInteractor player, ObjectIdentity identity, RecipeData recipe)
         {
@@ -71,9 +92,14 @@ namespace Abigobaldo.Game
         {
         }
 
+        protected virtual bool CanUpdateContainedObject()
+        {
+            return !IsHeld;
+        }
+
         private void UpdateContainedObject()
         {
-            if (containedObject == null || activeRecipe == null)
+            if (containedObject == null || activeRecipe == null || !CanUpdateContainedObject())
             {
                 if (particles != null)
                     particles.SetState(false, FoodState.Raw);
@@ -234,17 +260,10 @@ namespace Abigobaldo.Game
 
         private RecipeData FindRecipe(ObjectKind inputKind)
         {
-            if (recipes == null)
-                return null;
-
-            foreach (RecipeData recipe in recipes)
-            {
-                if (recipe != null && recipe.Matches(containerKind, inputKind))
-                    return recipe;
-            }
-
-            return null;
+            return recipeBook != null ? FindRecipe(recipeBook, inputKind) : null;
         }
+
+        protected abstract RecipeData FindRecipe(DemoRecipeBook book, ObjectKind inputKind);
 
         private void SpawnContainedVisual(RecipeData recipe)
         {
@@ -261,9 +280,7 @@ namespace Abigobaldo.Game
                     renderer.enabled = false;
             }
 
-            containedVisual = Instantiate(recipe.ContainedVisualPrefab, containedObject.transform);
-            containedVisual.name = recipe.ContainedVisualPrefab.name;
-            containedVisual.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            containedVisual = ObjectVisualPreset.InstantiateFor(recipe.ContainedVisualPrefab, VisualTarget, containedObject.transform);
         }
 
         private void ApplyContainedVisibility()
@@ -332,9 +349,9 @@ namespace Abigobaldo.Game
             }
         }
 
-        private Transform GetAnchor()
+        protected virtual Transform GetAnchor()
         {
-            return itemAnchor != null ? itemAnchor : transform;
+            return transform;
         }
 
         private Vector3 GetAnchorPosition()
@@ -378,6 +395,22 @@ namespace Abigobaldo.Game
 
             lastLoggedState = cookable.State;
             Debug.Log($"{name}: {containedObject.name} chegou em {cookable.State} ({cookable.CookedTime:0.0}s).", this);
+        }
+
+        private HoldableObject GetOrCreateHoldableObject()
+        {
+            if (holdableObject != null)
+                return holdableObject;
+
+            Rigidbody body = GetComponent<Rigidbody>();
+
+            if (body == null)
+                body = gameObject.AddComponent<Rigidbody>();
+
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            holdableObject = gameObject.AddComponent<HoldableObject>();
+            return holdableObject;
         }
     }
 }

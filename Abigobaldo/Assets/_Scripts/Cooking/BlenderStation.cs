@@ -6,6 +6,13 @@ namespace Abigobaldo.Game
     {
         [SerializeField] private BlenderCupContent cup;
 
+        protected override ObjectVisualTarget VisualTarget => ObjectVisualTarget.Blender;
+
+        protected override RecipeData FindRecipe(DemoRecipeBook book, ObjectKind inputKind)
+        {
+            return book.FindBlenderRecipe(inputKind);
+        }
+
         private void OnEnable()
         {
             CacheCup();
@@ -25,6 +32,11 @@ namespace Abigobaldo.Game
                 return;
 
             base.Interact(player);
+        }
+
+        public override void PickInteract(PlayerInteractor player)
+        {
+            // The blender base is fixed. The removable object is the BlenderCup.
         }
 
         protected override bool CanInsertObject(PlayerInteractor player, ObjectIdentity identity, RecipeData recipe)
@@ -53,16 +65,22 @@ namespace Abigobaldo.Game
             RefreshCupLock();
         }
 
+        protected override bool CanUpdateContainedObject()
+        {
+            CacheCup();
+            return base.CanUpdateContainedObject() && cup != null && cup.IsAttached;
+        }
+
+        protected override Transform GetAnchor()
+        {
+            CacheCup();
+            return cup != null ? cup.ContentRoot : transform;
+        }
+
         private bool TryAttachHeldCup(PlayerInteractor player)
         {
             if (player == null || player.Holder == null || !player.Holder.TryGetHeldComponent(out BlenderCupContent heldCup))
                 return false;
-
-            if (HasContainedObject)
-            {
-                Debug.Log($"{name}: tire o conteudo antes de encaixar/desencaixar o copo.", this);
-                return true;
-            }
 
             HoldableObject releasedCup = player.Holder.ReleaseHeldObject();
 
@@ -78,7 +96,7 @@ namespace Abigobaldo.Game
         private void RefreshCupLock()
         {
             CacheCup();
-            cup?.HoldableObject?.SetPickupLocked(HasContainedObject);
+            cup?.HoldableObject?.SetPickupLocked(false);
         }
 
         private void CacheCup()

@@ -192,6 +192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   hasCrushedCorn: 0
   crushedCornVisual: {fileID: 0}
+  contentRoot: {fileID: 2969653748614409272}
 --- !u!1 &7175827627267087376
 GameObject:
   m_ObjectHideFlags: 0

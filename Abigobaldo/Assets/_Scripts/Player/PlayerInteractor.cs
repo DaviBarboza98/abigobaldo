@@ -35,9 +35,9 @@ namespace Abigobaldo.Game
         {
             UpdateHighlight();
             HandleHeldInteraction();
-            TryBeginHoldFromHeldKey();
             TryInteract();
             TryPick();
+            TryBeginHoldFromHeldKey();
             TryDrop();
             TryThrow();
             TryZoomHeldObject();
@@ -49,14 +49,19 @@ namespace Abigobaldo.Game
             if (!input.InteractPressed || playerCamera == null)
                 return;
 
-            if (TryBeginHoldFromCurrentHit())
-                return;
-
             if (!TryGetHit(out RaycastHit hit))
                 return;
 
-            IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
-            interactable?.Interact(this);
+            ContainerStation container = hit.collider.GetComponentInParent<ContainerStation>();
+
+            if (container != null)
+            {
+                container.Interact(this);
+                return;
+            }
+
+            Plate plate = hit.collider.GetComponentInParent<Plate>();
+            plate?.Interact(this);
         }
 
         private void TryPick()
@@ -72,12 +77,39 @@ namespace Abigobaldo.Game
             if (target == null)
             {
                 IPickupInteractable pickupInteractable = hit.collider.GetComponentInParent<IPickupInteractable>();
-                pickupInteractable?.PickInteract(this);
+
+                if (pickupInteractable != null)
+                {
+                    pickupInteractable.PickInteract(this);
+                    return;
+                }
+
+                IHoldInteractable holdInteractable = hit.collider.GetComponentInParent<IHoldInteractable>();
+
+                if (holdInteractable != null)
+                {
+                    BeginHeldInteraction(holdInteractable);
+                    return;
+                }
+
+                IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
+
+                if (interactable != null
+                    && interactable is not ContainerStation
+                    && interactable is not Plate)
+                {
+                    interactable.Interact(this);
+                }
+
                 return;
             }
 
             if (!target.CanBeHeld)
+            {
+                ContainerStation container = hit.collider.GetComponentInParent<ContainerStation>();
+                container?.PickInteract(this);
                 return;
+            }
 
             if (holder != null && !holder.IsEmpty && target != holder.CurrentObject)
                 holder.Drop();
@@ -232,7 +264,7 @@ namespace Abigobaldo.Game
             if (currentHoldInteractable == null)
                 return;
 
-            if (input.InteractHeld)
+            if (input.PickHeld)
             {
                 currentHoldInteractable.UpdateHold(this);
                 return;
@@ -244,7 +276,7 @@ namespace Abigobaldo.Game
 
         private void TryBeginHoldFromHeldKey()
         {
-            if (currentHoldInteractable != null || !input.InteractHeld || input.InteractPressed)
+            if (currentHoldInteractable != null || !input.PickHeld || input.PickPressed)
                 return;
 
             TryBeginHoldFromCurrentHit();

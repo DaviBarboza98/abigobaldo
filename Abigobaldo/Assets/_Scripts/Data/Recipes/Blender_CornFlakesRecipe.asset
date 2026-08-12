@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05200edc31b623d4f8d609a56c8617f3, type: 3}
   m_Name: Blender_CornFlakesRecipe
   m_EditorClassIdentifier: 
-  containerKind: 1
   inputKind: 20
   resumeInputKinds: []
   outputOnInsertPrefab: {fileID: 0}

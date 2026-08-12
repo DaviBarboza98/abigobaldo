@@ -12,11 +12,13 @@ namespace Abigobaldo.Game
 
         private Rigidbody body;
         private bool pickupLocked;
+        private bool isHeld;
 
         public Rigidbody Rigidbody => body;
         public bool CanBeHeld => canBeHeld && !pickupLocked;
         public bool CanBeThrown => canBeThrown;
         public Transform GripPoint => gripPoint;
+        public bool IsHeld => isHeld;
 
         private void Awake()
         {
@@ -30,6 +32,8 @@ namespace Abigobaldo.Game
         public void PickUp(Vector3 holderPosition, Quaternion holderRotation)
         {
             transform.SetParent(null);
+            isHeld = true;
+            pickupLocked = false;
             AlignToHolder(holderPosition, holderRotation);
 
             body.isKinematic = false;
@@ -44,6 +48,8 @@ namespace Abigobaldo.Game
         public void Drop()
         {
             transform.SetParent(null);
+            isHeld = false;
+            pickupLocked = false;
             body.isKinematic = false;
             body.velocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
@@ -70,12 +76,16 @@ namespace Abigobaldo.Game
                 transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
 
+            isHeld = false;
+            pickupLocked = true;
             SetAttachedPhysics();
         }
 
         public void RemoveFromContainer()
         {
             transform.SetParent(null);
+            isHeld = false;
+            pickupLocked = false;
             body.detectCollisions = true;
             body.isKinematic = false;
         }

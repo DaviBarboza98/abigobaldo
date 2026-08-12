@@ -1,18 +1,20 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Abigobaldo.Game
 {
     public class Plate : MonoBehaviour, IInteractable
     {
         [System.Serializable]
-        private struct PlatedFoodVisual
+        private struct FoodVisual
         {
             public ObjectKind kind;
             public GameObject visualPrefab;
         }
 
         [SerializeField] private Transform foodRoot;
-        [SerializeField] private PlatedFoodVisual[] platedFoodVisuals;
+        [FormerlySerializedAs("platedFoodVisuals")]
+        [SerializeField] private FoodVisual[] foodVisuals;
 
         private ObjectKind contentKind = ObjectKind.None;
         private GameObject contentVisual;
@@ -36,10 +38,7 @@ namespace Abigobaldo.Game
             if (visualPrefab != null)
             {
                 Transform root = foodRoot != null ? foodRoot : transform;
-                contentVisual = Instantiate(visualPrefab, root.position, root.rotation, root);
-                contentVisual.name = visualPrefab.name;
-                contentVisual.transform.localPosition = Vector3.zero;
-                contentVisual.transform.localRotation = Quaternion.identity;
+                contentVisual = ObjectVisualPreset.InstantiateFor(visualPrefab, ObjectVisualTarget.Plate, root);
             }
 
             return true;
@@ -106,10 +105,10 @@ namespace Abigobaldo.Game
 
         private GameObject GetPlatedVisual(ObjectKind kind)
         {
-            if (platedFoodVisuals == null)
+            if (foodVisuals == null)
                 return null;
 
-            foreach (PlatedFoodVisual entry in platedFoodVisuals)
+            foreach (FoodVisual entry in foodVisuals)
             {
                 if (entry.kind == kind)
                     return entry.visualPrefab;

@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05200edc31b623d4f8d609a56c8617f3, type: 3}
   m_Name: FryingPan_FriedEggRecipe
   m_EditorClassIdentifier: 
-  containerKind: 0
   inputKind: 10
   resumeInputKinds:
   - 11
@@ -54,4 +53,4 @@ MonoBehaviour:
   - {fileID: 490776585673048975, guid: 98379f68ae411a84c91203b653786c19, type: 3}
   handMixOutputPrefab: {fileID: 3716004642490695564, guid: 61a9b4b6ce337c94faf57ae167cc7325, type: 3}
   handMixRequiredState: 1
-  handMixRequiredIntensity: 80
+  handMixRequiredIntensity: 720

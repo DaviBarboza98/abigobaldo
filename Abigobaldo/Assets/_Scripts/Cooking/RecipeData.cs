@@ -14,7 +14,6 @@ namespace Abigobaldo.Game
         }
 
         [Header("Match")]
-        [SerializeField] private ContainerKind containerKind;
         [SerializeField] private ObjectKind inputKind;
         [SerializeField] private ObjectKind[] resumeInputKinds;
 
@@ -47,7 +46,6 @@ namespace Abigobaldo.Game
         [SerializeField] private FoodState handMixRequiredState = FoodState.AlmostReady;
         [SerializeField] private float handMixRequiredIntensity = 80f;
 
-        public ContainerKind ContainerKind => containerKind;
         public ObjectKind InputKind => inputKind;
         public HoldableObject OutputOnInsertPrefab => outputOnInsertPrefab;
         public HoldableObject OutputWhenReadyPrefab => outputWhenReadyPrefab;
@@ -68,11 +66,8 @@ namespace Abigobaldo.Game
         public FoodState HandMixRequiredState => handMixRequiredState;
         public float HandMixRequiredIntensity => handMixRequiredIntensity;
 
-        public bool Matches(ContainerKind targetContainer, ObjectKind targetInput)
+        public bool Matches(ObjectKind targetInput)
         {
-            if (containerKind != targetContainer)
-                return false;
-
             if (inputKind == targetInput)
                 return true;
 
