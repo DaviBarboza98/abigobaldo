@@ -1,246 +1,120 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-public class HoldableObject : MonoBehaviour
+namespace Abigobaldo.Game
 {
-    public enum ObjectRole
+    [RequireComponent(typeof(Rigidbody))]
+    public class HoldableObject : MonoBehaviour
     {
-        Common,
-        Ingredient,
-        Tool,
-        Container,
-        BlenderCup,
-        Plate
-    }
+        [SerializeField] private bool canBeHeld = true;
+        [SerializeField] private bool canBeThrown = true;
+        [SerializeField] private bool startAttached;
+        [SerializeField] private Transform gripPoint;
 
-    [Header("Data")]
-    [SerializeField] private ObjectData objectData;
+        private Rigidbody body;
+        private bool pickupLocked;
 
-    [Header("Classification")]
-    [SerializeField] private ObjectRole role = ObjectRole.Common;
+        public Rigidbody Rigidbody => body;
+        public bool CanBeHeld => canBeHeld && !pickupLocked;
+        public bool CanBeThrown => canBeThrown;
+        public Transform GripPoint => gripPoint;
 
-    [Header("Properties")]
-    [SerializeField] private bool canBeHeld = true;
-    [SerializeField] private bool canBeThrown = true;
-
-    private Rigidbody rb;
-    private MonoBehaviour[] holdStateBehaviours;
-    private bool hasRuntimeCookState;
-    private ObjectCookState runtimeCookState;
-    private bool hasRuntimeTint;
-    private Color runtimeTint;
-    private Material runtimeMaterial;
-
-    public ObjectData Data => objectData;
-    public ObjectRole Role => role;
-    public Rigidbody Rigidbody => rb;
-    public string ObjectName => objectData != null ? objectData.DisplayName : gameObject.name;
-    public bool CanBeHeld => canBeHeld;
-    public bool CanBeThrown => canBeThrown;
-    public ObjectCookState CookState => hasRuntimeCookState ? runtimeCookState : objectData != null ? objectData.CookState : ObjectCookState.Raw;
-    public bool HasRuntimeTint => hasRuntimeTint;
-    public Color RuntimeTint => runtimeTint;
-    public Material RuntimeMaterial => runtimeMaterial;
-
-    protected virtual void Awake()
-    {
-        GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.HoldableObject);
-
-        rb = GetComponent<Rigidbody>();
-        EnsureDynamicMeshCollidersAreConvex();
-        holdStateBehaviours = GetComponents<MonoBehaviour>();
-    }
-
-    public void Configure(ObjectData data, bool held, bool thrown)
-    {
-        objectData = data;
-        canBeHeld = held;
-        canBeThrown = thrown;
-    }
-
-    public void SetRuntimeCookVisual(ObjectCookState state, Color? tint)
-    {
-        SetRuntimeCookVisual(state, tint, null);
-    }
-
-    public void SetRuntimeCookVisual(ObjectCookState state, Color? tint, Material material)
-    {
-        hasRuntimeCookState = true;
-        runtimeCookState = state;
-        hasRuntimeTint = tint.HasValue;
-        runtimeMaterial = material;
-
-        if (runtimeMaterial != null)
+        private void Awake()
         {
-            ApplyMaterial(runtimeMaterial);
-            return;
+            body = GetComponent<Rigidbody>();
+            EnsureDynamicMeshCollidersAreConvex();
+
+            if (startAttached)
+                SetAttachedPhysics();
         }
 
-        if (!tint.HasValue)
-            return;
-
-        runtimeTint = tint.Value;
-        ApplyTint(runtimeTint);
-    }
-
-    public virtual void PickUp(Vector3 position, Quaternion rotation)
-    {
-        transform.SetParent(null);
-        transform.SetPositionAndRotation(position, rotation);
-
-        rb.isKinematic = false;
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.useGravity = false;
-        rb.detectCollisions = true;
-        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-        rb.interpolation = RigidbodyInterpolation.Interpolate;
-
-        NotifyPickedUp();
-    }
-
-    public virtual void Drop()
-    {
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = false;
-        rb.useGravity = true;
-        rb.detectCollisions = true;
-
-        transform.SetParent(null);
-        NotifyDropped();
-    }
-
-    public virtual void Throw(Vector3 direction, float force)
-    {
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = false;
-        rb.useGravity = true;
-        rb.detectCollisions = true;
-
-        transform.SetParent(null);
-        rb.AddForce(direction.normalized * force, ForceMode.Impulse);
-        NotifyThrown();
-    }
-
-    public void PlaceAt(Transform anchor)
-    {
-        if (anchor == null)
-            return;
-
-        transform.SetParent(null);
-        transform.SetPositionAndRotation(anchor.position, anchor.rotation);
-
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = true;
-        rb.useGravity = false;
-        rb.detectCollisions = true;
-        NotifyDropped();
-    }
-
-    private void NotifyPickedUp()
-    {
-        RefreshReceivers();
-
-        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        public void PickUp(Vector3 holderPosition, Quaternion holderRotation)
         {
-            HoldStateReceiver receiver = behaviour as HoldStateReceiver;
-            receiver?.OnPickedUp();
+            transform.SetParent(null);
+            AlignToHolder(holderPosition, holderRotation);
+
+            body.isKinematic = false;
+            body.velocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.useGravity = false;
+            body.detectCollisions = true;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
         }
-    }
 
-    private void NotifyDropped()
-    {
-        RefreshReceivers();
-
-        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        public void Drop()
         {
-            HoldStateReceiver receiver = behaviour as HoldStateReceiver;
-            receiver?.OnDropped();
+            transform.SetParent(null);
+            body.isKinematic = false;
+            body.velocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.useGravity = true;
+            body.detectCollisions = true;
         }
-    }
 
-    private void NotifyThrown()
-    {
-        RefreshReceivers();
-
-        foreach (MonoBehaviour behaviour in holdStateBehaviours)
+        public void Throw(Vector3 direction, float force)
         {
-            HoldStateReceiver receiver = behaviour as HoldStateReceiver;
-            receiver?.OnThrown();
+            Drop();
+            body.AddForce(direction.normalized * force, ForceMode.Impulse);
         }
-    }
 
-    private void RefreshReceivers()
-    {
-        if (holdStateBehaviours == null || holdStateBehaviours.Length == 0)
-            holdStateBehaviours = GetComponents<MonoBehaviour>();
-    }
-
-    private void ApplyTint(Color tint)
-    {
-        foreach (Renderer targetRenderer in GetComponentsInChildren<Renderer>())
+        public void SetPickupLocked(bool locked)
         {
-            foreach (Material material in targetRenderer.materials)
+            pickupLocked = locked;
+        }
+
+        public void PlaceInContainer(Transform anchor)
+        {
+            if (anchor != null)
             {
-                if (material.HasProperty("_BaseColor"))
-                    material.SetColor("_BaseColor", tint);
-                else if (material.HasProperty("_Color"))
-                    material.color = tint;
+                transform.SetParent(anchor);
+                transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            }
+
+            SetAttachedPhysics();
+        }
+
+        public void RemoveFromContainer()
+        {
+            transform.SetParent(null);
+            body.detectCollisions = true;
+            body.isKinematic = false;
+        }
+
+        private void AlignToHolder(Vector3 holderPosition, Quaternion holderRotation)
+        {
+            if (gripPoint == null)
+            {
+                transform.SetPositionAndRotation(holderPosition, holderRotation);
+                return;
+            }
+
+            Quaternion targetRotation = holderRotation * Quaternion.Inverse(gripPoint.localRotation);
+            transform.rotation = targetRotation;
+            transform.position = holderPosition - (gripPoint.position - transform.position);
+        }
+
+        private void SetAttachedPhysics()
+        {
+            if (body == null)
+                return;
+
+            body.velocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.isKinematic = true;
+            body.useGravity = false;
+            body.detectCollisions = true;
+        }
+
+        private void EnsureDynamicMeshCollidersAreConvex()
+        {
+            if (body == null || body.isKinematic)
+                return;
+
+            foreach (MeshCollider meshCollider in GetComponentsInChildren<MeshCollider>())
+            {
+                if (meshCollider != null && !meshCollider.convex)
+                    meshCollider.convex = true;
             }
         }
     }
-
-    private void ApplyMaterial(Material material)
-    {
-        if (material == null)
-            return;
-
-        foreach (Renderer targetRenderer in GetComponentsInChildren<Renderer>())
-            targetRenderer.material = material;
-    }
-
-    private void EnsureDynamicMeshCollidersAreConvex()
-    {
-        if (rb == null || rb.isKinematic)
-            return;
-
-        foreach (MeshCollider meshCollider in GetComponentsInChildren<MeshCollider>())
-        {
-            if (meshCollider == null || meshCollider.convex)
-                continue;
-
-            meshCollider.convex = true;
-        }
-    }
 }
-
-public readonly struct RuntimeObjectState
-{
-    public RuntimeObjectState(ObjectData data, ObjectCookState cookState, Material material)
-    {
-        Data = data;
-        CookState = cookState;
-        Material = material;
-    }
-
-    public ObjectData Data { get; }
-    public ObjectCookState CookState { get; }
-    public Material Material { get; }
-
-    public static RuntimeObjectState FromObject(HoldableObject holdableObject)
-    {
-        if (holdableObject == null)
-            return default;
-
-        return new RuntimeObjectState(
-            holdableObject.Data,
-            holdableObject.CookState,
-            holdableObject.RuntimeMaterial
-        );
-    }
-}
-
-

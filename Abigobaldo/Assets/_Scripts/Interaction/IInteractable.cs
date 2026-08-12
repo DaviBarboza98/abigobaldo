@@ -1,5 +1,7 @@
-﻿public interface IInteractable
+namespace Abigobaldo.Game
 {
-    void Interact(PlayerInteraction player);
+    public interface IInteractable
+    {
+        void Interact(PlayerInteractor player);
+    }
 }
-

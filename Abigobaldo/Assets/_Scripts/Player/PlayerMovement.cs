@@ -1,66 +1,61 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(PlayerInputHandler))]
-public class PlayerMovement : MonoBehaviour
+namespace Abigobaldo.Game
 {
-    [Header("-- VALORES --")]
-
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float runSpeed = 8f;
-    [SerializeField] private float gravity = -20f;
-    [SerializeField] private float groundStickForce = -2f;
-
-    private CharacterController controller;
-    private PlayerInputHandler input;
-    private Vector3 verticalVelocity;
-
-    public bool IsRunning { get; private set; }
-
-    private void Awake()
+    [RequireComponent(typeof(CharacterController))]
+    [RequireComponent(typeof(PlayerInput))]
+    public class PlayerMovement : MonoBehaviour
     {
-        controller = GetComponent<CharacterController>();
-        input = GetComponent<PlayerInputHandler>();
+        [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private float runSpeed = 8f;
+        [SerializeField] private float gravity = -20f;
+        [SerializeField] private float groundStickForce = -2f;
 
-        Cursor.visible = false;
-    }
+        private CharacterController controller;
+        private PlayerInput input;
+        private Vector3 verticalVelocity;
 
-    private void Update()
-    {
-        HandleMovement();
-        HandleGravity();
-    }
+        public bool IsRunning { get; private set; }
 
-    private void HandleMovement()
-    {
-        Vector2 moveInput = input.Movement;
-        IsRunning = input.RunPressed;
-
-        float currentSpeed = IsRunning ? runSpeed : moveSpeed;
-
-        Vector3 moveDirection = transform.right * moveInput.x + transform.forward * moveInput.y;
-
-        if (moveDirection.sqrMagnitude > 1f)
-            moveDirection.Normalize();
-
-        controller.Move(moveDirection * currentSpeed * Time.deltaTime);
-    }
-
-    private void HandleGravity()
-    {
-        if (controller.isGrounded && verticalVelocity.y < 0f)
+        private void Awake()
         {
-            verticalVelocity.y = groundStickForce;
-        }
-        else
-        {
-            verticalVelocity.y += gravity * Time.deltaTime;
+            controller = GetComponent<CharacterController>();
+            input = GetComponent<PlayerInput>();
         }
 
-        controller.Move(
-            verticalVelocity *
-            Time.deltaTime
-        );
+        private void Update()
+        {
+            Move();
+            ApplyGravity();
+        }
+
+        private void Move()
+        {
+            IsRunning = input.RunPressed;
+            float speed = IsRunning ? runSpeed : moveSpeed;
+            Vector3 direction = transform.right * input.Movement.x + transform.forward * input.Movement.y;
+
+            if (direction.sqrMagnitude > 1f)
+                direction.Normalize();
+
+            controller.Move(direction * speed * Time.deltaTime);
+        }
+
+        private void ApplyGravity()
+        {
+            if (controller.isGrounded && verticalVelocity.y < 0f)
+                verticalVelocity.y = groundStickForce;
+            else
+                verticalVelocity.y += gravity * Time.deltaTime;
+
+            controller.Move(verticalVelocity * Time.deltaTime);
+        }
+
+        private void OnValidate()
+        {
+            moveSpeed = Mathf.Max(0f, moveSpeed);
+            runSpeed = Mathf.Max(moveSpeed, runSpeed);
+            groundStickForce = Mathf.Min(0f, groundStickForce);
+        }
     }
 }
-

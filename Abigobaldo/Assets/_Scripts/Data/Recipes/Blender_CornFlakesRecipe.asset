@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05200edc31b623d4f8d609a56c8617f3, type: 3}
+  m_Name: Blender_CornFlakesRecipe
+  m_EditorClassIdentifier: 
+  containerKind: 1
+  inputKind: 20
+  resumeInputKinds: []
+  outputOnInsertPrefab: {fileID: 0}
+  outputWhenReadyPrefab: {fileID: 789666017862269959, guid: 57ac5e8002b7b274190eac1bc1325e8a, type: 3}
+  charcoalPrefab: {fileID: 0}
+  carbonizedTurnsIntoCharcoal: 0
+  containedVisualPrefab: {fileID: 0}
+  stateVisuals: []
+  usesHeat: 1
+  canBurn: 0
+  spinsInContainer: 1
+  spinSpeed: 720
+  almostReadyTime: 2.5
+  readyTime: 5
+  overdoneTime: 5
+  burnedTime: 5
+  carbonizedTime: 5
+  spawnedOnInsertPrefabs: []
+  handMixOutputPrefab: {fileID: 0}
+  handMixRequiredState: 1
+  handMixRequiredIntensity: 80

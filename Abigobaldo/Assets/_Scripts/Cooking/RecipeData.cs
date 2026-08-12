@@ -1,106 +1,120 @@
-﻿using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(
-    fileName = "NewRecipe",
-    menuName = "Abigobaldos/Recipe Data"
-)]
-public class RecipeData : ScriptableObject
+namespace Abigobaldo.Game
 {
-    [Header("Station")]
-    [SerializeField] private ContainerType requiredContainer;
-
-    [Header("Ingredients")]
-    [SerializeField] private List<ObjectData> ingredients = new List<ObjectData>();
-
-    [Header("Result")]
-    [SerializeField] private ObjectData resultObject;
-    [SerializeField] private ObjectData readyObject;
-    [SerializeField] private ObjectData overcookedObject;
-    [SerializeField] private ObjectData burnedObject;
-    [SerializeField] private ObjectData carbonizedObject;
-    [SerializeField] private Material readyMaterial;
-    [SerializeField] private Material overcookedMaterial;
-    [SerializeField] private Material burnedMaterial;
-    [SerializeField] private Material carbonizedMaterial;
-    [SerializeField] private List<ObjectData> byproducts = new List<ObjectData>();
-    [SerializeField] private bool spawnByproductsOnStart;
-
-    [Header("Timing")]
-    [SerializeField] private float cookingTime = 3f;
-    [SerializeField] private bool canOvercook;
-    [SerializeField] private float slightlyBurnedDelay = 5f;
-    [SerializeField] private float burnedDelay = 10f;
-    [SerializeField] private float carbonizedDelay = 15f;
-
-    public ContainerType RequiredContainer => requiredContainer;
-    public IReadOnlyList<ObjectData> Ingredients => ingredients;
-    public ObjectData ResultObject => resultObject;
-    public ObjectData ReadyObject => readyObject;
-    public ObjectData OvercookedObject => overcookedObject;
-    public ObjectData BurnedObject => burnedObject;
-    public ObjectData CarbonizedObject => carbonizedObject;
-    public Material ReadyMaterial => readyMaterial;
-    public Material OvercookedMaterial => overcookedMaterial;
-    public Material BurnedMaterial => burnedMaterial;
-    public Material CarbonizedMaterial => carbonizedMaterial;
-    public IReadOnlyList<ObjectData> Byproducts => byproducts;
-    public bool SpawnByproductsOnStart => spawnByproductsOnStart;
-    public float CookingTime => cookingTime;
-    public bool CanOvercook => canOvercook;
-    public float SlightlyBurnedDelay => slightlyBurnedDelay;
-    public float BurnedDelay => burnedDelay;
-    public float CarbonizedDelay => carbonizedDelay;
-
-    public bool CanRunIn(ContainerType containerType)
+    [CreateAssetMenu(menuName = "Abigobaldo/Recipe")]
+    public class RecipeData : ScriptableObject
     {
-        return requiredContainer == containerType;
-    }
-
-    public bool Matches(ContainerType containerType, IReadOnlyList<ObjectData> contents)
-    {
-        if (!CanRunIn(containerType))
-            return false;
-
-        if (contents == null)
-            return false;
-
-        if (contents.Count != ingredients.Count)
-            return false;
-
-        List<ObjectData> remaining = new List<ObjectData>(contents);
-
-        foreach (ObjectData ingredient in ingredients)
+        [System.Serializable]
+        public struct StateVisual
         {
-            if (ingredient == null)
-                return false;
-
-            if (!remaining.Remove(ingredient))
-                return false;
+            public FoodState state;
+            public Material material;
+            public GameObject modelPrefab;
         }
 
-        return true;
-    }
+        [Header("Match")]
+        [SerializeField] private ContainerKind containerKind;
+        [SerializeField] private ObjectKind inputKind;
+        [SerializeField] private ObjectKind[] resumeInputKinds;
 
-    public ObjectData GetObjectForCookState(ObjectCookState state)
-    {
-        return state switch
+        [Header("Output")]
+        [SerializeField] private HoldableObject outputOnInsertPrefab;
+        [SerializeField] private HoldableObject outputWhenReadyPrefab;
+        [SerializeField] private HoldableObject charcoalPrefab;
+        [SerializeField] private bool carbonizedTurnsIntoCharcoal = true;
+
+        [Header("Visual")]
+        [SerializeField] private GameObject containedVisualPrefab;
+        [SerializeField] private StateVisual[] stateVisuals;
+
+        [Header("Timing")]
+        [SerializeField] private bool usesHeat = true;
+        [SerializeField] private bool canBurn = true;
+        [SerializeField] private bool spinsInContainer;
+        [SerializeField] private float spinSpeed = 720f;
+        [SerializeField] private float almostReadyTime = 5f;
+        [SerializeField] private float readyTime = 10f;
+        [SerializeField] private float overdoneTime = 15f;
+        [SerializeField] private float burnedTime = 20f;
+        [SerializeField] private float carbonizedTime = 25f;
+
+        [Header("Side Effects")]
+        [SerializeField] private HoldableObject[] spawnedOnInsertPrefabs;
+
+        [Header("Hand Mixing")]
+        [SerializeField] private HoldableObject handMixOutputPrefab;
+        [SerializeField] private FoodState handMixRequiredState = FoodState.AlmostReady;
+        [SerializeField] private float handMixRequiredIntensity = 80f;
+
+        public ContainerKind ContainerKind => containerKind;
+        public ObjectKind InputKind => inputKind;
+        public HoldableObject OutputOnInsertPrefab => outputOnInsertPrefab;
+        public HoldableObject OutputWhenReadyPrefab => outputWhenReadyPrefab;
+        public HoldableObject CharcoalPrefab => charcoalPrefab;
+        public bool CarbonizedTurnsIntoCharcoal => carbonizedTurnsIntoCharcoal;
+        public GameObject ContainedVisualPrefab => containedVisualPrefab;
+        public bool UsesHeat => usesHeat;
+        public bool CanBurn => canBurn;
+        public bool SpinsInContainer => spinsInContainer;
+        public float SpinSpeed => spinSpeed;
+        public float AlmostReadyTime => almostReadyTime;
+        public float ReadyTime => readyTime;
+        public float OverdoneTime => overdoneTime;
+        public float BurnedTime => burnedTime;
+        public float CarbonizedTime => carbonizedTime;
+        public HoldableObject[] SpawnedOnInsertPrefabs => spawnedOnInsertPrefabs;
+        public HoldableObject HandMixOutputPrefab => handMixOutputPrefab;
+        public FoodState HandMixRequiredState => handMixRequiredState;
+        public float HandMixRequiredIntensity => handMixRequiredIntensity;
+
+        public bool Matches(ContainerKind targetContainer, ObjectKind targetInput)
         {
-            ObjectCookState.Ready => readyObject != null ? readyObject : resultObject,
-            ObjectCookState.Overcooked => overcookedObject != null ? overcookedObject : GetObjectForCookState(ObjectCookState.Ready),
-            ObjectCookState.Burned => burnedObject != null ? burnedObject : GetObjectForCookState(ObjectCookState.Overcooked),
-            ObjectCookState.Carbonized => carbonizedObject != null ? carbonizedObject : GetObjectForCookState(ObjectCookState.Burned),
-            _ => resultObject
-        };
-    }
+            if (containerKind != targetContainer)
+                return false;
 
-    private void OnValidate()
-    {
-        cookingTime = Mathf.Max(0f, cookingTime);
-        slightlyBurnedDelay = Mathf.Max(0f, slightlyBurnedDelay);
-        burnedDelay = Mathf.Max(slightlyBurnedDelay, burnedDelay);
-        carbonizedDelay = Mathf.Max(burnedDelay, carbonizedDelay);
+            if (inputKind == targetInput)
+                return true;
+
+            if (resumeInputKinds != null)
+            {
+                foreach (ObjectKind resumeInputKind in resumeInputKinds)
+                {
+                    if (resumeInputKind == targetInput)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TryGetStateVisual(FoodState state, out StateVisual visual)
+        {
+            if (stateVisuals != null)
+            {
+                foreach (StateVisual entry in stateVisuals)
+                {
+                    if (entry.state == state)
+                    {
+                        visual = entry;
+                        return true;
+                    }
+                }
+            }
+
+            visual = default;
+            return false;
+        }
+
+        private void OnValidate()
+        {
+            spinSpeed = Mathf.Max(0f, spinSpeed);
+            almostReadyTime = Mathf.Max(0f, almostReadyTime);
+            readyTime = Mathf.Max(almostReadyTime, readyTime);
+            overdoneTime = Mathf.Max(readyTime, overdoneTime);
+            burnedTime = Mathf.Max(overdoneTime, burnedTime);
+            carbonizedTime = Mathf.Max(burnedTime, carbonizedTime);
+            handMixRequiredIntensity = Mathf.Max(0f, handMixRequiredIntensity);
+        }
     }
 }
-
-

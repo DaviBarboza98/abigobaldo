@@ -1,49 +1,65 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class ObjectSpawner : MonoBehaviour, IInteractable
+namespace Abigobaldo.Game
 {
-    [Header("Object")]
-    [SerializeField] private GameObject objectPrefab;
-
-    private void Awake()
+    public class ObjectSpawner : MonoBehaviour, IInteractable, IPickupInteractable
     {
-        GameLayers.SetLayerRecursivelyIfDefault(gameObject, GameLayers.Spawner);
-    }
+        [SerializeField] private HoldableObject prefab;
+        [SerializeField] private Transform spawnPoint;
+        [SerializeField] private bool giveDirectlyToHolder = true;
+        [SerializeField] private bool replaceHeldObject = true;
+        [SerializeField] private bool alignToSpawnPoint = true;
 
-    public HoldableObject SpawnObject(Holder holder)
-    {
-        TrySpawnIntoHolder(holder, out HoldableObject spawnedObject);
-        return spawnedObject;
-    }
+        public void Interact(PlayerInteractor player)
+        {
+            Spawn(player);
+        }
 
-    public bool TrySpawnIntoHolder(Holder holder, out HoldableObject spawnedObject)
-    {
-        spawnedObject = null;
+        public void PickInteract(PlayerInteractor player)
+        {
+            Spawn(player);
+        }
 
-        if (objectPrefab == null || holder == null || !holder.IsEmpty())
-            return false;
+        private void Spawn(PlayerInteractor player)
+        {
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{name} has no object prefab configured.", this);
+                return;
+            }
 
-        GameObject objectInstance = Instantiate(objectPrefab, holder.transform.position, holder.transform.rotation);
-        spawnedObject = objectInstance.GetComponent<HoldableObject>();
+            Transform targetSpawnPoint = spawnPoint != null ? spawnPoint : transform;
+            HoldableObject instance = Instantiate(prefab, targetSpawnPoint.position, targetSpawnPoint.rotation);
+            instance.name = prefab.name;
 
-        if (spawnedObject != null && holder.TryPickUp(spawnedObject))
-            return true;
+            if (!giveDirectlyToHolder || player == null || player.Holder == null)
+            {
+                if (!alignToSpawnPoint)
+                    instance.transform.rotation = prefab.transform.rotation;
 
-        Destroy(objectInstance);
-        spawnedObject = null;
-        return false;
-    }
+                instance.Drop();
+                return;
+            }
 
-    public void Interact(PlayerInteraction player)
-    {
-        if (player == null || player.Holder == null)
-            return;
+            if (!player.Holder.IsEmpty)
+            {
+                if (!replaceHeldObject)
+                {
+                    Destroy(instance.gameObject);
+                    return;
+                }
 
-        if (!player.Holder.IsEmpty())
-            return;
+                player.Holder.Drop();
+            }
 
-        TrySpawnIntoHolder(player.Holder, out _);
+            if (!player.Holder.TryPickUp(instance))
+                instance.Drop();
+        }
+
+        private void OnValidate()
+        {
+            if (spawnPoint == null)
+                spawnPoint = transform;
+        }
     }
 }
-
-

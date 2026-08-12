@@ -1,8 +1,9 @@
-﻿public interface IHoldInteractable
+namespace Abigobaldo.Game
 {
-    void BeginHold(PlayerInteraction player);
-    void UpdateHold(PlayerInteraction player);
-    void EndHold(PlayerInteraction player);
+    public interface IHoldInteractable
+    {
+        void BeginHold(PlayerInteractor player);
+        void UpdateHold(PlayerInteractor player);
+        void EndHold(PlayerInteractor player);
+    }
 }
-
-

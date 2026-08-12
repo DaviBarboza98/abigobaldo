@@ -1,53 +1,46 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-[RequireComponent(typeof(PlayerInputHandler))]
-public class PlayerCursor : MonoBehaviour
+namespace Abigobaldo.Game
 {
-    private PlayerInputHandler input;
-    private bool cursorUnlocked;
-
-    private void Awake()
+    [RequireComponent(typeof(PlayerInput))]
+    public class PlayerCursor : MonoBehaviour
     {
-        input = GetComponent<PlayerInputHandler>();
-    }
+        private PlayerInput input;
+        private bool unlocked;
 
-    private void Start()
-    {
-        LockCursor();
-    }
+        private void Awake()
+        {
+            input = GetComponent<PlayerInput>();
+        }
 
-    private void Update()
-    {
-        HandleCursorToggle();
-    }
-
-    private void HandleCursorToggle()
-    {
-        if (!input.ToggleCursorPressed)
-            return;
-
-        cursorUnlocked = !cursorUnlocked;
-
-        if (cursorUnlocked)
-            UnlockCursor();
-        else
+        private void Start()
+        {
             LockCursor();
-    }
+        }
 
-    public void LockCursor()
-    {
-        cursorUnlocked = false;
+        private void Update()
+        {
+            if (!input.ToggleCursorPressed)
+                return;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+            if (unlocked)
+                LockCursor();
+            else
+                UnlockCursor();
+        }
 
-    public void UnlockCursor()
-    {
-        cursorUnlocked = true;
+        public void LockCursor()
+        {
+            unlocked = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        public void UnlockCursor()
+        {
+            unlocked = true;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 }
-

@@ -1,139 +1,106 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Rendering;
 
-[RequireComponent(typeof(PlayerInputHandler))]
-[RequireComponent(typeof(PlayerMovement))]
-public class PlayerCamera : MonoBehaviour
+namespace Abigobaldo.Game
 {
-    [Header("-- REFERENCIAS --")]
-    [SerializeField] private Transform cameraPivot;
-    [SerializeField] private Camera playerCamera;
-    [SerializeField] private Transform model;
-    [SerializeField] private string[] hiddenFirstPersonParts = { "Head" };
-
-    [Header("-- VALORES --")]
-    [SerializeField] private float sensitivity = 2f;
-    [SerializeField] private float minPitch = -80f;
-    [SerializeField] private float maxPitch = 80f;
-    [SerializeField] private float defaultFov = 70f;
-    [SerializeField] private float runningFov = 80f;
-    [SerializeField] private float fovSmoothSpeed = 8f;
-
-    private PlayerInputHandler input;
-    private PlayerMovement movement;
-    private float pitch;
-
-    private void Awake()
+    [RequireComponent(typeof(PlayerInput))]
+    [RequireComponent(typeof(PlayerMovement))]
+    public class PlayerCamera : MonoBehaviour
     {
-        input = GetComponent<PlayerInputHandler>();
-        movement = GetComponent<PlayerMovement>();
+        [SerializeField] private Transform cameraPivot;
+        [SerializeField] private Camera playerCamera;
+        [SerializeField] private Transform modelRoot;
+        [SerializeField] private string[] hiddenFirstPersonParts = { "Head" };
 
-        if (model == null)
-            model = FindDeepChild(transform, "Model");
+        [SerializeField] private float sensitivity = 0.2f;
+        [SerializeField] private float minPitch = -80f;
+        [SerializeField] private float maxPitch = 80f;
+        [SerializeField] private float defaultFov = 60f;
+        [SerializeField] private float runningFov = 75f;
+        [SerializeField] private float fovSmoothSpeed = 8f;
 
-        HideFirstPersonParts();
-    }
+        private PlayerInput input;
+        private PlayerMovement movement;
+        private float pitch;
 
-    private void Update()
-    {
-        HandleLook();
-        HandleFov();
-    }
-
-    private void HandleLook()
-    {
-        if (Cursor.lockState != CursorLockMode.Locked)
-            return;
-
-        if (input.RotateHeld)
-            return;
-
-        Vector2 lookInput = input.Look;
-        float mouseX = lookInput.x * sensitivity;
-        float mouseY = lookInput.y * sensitivity;
-
-        transform.rotation *= Quaternion.Euler(0f, mouseX, 0f);
-
-        pitch = Mathf.Clamp(pitch - mouseY, minPitch, maxPitch);
-        cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-    }
-
-    private void HandleFov()
-    {
-        float targetFov = movement.IsRunning
-            ? runningFov
-            : defaultFov;
-
-        playerCamera.fieldOfView = Mathf.Lerp(
-            playerCamera.fieldOfView,
-            targetFov,
-            fovSmoothSpeed * Time.deltaTime
-        );
-    }
-
-    private void HideFirstPersonParts()
-    {
-        if (model == null)
-            return;
-
-        HideModelParts(hiddenFirstPersonParts);
-
-        string[] legacyPartsToHide =
+        private void Awake()
         {
-            "OlhoE",
-            "OlhoD",
-            "SombrancelhaE",
-            "SombrancelhaD",
-            "Nariz",
-            "Cabeca",
-            "Cabelin",
-            "Bigode"
-        };
+            input = GetComponent<PlayerInput>();
+            movement = GetComponent<PlayerMovement>();
 
-        HideModelParts(legacyPartsToHide);
-    }
+            if (cameraPivot == null)
+                cameraPivot = FindDeepChild(transform, "CameraPivot");
 
-    private void HideModelParts(string[] partNames)
-    {
-        if (partNames == null)
-            return;
+            if (playerCamera == null)
+                playerCamera = GetComponentInChildren<Camera>();
 
-        foreach (string partName in partNames)
-            HideModelPart(partName);
-    }
+            if (modelRoot == null)
+                modelRoot = FindDeepChild(transform, "Model");
 
-    private void HideModelPart(string partName)
-    {
-        if (string.IsNullOrWhiteSpace(partName))
-            return;
-
-        Transform part = FindDeepChild(model, partName);
-
-        if (part == null)
-            return;
-
-        foreach (Renderer renderer in part.GetComponentsInChildren<Renderer>())
-            renderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-    }
-
-    private static Transform FindDeepChild(Transform root, string childName)
-    {
-        if (root == null)
-            return null;
-
-        if (root.name == childName)
-            return root;
-
-        for (int i = 0; i < root.childCount; i++)
-        {
-            Transform result = FindDeepChild(root.GetChild(i), childName);
-
-            if (result != null)
-                return result;
+            HideFirstPersonParts();
         }
 
-        return null;
+        private void Update()
+        {
+            Look();
+            UpdateFov();
+        }
+
+        private void Look()
+        {
+            if (Cursor.lockState != CursorLockMode.Locked || input.RotateHeld)
+                return;
+
+            transform.rotation *= Quaternion.Euler(0f, input.Look.x * sensitivity, 0f);
+            pitch = Mathf.Clamp(pitch - input.Look.y * sensitivity, minPitch, maxPitch);
+
+            if (cameraPivot != null)
+                cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+
+        private void UpdateFov()
+        {
+            if (playerCamera == null)
+                return;
+
+            float targetFov = movement.IsRunning ? runningFov : defaultFov;
+            playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFov, fovSmoothSpeed * Time.deltaTime);
+        }
+
+        private void HideFirstPersonParts()
+        {
+            if (modelRoot == null || hiddenFirstPersonParts == null)
+                return;
+
+            foreach (string partName in hiddenFirstPersonParts)
+            {
+                Transform part = FindDeepChild(modelRoot, partName);
+
+                if (part == null)
+                    continue;
+
+                foreach (Renderer targetRenderer in part.GetComponentsInChildren<Renderer>())
+                    targetRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            }
+        }
+
+        private static Transform FindDeepChild(Transform root, string childName)
+        {
+            if (root == null || string.IsNullOrWhiteSpace(childName))
+                return null;
+
+            if (root.name == childName)
+                return root;
+
+            foreach (Transform child in root)
+            {
+                Transform result = FindDeepChild(child, childName);
+
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
     }
 }
-
-
