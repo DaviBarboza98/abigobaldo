@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8165308199392748763}
   - component: {fileID: 736446545324806315}
   - component: {fileID: 6019650499997875178}
+  - component: {fileID: 7093245677147222822}
   m_Layer: 0
   m_Name: Cuscuz
   m_TagString: Untagged
@@ -76,6 +77,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &6019650499997875178
 MonoBehaviour:
@@ -89,8 +91,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kind: 23
-  displayName: Cuscuz
+  definition: {fileID: 11400000, guid: 5d26c5570f3e4362ac837e0ac5fea541, type: 2}
+  visualPrefab: {fileID: 8243645093671475888, guid: 94bd5c75f4cf23c479ced73bc5df272d, type: 3}
+  canBePlated: 1
+--- !u!114 &7093245677147222822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101253319468274465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d4fc847a1b64644d90e4bf29a07c31d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placements:
+  - target: 1
+    localPosition: {x: 0, y: -0.08, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.9, y: 0.9, z: 0.9}
+  - target: 2
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 90, y: 0, z: 0}
+    localScale: {x: 0.0065, y: 0.0065, z: 0.0065}
+  - target: 4
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
 --- !u!1 &3819237095390136996
 GameObject:
   m_ObjectHideFlags: 0

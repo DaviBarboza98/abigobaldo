@@ -1,187 +1,167 @@
 # Prefabs
 
-Guia direto para montar prefabs no Unity. Leia a linha do prefab, crie os GameObjects filhos, adicione os componentes e preencha os campos.
+Guia de montagem dos prefabs atuais. Os campos de receita e identidade usam assets; nenhum prefab precisa escolher comida por enum.
 
-## Pastas
+## Regras
 
-| Pasta | Uso |
-|---|---|
-| `Assets/Prefabs/Characters` | Abigobaldo e clientes. |
-| `Assets/Prefabs/Containers` | Frigideira, cuscuzeira, blender/base e futuros containers. |
-| `Assets/Prefabs/Environment` | Foodtruck, cozinha, portas, bancadas, cooktops. |
-| `Assets/Prefabs/Objects` | Objetos pegaveis: comidas, prato, copo do blender, cascas. |
-| `Assets/Prefabs/Player` | Player. |
-| `Assets/Prefabs/Props` | Decoracoes e objetos genericos. |
-| `Assets/Prefabs/Spawners` | Spawners de objetos. |
-| `Assets/Prefabs/UI` | Interface. |
-| `Assets/Prefabs/Visuals` | Visuals de comida para prato/container. |
-
-## Regras Rapidas
-
-| Tipo | Regra |
-|---|---|
-| Objeto pegavel | Root com `HoldableObject`, `ObjectIdentity`, `Rigidbody` e collider. |
-| Container pegavel | Root com script da station, `HoldableObject`, `ObjectIdentity`, `Rigidbody` e collider. |
-| Visual prefab | Sem `Rigidbody`, sem collider, sem `HoldableObject`, sem `ObjectIdentity`. |
-| Modelo | Fica no filho `Model` ou `Mesh`. |
-| Ajuste de mao | Filho opcional `GripPoint`. |
-| Receitas | Stations recebem `DemoRecipeBook.asset`. |
-| Tipo do station | Nao configurar. O script ja define: `FryingPanStation`, `CuscuzeiraStation`, `BlenderStation`. |
-
-## Assets de Data
-
-| Asset | Caminho | Usado por |
+| Tipo | Componentes no root | Filhos recomendados |
 |---|---|---|
-| `DemoRecipeBook` | `Assets/_Scripts/Data/RecipeBooks/DemoRecipeBook.asset` | Todos os stations. |
-| Recipes | `Assets/_Scripts/Data/Recipes` | Referenciadas dentro do `DemoRecipeBook`. |
+| Objeto pegavel | `HoldableObject`, `ObjectIdentity`, `ObjectVisualPreset`, `Rigidbody`, collider | `Model`, `GripPoint` opcional |
+| Container pegavel | script da station, `HoldableObject`, `Rigidbody`, collider | `Model`, anchors necessarios |
+| Spawner | `ObjectSpawner`, collider | `Model`, `SpawnPoint` opcional |
 
-## Player
+## Dados
 
-| GameObject | Filho de | Componentes | Campos |
+| Asset | Pasta | Funcao |
+|---|---|---|
+| `ObjectDefinition` | `Assets/_Scripts/Data/Objects` | Identidade leve usada para comparar ingredientes. |
+| `RecipeData` | `Assets/_Scripts/Data/Recipes` | Ingredientes, estacao, transformacoes, tempos e aparencia de cada estado. |
+| `RecipeBook` | `Assets/_Scripts/Data/RecipeBooks/RecipeBook.asset` | Lista unica das receitas e prefab global obrigatorio de `Charcoal`. |
+
+Nos campos `In Progress Prefab`, `Result Prefab` e `Byproducts`, arraste o **GameObject do prefab**. O Inspector nao pede mais um componente `HoldableObject`; o sistema valida esse componente somente quando precisar instanciar o prefab.
+
+## Estados Aquecidos
+
+| Ordem | Estado | Configuracao no `RecipeData` |
+|---:|---|---|
+| 1 | `Raw` | Material e modelo opcionais. |
+| 2 | `AlmostReady` | Tempo, material e modelo opcionais. |
+| 3 | `Ready` | Usa `Processing Time`; material e modelo opcionais. |
+| 4 | `Overdone` | Tempo, material e modelo opcionais. |
+| 5 | `Burned` | Tempo, material e modelo opcionais. |
+| 6 | `Carbonized` | Usa `Carbonized Time` e sempre substitui o objeto pelo `Charcoal Prefab` do `RecipeBook`. |
+
+Receitas sem calor, como o blender, deixam `Uses Heat` desligado e terminam em `Processing Time`; elas nao queimam.
+
+## Objetos
+
+| Prefab | Componentes extras | `ObjectIdentity` | Observacao |
 |---|---|---|---|
-| `Player` | root | `PlayerInput`, `PlayerMovement`, `PlayerCamera`, `PlayerCursor`, `PlayerInteractor` | Referenciar camera e holder se nao pegar automatico. |
-| `Model` | `Player` | nenhum obrigatorio | Organizacao. |
-| `Body` | `Model` | renderers | Corpo visivel. |
-| `Head` | `Model` | renderers | Deixar oculto em primeira pessoa. |
-| `CameraPivot` | `Player` | nenhum | Pivot da camera. |
-| `Camera` | `CameraPivot` | `Camera`, `AudioListener` | Camera principal. |
-| `Holder` | `Camera` ou `CameraPivot` | `Holder` | Ponto onde objeto fica na mao. |
+| `Egg` | `ObjectVisualPreset` | `Egg`, nao empratavel | Ingrediente. Configure pose de `FryingPan` se ele puder aparecer em container. |
+| `Corn` | `ObjectVisualPreset` | `Corn`, nao empratavel | Ingrediente. Configure pose de `Blender` e `FryingPan`. |
+| `CornFlakes` | `ObjectVisualPreset` | `CornFlakes`, nao empratavel | Resultado do blender. Configure pose de `Cuscuzeira` se um dia for visivel. |
+| `FriedEgg` | `ObjectVisualPreset`, `PlateableObject`, `RotationTransform` | `FriedEgg`, empratavel | So ele pode virar omelete ao girar. |
+| `Omelet` | `ObjectVisualPreset`, `PlateableObject` | `Omelet`, empratavel | Cozinha como receita propria. |
+| `Cuscuz` | `ObjectVisualPreset`, `PlateableObject` | `Cuscuz`, empratavel | Conteudo da cuscuzeira fica oculto, mas precisa pose de `Plate`. |
+| `RoastedCorn` | `ObjectVisualPreset`, `PlateableObject` | `RoastedCorn`, empratavel | Usa o proprio modelo do objeto em container/prato. |
+| `Charcoal` | `ObjectVisualPreset`, `PlateableObject` | `Charcoal`, empratavel | Resultado carbonizado global. |
+| `EggShellA/B` | nenhum | `EggShell`, nao empratavel | Subprodutos da receita do ovo. |
+| `Plate` | `Plate` | `Plate`, nao empratavel | Precisa do filho `FoodRoot`. |
+| `BlenderCup` | `BlenderCupContent` | `BlenderCup`, nao empratavel | Precisa do filho `ContentRoot`. |
 
-## Objeto Pegavel Padrao
+Todo `ObjectIdentity` recebe:
 
-Use para: `Egg`, `Corn`, `CornFlakes`, `Cuscuz`, `FriedEgg`, `Omelet`, `Charcoal`, `EggShellA`, `EggShellB`, `RoastedCorn`.
+| Campo | Preenchimento |
+|---|---|
+| `Definition` | Asset correspondente em `Data/Objects`. |
 
-| GameObject | Filho de | Componentes | Campos |
+Comida que pode ir ao prato recebe `PlateableObject`. O campo antigo `Can Be Plated` fica escondido e so existe para prefabs velhos nao quebrarem.
+
+## Containers
+
+| Prefab | Componentes no root | Filhos | Campos |
 |---|---|---|---|
-| `ObjectName` | root | `HoldableObject`, `ObjectIdentity`, `Rigidbody`, collider | `ObjectIdentity.kind`; `HoldableObject.canBeThrown`. |
-| `Model` | `ObjectName` | renderers/mesh | Visual do objeto. |
-| `GripPoint` | `ObjectName` | nenhum | Opcional. Arrastar no `HoldableObject.gripPoint`. |
+| `FryingPan` | `FryingPanStation`, `HoldableObject`, `Rigidbody`, collider | `Model`, `ItemAnchor`, `SideEffectSpawnRoot`, `GripPoint` opcional | `Recipe Book`, `Item Anchor`, root das cascas; `Can Be Thrown` desligado. |
+| `Cuscuzeira` | `CuscuzeiraStation`, `HoldableObject`, `Rigidbody`, collider | `Model`, `GripPoint` opcional | `Recipe Book`; `Show Contents` desligado; `Can Be Thrown` desligado. |
+| `Blender` | `BlenderStation`, collider | `Model`, `CupAnchor/BlenderCup` encaixado | `Recipe Book`, referencia do copo opcional, `Spin Speed`. A base e fixa e nao possui `Rigidbody`. |
+| `BlenderCup` | `BlenderCupContent`, `HoldableObject`, `ObjectIdentity`, `Rigidbody`, collider | `Model`, `Lid`, `ContentRoot`, `GripPoint` opcional | `Content Root`; `Station` pode ficar vazio quando o copo comeca filho do blender. |
+| `Cooktop` | `CooktopSlot`, collider, `OutlineHighlightable` | `Model`, `ContainerAnchor` | `Container Anchor` recebe o ponto de encaixe; `Starting Container` e opcional. |
 
-## Objetos Atuais
+O `BlenderCup` deve ser uma instancia aninhada do prefab e filho de `Blender/CupAnchor`. Copo e motor possuem `OutlineHighlightable` independentes. Clique no copo para pega-lo; clique no motor segurando o copo para encaixa-lo. Sem o copo, o motor nao processa receitas.
 
-| Prefab | Pasta | Kind | Collider recomendado | Observacao |
-|---|---|---|---|---|
-| `Egg` | `Objects` | `Egg` | `SphereCollider` ou `MeshCollider convex` | Filho visual deve ser `Model/Mesh`, nao `Ovo`. |
-| `Corn` | `Objects` | `Corn` | `CapsuleCollider` | OK. |
-| `CornFlakes` | `Objects` | `CornFlakes` | `BoxCollider` pequeno | Melhor visual como varios floquinhos sem fisica. |
-| `Cuscuz` | `Objects` | `Cuscuz` | `BoxCollider` ou `MeshCollider convex` | Pode ser empratado quando pronto. |
-| `FriedEgg` | `Objects` | `FriedEgg` | `BoxCollider` baixo ou `MeshCollider convex` | Recebe `CookableItem` em runtime. |
-| `Omelet` | `Objects` | `Omelet` | `BoxCollider` baixo ou `MeshCollider convex` | Recebe `CookableItem` em runtime. |
-| `Charcoal` | `Objects` | `Charcoal` | `BoxCollider` | Pode ser empratado. |
-| `EggShellA` | `Objects` | `Generic` ou `Decorative` | `MeshCollider convex` | Spawn lateral da receita do ovo. |
-| `EggShellB` | `Objects` | `Generic` ou `Decorative` | `MeshCollider convex` | Spawn lateral da receita do ovo. |
-| `Plate` | `Objects` | `Plate` | `MeshCollider convex` ou `BoxCollider` | Tem script `Plate`. |
-| `BlenderCup` | `Objects` | `BlenderCup` | `MeshCollider convex` ou colliders simples | Copo pegavel separado da base. |
+`FryingPanStation` e `CuscuzeiraStation` herdam de `HeatedContainerStation`. Por isso, somente avancam o timer enquanto estiverem encaixadas em um `CooktopSlot`. Ao pegar o recipiente, ele libera a boca e pausa; ao clicar numa boca vazia segurando o recipiente, ele encaixa e retoma. Uma futura panela recebe a mesma capacidade herdando de `HeatedContainerStation`, sem alterar o cooktop.
 
 ## Plate
 
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `Plate` | root | `HoldableObject`, `ObjectIdentity`, `Rigidbody`, `Plate`, collider | `ObjectIdentity.kind = Plate`; preencher `foodRoot` e `foodVisuals`. |
-| `Model` | `Plate` | renderers/mesh | Visual do prato. |
-| `FoodRoot` | `Plate` | nenhum | Onde comida empratada aparece. |
-| `GripPoint` | `Plate` | nenhum | Opcional. |
+| GameObject | Componentes | Configuracao |
+|---|---|---|
+| `Plate` | componentes de objeto + `Plate` | `Food Root` aponta para o filho abaixo. |
+| `FoodRoot` | somente `Transform` | Pivot onde o visual da comida aparece. |
 
-## Visual Prefab
+O prato nao possui lista de comidas. Ele clona o proprio objeto recebido, remove fisica/scripts de gameplay da copia e aplica a pose `Plate` do `ObjectVisualPreset`.
 
-Use para: `FriedEggVisual`, `OmeletVisual`, `CuscuzVisual`, `CharcoalVisual`, `CornVisual`, `CornFlakesVisual`.
+## Visual Do Objeto
 
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `FoodVisual` | root | `ObjectVisualPreset` | Configurar poses por target. |
-| `Mesh` | `FoodVisual` | renderers/mesh | Sem collider. |
+| Componente | Campo | Uso |
+|---|---|---|
+| `ObjectVisualPreset` | `Placements` | Fica no root do prefab real do objeto, nao em prefab separado. |
+| Placement | `Target` | `Plate`, `FryingPan`, `Blender`, `Cuscuzeira` ou `Default`. |
+| Placement | posicao, rotacao, escala | Ajuste local a partir do anchor do destino. |
 
-| Target no `ObjectVisualPreset` | Uso |
+O visual nasce assim: o container/prato instancia uma copia do prefab do objeto, tira `Rigidbody`, colliders e scripts de gameplay, coloca essa copia como filha do anchor e aplica a pose do `ObjectVisualPreset`.
+
+Para um objeto entrar em um container, ele precisa ter uma entrada exata para o target daquele container. Exemplo: para entrar no liquidificador, precisa de `Blender`; para entrar na frigideira, precisa de `FryingPan`; para entrar na cuscuzeira, precisa de `Cuscuzeira`. A entrada `Default` serve apenas como fallback de pose quando o visual ja foi aceito por outro caminho.
+
+| Ajuste | Onde fazer |
 |---|---|
-| `Default` | Fallback. |
-| `Plate` | Posição no prato. |
-| `FryingPan` | Posição na frigideira. |
-| `Blender` | Posição dentro do copo do blender. |
-| `Cuscuzeira` | Só usar se algum dia mostrar conteúdo. |
+| Corrigir pivot torto/importacao do FBX | No filho `Model` dentro do prefab do objeto. |
+| Definir como aparece no prato | `ObjectVisualPreset` no root, entrada `Plate`. |
+| Definir como aparece na frigideira | `ObjectVisualPreset` no root, entrada `FryingPan`. |
+| Definir como aparece no blender | `ObjectVisualPreset` no root, entrada `Blender`. |
+| Tamanho padrao para qualquer container | Entrada `Default`. |
 
-## FryingPan
+Sem uma entrada especifica, usa `Default`; sem `ObjectVisualPreset`, usa transform local zerado e escala `1`.
 
-Criar em `Assets/Prefabs/Containers/FryingPan.prefab`.
+## Spawners
 
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `FryingPan` | root | `FryingPanStation`, `HoldableObject`, `ObjectIdentity`, `Rigidbody`, collider | `recipeBook = DemoRecipeBook`; `itemAnchor`; `sideEffectSpawnRoot`; `canBeThrown = false`. |
-| `Model` | `FryingPan` | renderers/mesh | Visual da frigideira. |
-| `ItemAnchor` | `FryingPan` | nenhum | Onde o item/visual fica em cima da frigideira. |
-| `SideEffectSpawnRoot` | `FryingPan` | nenhum | Onde cascas de ovo spawnam. |
-| `Particles` | `FryingPan` | `ParticleSystem`, `StationParticles` | Fumaça baixa. |
-| `GripPoint` | `FryingPan` | nenhum | Opcional. |
+| Prefab | `ObjectSpawner.prefab` | Configuracao |
+|---|---|---|
+| `EggSpawner` | `Egg` | `Give Directly To Holder` ligado. |
+| `CornSpawner` | `Corn` | `Give Directly To Holder` ligado. |
+| `PlateSpawner` | `Plate` | `Give Directly To Holder` ligado. |
 
-## Cuscuzeira
+## Player
 
-Criar em `Assets/Prefabs/Containers/Cuscuzeira.prefab`.
+| GameObject | Componentes principais | Filhos |
+|---|---|---|
+| `Player` | `PlayerInput`, `PlayerMovement`, `PlayerCamera`, `PlayerCursor`, `PlayerInteractor`, `CharacterController` | `Model`, `CameraPivot` |
+| `Model` | nenhum obrigatorio | `Body`, `Head` |
+| `CameraPivot` | nenhum | `Camera` |
+| `Camera` | `Camera`, `AudioListener` | `Holder` |
+| `Holder` | `Holder` | nenhum |
 
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `Cuscuzeira` | root | `CuscuzeiraStation`, `HoldableObject`, `ObjectIdentity`, `Rigidbody`, collider | `recipeBook = DemoRecipeBook`; `canBeThrown = false`; `showContainedObject = false`. |
-| `Model` | `Cuscuzeira` | renderers/mesh | Visual da cuscuzeira. |
-| `Particles` | `Cuscuzeira` | `ParticleSystem`, `StationParticles` | Vapor. |
-| `GripPoint` | `Cuscuzeira` | nenhum | Opcional. |
+`Head` deve ficar invisivel em primeira pessoa; `Body` continua visivel.
 
-## Blender Base
+## Outros
 
-Criar em `Assets/Prefabs/Containers/Blender.prefab`.
-
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `Blender` | root | `BlenderStation`, collider | `recipeBook = DemoRecipeBook`; `cup = BlenderCupContent` se o copo for filho inicial. |
-| `Model` | `Blender` | renderers/mesh | Base fixa do liquidificador. |
-| `CupAnchor` | `Blender` | nenhum | Ponto onde o `BlenderCup` fica encaixado. |
-| `Button` | `Blender` | collider opcional | Futuro botão separado. |
-
-## BlenderCup
-
-Prefab em `Assets/Prefabs/Objects/BlenderCup.prefab`.
-
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `BlenderCup` | root | `HoldableObject`, `ObjectIdentity`, `Rigidbody`, `BlenderCupContent`, collider | `ObjectIdentity.kind = BlenderCup`; `contentRoot = ContentRoot`; `canBeThrown = false`. |
-| `Model` | `BlenderCup` | renderers/mesh | Copo transparente. |
-| `Lid` | `BlenderCup` | renderers/mesh | Tampa. |
-| `ContentRoot` | `BlenderCup` | nenhum | Onde o conteúdo fica. Vai junto se pegar o copo. |
-| `GripPoint` | `BlenderCup` | nenhum | Opcional. |
-
-## Spawner Padrao
-
-Use para: `EggSpawner`, `CornSpawner`, `PlateSpawner`.
-
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `ThingSpawner` | root | `ObjectSpawner`, collider | `prefab`; `giveDirectlyToHolder = true`; `replaceHeldObject = true`. |
-| `Model` | `ThingSpawner` | renderers/mesh | Visual do item exposto. |
-| `SpawnPoint` | `ThingSpawner` | nenhum | Opcional. |
-
-## Door
-
-Criar em `Assets/Prefabs/Environment`.
-
-| GameObject | Filho de | Componentes | Campos |
-|---|---|---|---|
-| `Door` | root | `OpenableDoor`, collider | Pivot no eixo da dobradiça; `rotationAxis`; `maxOpenAngle = 90`. |
-| `Model` | `Door` | renderers/mesh | Visual da porta. |
-
-## Props
-
-| Tipo | GameObjects | Componentes no root | Exemplo |
-|---|---|---|---|
-| Prop pegavel | `PropName > Model, GripPoint` | `HoldableObject`, `ObjectIdentity`, `Rigidbody`, collider | Radio, saleiro, pimenteiro. |
-| Prop fixo | `PropName > Model` | collider só se bloquear ou interagir | Poster, lâmpada, calendário. |
-
-## Checklist Curta
-
-| Feito | Tarefa |
+| Prefab | Componentes |
 |---|---|
-| [ ] | Criar `Containers/FryingPan.prefab`. |
-| [ ] | Criar `Containers/Cuscuzeira.prefab`. |
-| [ ] | Criar `Containers/Blender.prefab`. |
-| [ ] | Revisar `Objects/BlenderCup.prefab`. |
-| [ ] | Renomear filhos antigos tipo `Ovo`, `Item_Charcoal`, `Food_EggShellA` para `Mesh`. |
-| [ ] | Remover colliders dos prefabs em `Visuals`. |
-| [ ] | Renomear `Plated*Visual` para `*Visual`. |
-| [ ] | Adicionar `ObjectVisualPreset` em todos os visuals. |
-| [ ] | Garantir `DemoRecipeBook.asset` em todos os stations. |
+| Porta | `OpenableDoor`, collider; pivot na dobradica. |
+| Prop pegavel | estrutura de objeto pegavel e uma `ObjectDefinition` propria. |
+| Prop fixo | renderers e collider apenas quando necessario. |
+
+## Estruturas Vazias
+
+| Prefab | Onde colocar o modelo | Componentes ja preparados |
+|---|---|---|
+| `Characters/Customer_Marcia` | `Model` | `CapsuleCollider`, `DialogueAnchor`. |
+| `Characters/Customer_Nino` | `Model` | `CapsuleCollider`, `DialogueAnchor`. |
+| `Characters/Customer_SeuZe` | `Model` | `CapsuleCollider`, `DialogueAnchor`. |
+| `Environment/FoodTruck` | `ExteriorModel` e `InteriorModel` | `CustomerQueueRoot`, `PlayerSpawnPoint`. |
+| `Environment/Door` | `Pivot/Model` | `OpenableDoor`, pivot, collider e eixo Z. |
+| `Environment/TrashCan` | `Model` | Collider e `DepositPoint`; aguarda o sistema de descarte. |
+| `Environment/ServiceCounter` | `Model` | Trigger, `PlateAnchor` e `CustomerAnchor`; aguarda pedidos/entrega. |
+| `Props/Radio` | `Model` | Objeto pegavel, collider, `Radio.asset`; aguarda sistema de audio. |
+| `Props/SaltShaker` | `Model` | Objeto pegavel, collider e `SaltShaker.asset`. |
+| `Props/PepperShaker` | `Model` | Objeto pegavel, collider e `PepperShaker.asset`. |
+| `UI/HUD` | UI sob o proprio root | `RectTransform`; aguarda feedback de interacao e pedidos. |
+| `UI/DialoguePanel` | UI sob o proprio root | `RectTransform`; aguarda o sistema de dialogo. |
+| `UI/OrderTicket` | UI sob o proprio root | `RectTransform`; aguarda o sistema de pedidos. |
+| `UI/MainMenu` | UI sob o proprio root | `RectTransform`; aguarda a logica de menu. |
+| `UI/ResultsScreen` | UI sob o proprio root | `RectTransform`; aguarda o sistema de resultados. |
+
+## Checklist
+
+| Feito | Verificacao |
+|---|---|
+| [ ] | Cada objeto aponta para seu `ObjectDefinition`. |
+| [ ] | Cada comida empratavel tem `PlateableObject`. |
+| [ ] | Cada objeto que aparece em container/prato tem `ObjectVisualPreset` no proprio prefab. |
+| [ ] | Todas as stations apontam para `RecipeBook.asset`. |
+| [ ] | `RecipeBook.Charcoal Prefab` aponta para `Charcoal`. |
+| [ ] | `FriedEgg` possui `RotationTransform`; os outros objetos nao. |
+| [ ] | `BlenderCup.ContentRoot` esta preenchido e o copo inicia filho do blender. |
+| [ ] | `FryingPan.ItemAnchor` e o root das cascas estao preenchidos. |
+| [ ] | `Cuscuzeira.Show Contents` esta desligado. |
+| [ ] | Cada cooktop possui `ContainerAnchor`; `Starting Container` aponta para o recipiente que comeca naquela boca. |
+| [ ] | `BlenderCup` continua uma instancia aninhada do prefab, com collider convexo e highlight proprio. |

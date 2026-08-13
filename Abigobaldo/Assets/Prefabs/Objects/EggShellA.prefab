@@ -121,8 +121,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kind: 1
-  displayName: Egg Shell
+  definition: {fileID: 11400000, guid: e5a8364bdf30460a96521dd25762df1e, type: 2}
+  visualPrefab: {fileID: 0}
+  canBePlated: 0
 --- !u!1 &7425221563162203204
 GameObject:
   m_ObjectHideFlags: 0

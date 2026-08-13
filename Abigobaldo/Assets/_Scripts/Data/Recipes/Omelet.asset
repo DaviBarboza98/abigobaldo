@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05200edc31b623d4f8d609a56c8617f3, type: 3}
+  m_Name: Omelet
+  m_EditorClassIdentifier: 
+  requiredStation: 0
+  ingredients:
+  - definition: {fileID: 11400000, guid: 062951e760a24e7eae9bf5087083d65b, type: 2}
+    amount: 1
+  inProgressPrefab: {fileID: 0}
+  resultPrefab: {fileID: 0}
+  processingTime: 10
+  usesHeat: 1
+  almostReadyTime: 5
+  overdoneTime: 15
+  burnedTime: 20
+  carbonizedTime: 25
+  rawAppearance:
+    material: {fileID: 2100000, guid: 692a26b8f81071441a8764fe2134afb4, type: 2}
+    modelPrefab: {fileID: 0}
+  almostReadyAppearance:
+    material: {fileID: 2100000, guid: 692a26b8f81071441a8764fe2134afb4, type: 2}
+    modelPrefab: {fileID: 0}
+  readyAppearance:
+    material: {fileID: 2100000, guid: 692a26b8f81071441a8764fe2134afb4, type: 2}
+    modelPrefab: {fileID: 0}
+  overdoneAppearance:
+    material: {fileID: 2100000, guid: 07cc9815bbf597447bd4395730e54663, type: 2}
+    modelPrefab: {fileID: 0}
+  burnedAppearance:
+    material: {fileID: 2100000, guid: e0a76244844b4884fab1f425dae2552a, type: 2}
+    modelPrefab: {fileID: 0}
+  byproducts: []

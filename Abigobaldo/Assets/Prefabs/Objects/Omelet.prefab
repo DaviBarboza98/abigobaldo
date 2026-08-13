@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 88099485041367057}
   - component: {fileID: 3716004642490695564}
   - component: {fileID: 9066315607579656249}
+  - component: {fileID: 920300000000000102}
   m_Layer: 0
   m_Name: Omelet
   m_TagString: Untagged
@@ -227,5 +228,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kind: 12
-  displayName: Omelet
+  definition: {fileID: 11400000, guid: 062951e760a24e7eae9bf5087083d65b, type: 2}
+  visualPrefab: {fileID: 5664562380880763276, guid: cd97ffa9a8ecbca418c8c0b9b098336c, type: 3}
+  canBePlated: 1
+--- !u!114 &920300000000000102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8371421149929513085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d4fc847a1b64644d90e4bf29a07c31d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  placements:
+  - target: 1
+    localPosition: {x: 0, y: -0.08, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.9, y: 0.9, z: 0.9}
+  - target: 2
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 90, y: 0, z: 0}
+    localScale: {x: 0.0065, y: 0.0065, z: 0.0065}

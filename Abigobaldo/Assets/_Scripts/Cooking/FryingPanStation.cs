@@ -1,21 +1,19 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Abigobaldo.Game
 {
-    public class FryingPanStation : ContainerStation
+    public class FryingPanStation : HeatedContainerStation
     {
-        [SerializeField] private Transform itemAnchor;
+        [FormerlySerializedAs("itemAnchor")]
+        [SerializeField] private Transform contentAnchor;
 
+        protected override RecipeStationType StationType => RecipeStationType.FryingPan;
         protected override ObjectVisualTarget VisualTarget => ObjectVisualTarget.FryingPan;
 
-        protected override RecipeData FindRecipe(DemoRecipeBook book, ObjectKind inputKind)
+        protected override Transform GetContentAnchor()
         {
-            return book.FindFryingPanRecipe(inputKind);
-        }
-
-        protected override Transform GetAnchor()
-        {
-            return itemAnchor != null ? itemAnchor : transform;
+            return contentAnchor != null ? contentAnchor : transform;
         }
     }
 }

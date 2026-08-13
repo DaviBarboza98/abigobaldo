@@ -39,11 +39,12 @@ Pastas:
 
 - `_Scripts/Player`: input, camera, movimento, interacao.
 - `_Scripts/Objects`: objetos pegaveis, holder, spawners e prato.
-- `_Scripts/Cooking`: recipes, containers, estados de comida e particulas.
+- `_Scripts/Cooking`: recipes, containers e estados de comida.
+- `_Scripts/Data/Objects`: identidades leves dos objetos usados em receitas.
+- `_Scripts/Data/Recipes`: receitas, tempos e aparencias de cada estado de cozimento.
 - `_Scripts/Interaction`: portas, highlight e interfaces.
 - `_Scripts/System`: configuracoes globais pequenas, como performance.
-- `_Scripts/Data/RecipeBooks`: assets que agrupam receitas por jogo/modo.
-- `_Scripts/Data/Recipes`: assets de receita do jogo.
+- `_Scripts/Data/RecipeBooks`: livro unico que agrupa as receitas do jogo.
 
 ## Prefabs
 

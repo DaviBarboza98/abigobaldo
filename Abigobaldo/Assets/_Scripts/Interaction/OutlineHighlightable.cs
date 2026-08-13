@@ -45,7 +45,7 @@ namespace Abigobaldo.Game
 
             foreach (Renderer targetRenderer in targetRenderers)
             {
-                if (targetRenderer == null)
+                if (targetRenderer == null || !BelongsToThisHighlight(targetRenderer))
                     continue;
 
                 if (!originalMaterials.ContainsKey(targetRenderer))
@@ -110,6 +110,12 @@ namespace Abigobaldo.Game
                 return;
 
             targetRenderers = GetComponentsInChildren<Renderer>();
+        }
+
+        private bool BelongsToThisHighlight(Renderer targetRenderer)
+        {
+            OutlineHighlightable closestHighlight = targetRenderer.GetComponentInParent<OutlineHighlightable>();
+            return closestHighlight == null || closestHighlight == this;
         }
 
         private void OnDisable()

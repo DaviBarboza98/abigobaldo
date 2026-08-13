@@ -5,73 +5,87 @@ namespace Abigobaldo.Game
     public class BlenderStation : ContainerStation
     {
         [SerializeField] private BlenderCupContent cup;
+        [SerializeField] private float spinSpeed = 720f;
 
+        private bool isRunning;
+
+        protected override RecipeStationType StationType => RecipeStationType.Blender;
         protected override ObjectVisualTarget VisualTarget => ObjectVisualTarget.Blender;
-
-        protected override RecipeData FindRecipe(DemoRecipeBook book, ObjectKind inputKind)
-        {
-            return book.FindBlenderRecipe(inputKind);
-        }
 
         private void OnEnable()
         {
             CacheCup();
-            RefreshCupLock();
-        }
-
-        private void LateUpdate()
-        {
-            RefreshCupLock();
+            LockBasePickup();
         }
 
         public override void Interact(PlayerInteractor player)
         {
             CacheCup();
 
-            if (TryAttachHeldCup(player))
-                return;
+            if (!TryAttachHeldCup(player))
+                Debug.Log($"{name}: interaja com o copo para colocar ou retirar ingredientes.", this);
+        }
 
+        public void InteractWithCup(PlayerInteractor player)
+        {
+            CacheCup();
             base.Interact(player);
         }
 
         public override void PickInteract(PlayerInteractor player)
         {
-            // The blender base is fixed. The removable object is the BlenderCup.
+            CacheCup();
+
+            if (TryAttachHeldCup(player))
+                return;
+
+            if (!HasActiveRecipe || !HasContent || cup == null || !cup.IsAttached)
+            {
+                isRunning = false;
+                Debug.Log($"{name}: nao ha uma receita pronta para processar.", this);
+                return;
+            }
+
+            isRunning = !isRunning;
+            Debug.Log($"{name}: liquidificador {(isRunning ? "ligado" : "desligado")}.", this);
         }
 
         protected override bool CanInsertObject(PlayerInteractor player, ObjectIdentity identity, RecipeData recipe)
         {
             CacheCup();
 
-            if (cup == null || cup.IsAttached)
+            if (cup != null && cup.IsAttached)
                 return true;
 
-            Debug.Log($"{name}: encaixe o copo antes de colocar ingrediente.", this);
+            Debug.Log($"{name}: encaixe o copo antes de colocar ingredientes.", this);
             return false;
         }
 
-        protected override void OnContainedObjectInserted(HoldableObject insertedObject, RecipeData recipe)
-        {
-            RefreshCupLock();
-        }
-
-        protected override void OnContainedObjectRemoved(HoldableObject removedObject)
-        {
-            RefreshCupLock();
-        }
-
-        protected override void OnContainedObjectReplaced(HoldableObject previousObject, HoldableObject newObject)
-        {
-            RefreshCupLock();
-        }
-
-        protected override bool CanUpdateContainedObject()
+        protected override bool CanUpdateRecipe()
         {
             CacheCup();
-            return base.CanUpdateContainedObject() && cup != null && cup.IsAttached;
+            return base.CanUpdateRecipe() && isRunning && cup != null && cup.IsAttached;
         }
 
-        protected override Transform GetAnchor()
+        protected override void AnimateContent(float deltaTime)
+        {
+            if (ContentMotionTarget != null)
+                ContentMotionTarget.Rotate(0f, 0f, spinSpeed * deltaTime, Space.Self);
+        }
+
+        protected override void OnContentChanged()
+        {
+            if (!HasContent)
+                isRunning = false;
+        }
+
+        protected override void OnRecipeBecameReady()
+        {
+            isRunning = false;
+            Debug.Log($"{name}: receita pronta; liquidificador desligado automaticamente.", this);
+        }
+
+        protected override Transform GetContentAnchor()
         {
             CacheCup();
             return cup != null ? cup.ContentRoot : transform;
@@ -84,25 +98,49 @@ namespace Abigobaldo.Game
 
             HoldableObject releasedCup = player.Holder.ReleaseHeldObject();
 
-            if (releasedCup == null || !heldCup.TryAttachHome())
+            if (releasedCup == null)
                 return false;
 
+            if (!heldCup.TryAttachHome())
+            {
+                player.Holder.TryPickUp(releasedCup);
+                return false;
+            }
+
             cup = heldCup;
-            RefreshCupLock();
             Debug.Log($"{name}: copo encaixado.", this);
             return true;
-        }
-
-        private void RefreshCupLock()
-        {
-            CacheCup();
-            cup?.HoldableObject?.SetPickupLocked(false);
         }
 
         private void CacheCup()
         {
             if (cup == null)
                 cup = GetComponentInChildren<BlenderCupContent>(true);
+        }
+
+        private void LockBasePickup()
+        {
+            HoldableObject baseHoldable = GetComponent<HoldableObject>();
+            baseHoldable?.SetPickupLocked(true);
+
+            Rigidbody body = GetComponent<Rigidbody>();
+
+            if (body == null)
+                return;
+
+            if (!body.isKinematic)
+            {
+                body.velocity = Vector3.zero;
+                body.angularVelocity = Vector3.zero;
+            }
+
+            body.useGravity = false;
+            body.isKinematic = true;
+        }
+
+        private void OnValidate()
+        {
+            spinSpeed = Mathf.Max(0f, spinSpeed);
         }
     }
 }

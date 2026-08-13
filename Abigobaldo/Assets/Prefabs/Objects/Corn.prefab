@@ -151,6 +151,7 @@ GameObject:
   - component: {fileID: 8652719106451286000}
   - component: {fileID: 5288080062610656972}
   - component: {fileID: 8566704415311612236}
+  - component: {fileID: 5293063692467836533}
   m_Layer: 0
   m_Name: Corn
   m_TagString: Untagged
@@ -215,6 +216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &8566704415311612236
 MonoBehaviour:
@@ -228,5 +230,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kind: 20
-  displayName: Corn
+  definition: {fileID: 11400000, guid: ddce042763b24c71802b24cdf622df7f, type: 2}
+  visualPrefab: {fileID: 920100000000000001, guid: 2acb3240f1774557aead64b8a0e4a471, type: 3}
+  canBePlated: 0
+--- !u!114 &5293063692467836533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8502167523777731712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d4fc847a1b64644d90e4bf29a07c31d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placements:
+  - target: 1
+    localPosition: {x: 0.207, y: 0.112, z: 0.381}
+    localEulerAngles: {x: -90, y: 0, z: 27.249}
+    localScale: {x: 1.2, y: 1.2, z: 1.2}
+  - target: 3
+    localPosition: {x: 0, y: 0, z: -0.00286}
+    localEulerAngles: {x: 90, y: 0, z: 27.249}
+    localScale: {x: 0.0085, y: 0.0085, z: 0.0085}
+  - target: 2
+    localPosition: {x: 0.00105, y: -0.00293, z: 0.00146}
+    localEulerAngles: {x: 0, y: 0, z: 22.112}
+    localScale: {x: 0.0085, y: 0.0085, z: 0.0085}

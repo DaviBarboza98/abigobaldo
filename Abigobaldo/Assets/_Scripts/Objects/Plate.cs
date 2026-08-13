@@ -3,145 +3,171 @@ using UnityEngine.Serialization;
 
 namespace Abigobaldo.Game
 {
-    public class Plate : MonoBehaviour, IInteractable
+    public class Plate : MonoBehaviour, IInteractable, IObjectContainer
     {
-        [System.Serializable]
-        private struct FoodVisual
-        {
-            public ObjectKind kind;
-            public GameObject visualPrefab;
-        }
+        [FormerlySerializedAs("foodRoot")]
+        [SerializeField] private Transform contentAnchor;
 
-        [SerializeField] private Transform foodRoot;
-        [FormerlySerializedAs("platedFoodVisuals")]
-        [SerializeField] private FoodVisual[] foodVisuals;
-
-        private ObjectKind contentKind = ObjectKind.None;
+        private HoldableObject contentObject;
+        private ObjectDefinition contentDefinition;
         private GameObject contentVisual;
+        private HoldableObject holdableObject;
 
-        public bool IsEmpty => contentKind == ObjectKind.None;
-        public ObjectKind ContentKind => contentKind;
+        public bool IsEmpty => contentObject == null;
+        public bool HasContent => contentObject != null;
+        public HoldableObject Holdable => holdableObject;
+        public ObjectDefinition ContentDefinition => contentDefinition;
+
+        private void Awake()
+        {
+            holdableObject = GetComponent<HoldableObject>();
+        }
 
         public void Interact(PlayerInteractor player)
         {
-            TryPlateHeldReadyFood(player);
-        }
+            if (player == null || player.Holder == null)
+                return;
 
-        public bool TrySetFood(ObjectKind kind, GameObject visualPrefab)
-        {
-            if (!IsEmpty || kind == ObjectKind.None)
-                return false;
-
-            contentKind = kind;
-            visualPrefab ??= GetPlatedVisual(kind);
-
-            if (visualPrefab != null)
+            if (!player.Holder.IsEmpty)
             {
-                Transform root = foodRoot != null ? foodRoot : transform;
-                contentVisual = ObjectVisualPreset.InstantiateFor(visualPrefab, ObjectVisualTarget.Plate, root);
+                TryInsertObject(player.Holder.CurrentObject, player);
+                return;
             }
 
-            return true;
+            TryTakeLastObject(player);
         }
 
-        public void Clear()
+        public bool TryInsertObject(HoldableObject source, PlayerInteractor player)
         {
-            contentKind = ObjectKind.None;
-
-            if (contentVisual != null)
-                Destroy(contentVisual);
-        }
-
-        private bool TryPlateHeldReadyFood(PlayerInteractor player)
-        {
-            if (player == null || player.Holder == null || !IsEmpty)
+            if (source == null || !IsEmpty)
                 return false;
 
-            if (!player.Holder.TryGetHeldIdentity(out ObjectIdentity heldIdentity))
+            if (IsContainer(source))
                 return false;
 
-            CookableItem cookable = player.Holder.CurrentObject != null ? player.Holder.CurrentObject.GetComponent<CookableItem>() : null;
+            ObjectIdentity identity = source.GetComponent<ObjectIdentity>();
 
-            if (cookable != null && !cookable.CanBePlated)
+            if (identity == null || identity.Definition == null)
                 return false;
 
-            if (cookable == null && !IsPlateableReadyFood(heldIdentity.Kind))
+            if (!ObjectVisualPreset.HasPlacementFor(source.gameObject, ObjectVisualTarget.Plate))
                 return false;
 
-            if (!TrySetFoodFromObject(player.Holder.CurrentObject))
+            HoldableObject insertedObject = source;
+
+            if (player != null && player.Holder != null && player.Holder.CurrentObject == source)
+                insertedObject = player.Holder.ReleaseHeldObject();
+
+            if (insertedObject == null)
                 return false;
 
-            player.Holder.ConsumeHeldObject();
+            contentDefinition = identity.Definition;
+            contentObject = insertedObject;
+            contentObject.PlaceInContainer(GetContentAnchor());
+            RefreshVisual();
             return true;
         }
 
         public bool TrySetFoodFromObject(HoldableObject source)
         {
-            if (source == null)
-                return false;
-
-            ObjectIdentity identity = source.GetComponent<ObjectIdentity>();
-
-            if (identity == null)
-                return false;
-
-            GameObject visualPrefab = GetPlatedVisual(identity.Kind);
-
-            if (visualPrefab != null)
-                return TrySetFood(identity.Kind, visualPrefab);
-
-            if (!IsEmpty)
-                return false;
-
-            contentKind = identity.Kind;
-            Transform root = foodRoot != null ? foodRoot : transform;
-            contentVisual = Instantiate(source.gameObject, root.position, root.rotation, root);
-            contentVisual.name = $"Visual_{source.name}";
-            contentVisual.transform.localPosition = Vector3.zero;
-            contentVisual.transform.localRotation = Quaternion.identity;
-            StripRuntimeComponents(contentVisual);
-            return true;
+            return TryInsertObject(source, null);
         }
 
-        private GameObject GetPlatedVisual(ObjectKind kind)
+        public bool TryTakeLastObject(PlayerInteractor player)
         {
-            if (foodVisuals == null)
-                return null;
+            if (player == null || player.Holder == null || !player.Holder.IsEmpty || contentObject == null)
+                return false;
 
-            foreach (FoodVisual entry in foodVisuals)
-            {
-                if (entry.kind == kind)
-                    return entry.visualPrefab;
-            }
-
-            return null;
+            HoldableObject target = ExtractContent();
+            return player.Holder.TryPickUp(target);
         }
 
-        private static bool IsPlateableReadyFood(ObjectKind kind)
+        public bool TryMoveLastObjectTo(IObjectContainer target, PlayerInteractor player)
         {
-            return kind == ObjectKind.FriedEgg
-                || kind == ObjectKind.Omelet
-                || kind == ObjectKind.Cuscuz
-                || kind == ObjectKind.RoastedCorn
-                || kind == ObjectKind.Charcoal;
+            if (target == null || target == this || contentObject == null)
+                return false;
+
+            HoldableObject item = ExtractContent();
+
+            if (target.TryInsertObject(item, player))
+                return true;
+
+            TryInsertObject(item, player);
+            return false;
         }
 
-        private static void StripRuntimeComponents(GameObject target)
+        public void Clear()
         {
-            foreach (Rigidbody rigidbody in target.GetComponentsInChildren<Rigidbody>())
-                Destroy(rigidbody);
+            contentDefinition = null;
+            contentObject = null;
 
-            foreach (Collider collider in target.GetComponentsInChildren<Collider>())
-                Destroy(collider);
+            if (contentVisual != null)
+                Destroy(contentVisual);
 
-            foreach (HoldableObject holdableObject in target.GetComponentsInChildren<HoldableObject>())
-                Destroy(holdableObject);
+            contentVisual = null;
+        }
 
-            foreach (CookableItem cookableItem in target.GetComponentsInChildren<CookableItem>())
-                Destroy(cookableItem);
+        public bool TryPlateHeldObject(PlayerInteractor player)
+        {
+            return player != null && player.Holder != null && TryInsertObject(player.Holder.CurrentObject, player);
+        }
 
-            foreach (ObjectIdentity identity in target.GetComponentsInChildren<ObjectIdentity>())
-                Destroy(identity);
+        private static bool IsContainer(HoldableObject source)
+        {
+            return source.GetComponent<IObjectContainer>() != null
+                || source.GetComponent<BlenderCupContent>() != null;
+        }
+
+        private Transform GetContentAnchor()
+        {
+            return contentAnchor != null ? contentAnchor : transform;
+        }
+
+        private HoldableObject ExtractContent()
+        {
+            HoldableObject item = contentObject;
+            ClearVisualOnly();
+            contentObject = null;
+            contentDefinition = null;
+            item.RemoveFromContainer();
+            return item;
+        }
+
+        private void RefreshVisual()
+        {
+            ClearVisualOnly();
+
+            if (contentObject == null)
+                return;
+
+            SetRenderersVisible(contentObject.gameObject, false);
+            contentVisual = ObjectVisualPreset.InstantiateFromObject(contentObject, ObjectVisualTarget.Plate, GetContentAnchor());
+
+            RecipeProgress progress = contentObject.GetComponent<RecipeProgress>();
+            progress?.ApplyVisualTo(contentVisual);
+        }
+
+        private void ClearVisualOnly()
+        {
+            if (contentVisual != null)
+                Destroy(contentVisual);
+
+            contentVisual = null;
+
+            if (contentObject != null)
+                SetRenderersVisible(contentObject.gameObject, true);
+        }
+
+        private static void SetRenderersVisible(GameObject target, bool visible)
+        {
+            foreach (Renderer targetRenderer in target.GetComponentsInChildren<Renderer>(true))
+                targetRenderer.enabled = visible;
+        }
+
+        private void OnValidate()
+        {
+            if (contentAnchor == null)
+                contentAnchor = transform;
         }
     }
 }

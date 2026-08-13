@@ -134,9 +134,9 @@ namespace Abigobaldo.Game
             Quaternion pitch = Quaternion.AngleAxis(pitchDegrees, cameraTransform.right);
             localTargetRotation = Quaternion.Inverse(transform.rotation) * (yaw * pitch * targetRotation);
 
-            CookableItem cookable = currentObject.GetComponent<CookableItem>();
             float rotationAmount = Mathf.Abs(yawDegrees) + Mathf.Abs(pitchDegrees);
-            HoldableObject mixedPrefab = cookable != null ? cookable.AddHandMix(rotationAmount) : null;
+            IHeldRotationReceiver rotationReceiver = currentObject.GetComponent<IHeldRotationReceiver>();
+            HoldableObject mixedPrefab = rotationReceiver?.AddRotation(rotationAmount);
 
             if (mixedPrefab != null)
                 TransformHeldInto(mixedPrefab);

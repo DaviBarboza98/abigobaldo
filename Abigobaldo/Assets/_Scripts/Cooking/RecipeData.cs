@@ -1,115 +1,208 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Abigobaldo.Game
 {
-    [CreateAssetMenu(menuName = "Abigobaldo/Recipe")]
-    public class RecipeData : ScriptableObject
+    [CreateAssetMenu(fileName = "NewRecipe", menuName = "Abigobaldo/Recipe")]
+    public sealed class RecipeData : ScriptableObject
     {
         [System.Serializable]
-        public struct StateVisual
+        public struct Ingredient
         {
-            public FoodState state;
+            public ObjectDefinition definition;
+            [Min(1)] public int amount;
+        }
+
+        [System.Serializable]
+        public struct StateAppearance
+        {
+            [Tooltip("Optional material applied when the food reaches this state.")]
             public Material material;
+            [Tooltip("Optional model used when the food reaches this state.")]
             public GameObject modelPrefab;
         }
 
         [Header("Match")]
-        [SerializeField] private ObjectKind inputKind;
-        [SerializeField] private ObjectKind[] resumeInputKinds;
+        [SerializeField] private RecipeStationType requiredStation;
+        [SerializeField] private Ingredient[] ingredients;
 
-        [Header("Output")]
-        [SerializeField] private HoldableObject outputOnInsertPrefab;
-        [SerializeField] private HoldableObject outputWhenReadyPrefab;
-        [SerializeField] private HoldableObject charcoalPrefab;
-        [SerializeField] private bool carbonizedTurnsIntoCharcoal = true;
+        [Header("Transformation")]
+        [Tooltip("Optional object used while the recipe is running. If empty, a single input object is kept.")]
+        [SerializeField] private GameObject inProgressPrefab;
+        [Tooltip("Optional replacement created when the recipe becomes ready.")]
+        [SerializeField] private GameObject resultPrefab;
 
-        [Header("Visual")]
-        [SerializeField] private GameObject containedVisualPrefab;
-        [SerializeField] private StateVisual[] stateVisuals;
+        [Header("Process")]
+        [SerializeField] private float processingTime = 5f;
+        [Tooltip("Enables the six heated-food states. Disable for finite processes such as blending.")]
+        [SerializeField] private bool usesHeat;
 
-        [Header("Timing")]
-        [SerializeField] private bool usesHeat = true;
-        [SerializeField] private bool canBurn = true;
-        [SerializeField] private bool spinsInContainer;
-        [SerializeField] private float spinSpeed = 720f;
+        [Header("Heated State Times")]
+        [Tooltip("Elapsed time when Raw becomes Almost Ready.")]
         [SerializeField] private float almostReadyTime = 5f;
-        [SerializeField] private float readyTime = 10f;
+        [Tooltip("Elapsed time when Ready becomes Overdone.")]
         [SerializeField] private float overdoneTime = 15f;
+        [Tooltip("Elapsed time when Overdone becomes Burned.")]
         [SerializeField] private float burnedTime = 20f;
+        [Tooltip("Elapsed time when the object is obligatorily replaced by the Recipe Book charcoal prefab.")]
         [SerializeField] private float carbonizedTime = 25f;
 
-        [Header("Side Effects")]
-        [SerializeField] private HoldableObject[] spawnedOnInsertPrefabs;
+        [Header("Heated State Appearances")]
+        [SerializeField] private StateAppearance rawAppearance;
+        [SerializeField] private StateAppearance almostReadyAppearance;
+        [SerializeField] private StateAppearance readyAppearance;
+        [SerializeField] private StateAppearance overdoneAppearance;
+        [SerializeField] private StateAppearance burnedAppearance;
 
-        [Header("Hand Mixing")]
-        [SerializeField] private HoldableObject handMixOutputPrefab;
-        [SerializeField] private FoodState handMixRequiredState = FoodState.AlmostReady;
-        [SerializeField] private float handMixRequiredIntensity = 80f;
+        [Header("Byproducts On Start")]
+        [SerializeField] private GameObject[] byproducts;
 
-        public ObjectKind InputKind => inputKind;
-        public HoldableObject OutputOnInsertPrefab => outputOnInsertPrefab;
-        public HoldableObject OutputWhenReadyPrefab => outputWhenReadyPrefab;
-        public HoldableObject CharcoalPrefab => charcoalPrefab;
-        public bool CarbonizedTurnsIntoCharcoal => carbonizedTurnsIntoCharcoal;
-        public GameObject ContainedVisualPrefab => containedVisualPrefab;
+        public RecipeStationType RequiredStation => requiredStation;
+        public IReadOnlyList<Ingredient> Ingredients => ingredients;
+        public GameObject InProgressPrefab => inProgressPrefab;
+        public GameObject ResultPrefab => resultPrefab;
+        public float ProcessingTime => processingTime;
         public bool UsesHeat => usesHeat;
-        public bool CanBurn => canBurn;
-        public bool SpinsInContainer => spinsInContainer;
-        public float SpinSpeed => spinSpeed;
-        public float AlmostReadyTime => almostReadyTime;
-        public float ReadyTime => readyTime;
-        public float OverdoneTime => overdoneTime;
-        public float BurnedTime => burnedTime;
-        public float CarbonizedTime => carbonizedTime;
-        public HoldableObject[] SpawnedOnInsertPrefabs => spawnedOnInsertPrefabs;
-        public HoldableObject HandMixOutputPrefab => handMixOutputPrefab;
-        public FoodState HandMixRequiredState => handMixRequiredState;
-        public float HandMixRequiredIntensity => handMixRequiredIntensity;
+        public IReadOnlyList<GameObject> Byproducts => byproducts;
+        public int RequiredIngredientCount => GetRequiredIngredientCount();
 
-        public bool Matches(ObjectKind targetInput)
+        public FoodState EvaluateState(float elapsedTime)
         {
-            if (inputKind == targetInput)
-                return true;
+            if (!usesHeat)
+                return elapsedTime >= processingTime ? FoodState.Ready : FoodState.Raw;
 
-            if (resumeInputKinds != null)
-            {
-                foreach (ObjectKind resumeInputKind in resumeInputKinds)
-                {
-                    if (resumeInputKind == targetInput)
-                        return true;
-                }
-            }
+            if (elapsedTime >= carbonizedTime)
+                return FoodState.Carbonized;
 
-            return false;
+            if (elapsedTime >= burnedTime)
+                return FoodState.Burned;
+
+            if (elapsedTime >= overdoneTime)
+                return FoodState.Overdone;
+
+            if (elapsedTime >= processingTime)
+                return FoodState.Ready;
+
+            if (elapsedTime >= almostReadyTime)
+                return FoodState.AlmostReady;
+
+            return FoodState.Raw;
         }
 
-        public bool TryGetStateVisual(FoodState state, out StateVisual visual)
+        public bool TryGetAppearance(FoodState state, out StateAppearance appearance)
         {
-            if (stateVisuals != null)
+            switch (state)
             {
-                foreach (StateVisual entry in stateVisuals)
-                {
-                    if (entry.state == state)
-                    {
-                        visual = entry;
-                        return true;
-                    }
-                }
+                case FoodState.Raw:
+                    appearance = rawAppearance;
+                    return true;
+                case FoodState.AlmostReady:
+                    appearance = almostReadyAppearance;
+                    return true;
+                case FoodState.Ready:
+                    appearance = readyAppearance;
+                    return true;
+                case FoodState.Overdone:
+                    appearance = overdoneAppearance;
+                    return true;
+                case FoodState.Burned:
+                    appearance = burnedAppearance;
+                    return true;
+                default:
+                    appearance = default;
+                    return false;
+            }
+        }
+
+        public bool Matches(RecipeStationType station, IReadOnlyList<ObjectDefinition> contents)
+        {
+            return requiredStation == station
+                && contents != null
+                && contents.Count == RequiredIngredientCount
+                && ContainsOnlyRequiredAmounts(contents);
+        }
+
+        public bool CanAccept(RecipeStationType station, IReadOnlyList<ObjectDefinition> contents)
+        {
+            return requiredStation == station
+                && contents != null
+                && contents.Count <= RequiredIngredientCount
+                && ContainsOnlyRequiredAmounts(contents);
+        }
+
+        private bool ContainsOnlyRequiredAmounts(IReadOnlyList<ObjectDefinition> contents)
+        {
+            if (ingredients == null || ingredients.Length == 0)
+                return false;
+
+            foreach (ObjectDefinition content in contents)
+            {
+                if (content == null || Count(contents, content) > GetRequiredAmount(content))
+                    return false;
             }
 
-            visual = default;
-            return false;
+            return true;
+        }
+
+        private int GetRequiredIngredientCount()
+        {
+            if (ingredients == null)
+                return 0;
+
+            int total = 0;
+
+            foreach (Ingredient ingredient in ingredients)
+                total += Mathf.Max(1, ingredient.amount);
+
+            return total;
+        }
+
+        private int GetRequiredAmount(ObjectDefinition definition)
+        {
+            if (ingredients == null)
+                return 0;
+
+            int total = 0;
+
+            foreach (Ingredient ingredient in ingredients)
+            {
+                if (ingredient.definition == definition)
+                    total += Mathf.Max(1, ingredient.amount);
+            }
+
+            return total;
+        }
+
+        private static int Count(IReadOnlyList<ObjectDefinition> contents, ObjectDefinition definition)
+        {
+            int count = 0;
+
+            foreach (ObjectDefinition content in contents)
+            {
+                if (content == definition)
+                    count++;
+            }
+
+            return count;
         }
 
         private void OnValidate()
         {
-            spinSpeed = Mathf.Max(0f, spinSpeed);
-            almostReadyTime = Mathf.Max(0f, almostReadyTime);
-            readyTime = Mathf.Max(almostReadyTime, readyTime);
-            overdoneTime = Mathf.Max(readyTime, overdoneTime);
+            processingTime = Mathf.Max(0f, processingTime);
+            almostReadyTime = Mathf.Clamp(almostReadyTime, 0f, processingTime);
+            overdoneTime = Mathf.Max(processingTime, overdoneTime);
             burnedTime = Mathf.Max(overdoneTime, burnedTime);
             carbonizedTime = Mathf.Max(burnedTime, carbonizedTime);
-            handMixRequiredIntensity = Mathf.Max(0f, handMixRequiredIntensity);
+
+            if (ingredients == null)
+                return;
+
+            for (int i = 0; i < ingredients.Length; i++)
+            {
+                Ingredient ingredient = ingredients[i];
+                ingredient.amount = Mathf.Max(1, ingredient.amount);
+                ingredients[i] = ingredient;
+            }
         }
     }
 }

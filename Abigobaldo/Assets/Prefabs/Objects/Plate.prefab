@@ -167,8 +167,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 7.2669983, y: 0.000005853272, z: 5.606038}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.67, y: 0.67, z: 0.67}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4274668961741090104}
   - {fileID: 4952558469195980907}
@@ -215,6 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &3122030885625173211
 MonoBehaviour:
@@ -228,8 +229,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kind: 30
-  displayName: Plate
+  definition: {fileID: 11400000, guid: b3cf2ddee48c46738cb9842be177b898, type: 2}
+  canBePlated: 0
 --- !u!114 &1710559504525256708
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,15 +244,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodRoot: {fileID: 4952558469195980907}
-  platedFoodVisuals:
-  - kind: 11
-    visualPrefab: {fileID: 1233837207503327123, guid: 98f4b77d51b344940a6cecb54f2fdd65, type: 3}
-  - kind: 40
-    visualPrefab: {fileID: 4854418956030494278, guid: ffb5354216f4fd04e8579fe0f6b3c9d7, type: 3}
-  - kind: 23
-    visualPrefab: {fileID: 8243645093671475888, guid: 94bd5c75f4cf23c479ced73bc5df272d, type: 3}
-  - kind: 12
-    visualPrefab: {fileID: 5664562380880763276, guid: cd97ffa9a8ecbca418c8c0b9b098336c, type: 3}
 --- !u!1 &4512563786988864575
 GameObject:
   m_ObjectHideFlags: 0

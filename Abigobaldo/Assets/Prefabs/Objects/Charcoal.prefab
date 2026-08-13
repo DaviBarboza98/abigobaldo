@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 811426520764410654}
   - component: {fileID: 9102420138286949324}
   - component: {fileID: 507761831008621525}
+  - component: {fileID: 604748979804210815}
   m_Layer: 0
   m_Name: Charcoal
   m_TagString: Untagged
@@ -108,6 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &507761831008621525
 MonoBehaviour:
@@ -121,8 +123,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b047a52bb5a24854396ffc09aaeebec6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kind: 40
-  displayName: Charcoal
+  definition: {fileID: 11400000, guid: ba80315162a9454a9e818680feef19c2, type: 2}
+  canBePlated: 1
+--- !u!114 &604748979804210815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2911660749610797691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d4fc847a1b64644d90e4bf29a07c31d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placements:
+  - target: 1
+    localPosition: {x: 0, y: 0.236, z: 0}
+    localEulerAngles: {x: 73.963, y: -60.87, z: -115.452}
+    localScale: {x: 1, y: 1, z: 1}
 --- !u!1 &4810563784211523688
 GameObject:
   m_ObjectHideFlags: 0

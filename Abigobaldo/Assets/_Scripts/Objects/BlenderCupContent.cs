@@ -1,12 +1,13 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Abigobaldo.Game
 {
-    public class BlenderCupContent : MonoBehaviour
+    public class BlenderCupContent : MonoBehaviour, IInteractable, IObjectContainer
     {
-        [SerializeField] private bool hasCrushedCorn;
-        [SerializeField] private GameObject crushedCornVisual;
-        [SerializeField] private Transform contentRoot;
+        [FormerlySerializedAs("contentRoot")]
+        [SerializeField] private Transform contentAnchor;
+        [SerializeField] private BlenderStation station;
 
         private HoldableObject holdableObject;
         private Rigidbody body;
@@ -15,10 +16,12 @@ namespace Abigobaldo.Game
         private Quaternion homeLocalRotation;
         private Vector3 homeLocalScale;
 
-        public bool HasCrushedCorn => hasCrushedCorn;
         public HoldableObject HoldableObject => holdableObject;
-        public Transform ContentRoot => contentRoot != null ? contentRoot : transform;
-        public bool IsAttached => transform.parent == homeParent && homeParent != null;
+        public HoldableObject Holdable => holdableObject;
+        public Transform ContentAnchor => contentAnchor != null ? contentAnchor : transform;
+        public Transform ContentRoot => ContentAnchor;
+        public bool IsAttached => homeParent != null && transform.parent == homeParent;
+        public bool HasContent => station != null && station.HasContent;
 
         private void Awake()
         {
@@ -27,22 +30,12 @@ namespace Abigobaldo.Game
             homeLocalRotation = transform.localRotation;
             homeLocalScale = transform.localScale;
             CacheReferences();
-            RefreshVisual();
         }
 
-        public void SetCrushedCorn(bool value)
+        public void Interact(PlayerInteractor player)
         {
-            hasCrushedCorn = value;
-            RefreshVisual();
-        }
-
-        public bool TryConsumeCrushedCorn()
-        {
-            if (!hasCrushedCorn)
-                return false;
-
-            SetCrushedCorn(false);
-            return true;
+            CacheReferences();
+            station?.InteractWithCup(player);
         }
 
         public bool TryAttachHome()
@@ -51,52 +44,50 @@ namespace Abigobaldo.Game
                 return false;
 
             CacheReferences();
-            transform.SetParent(homeParent);
+            holdableObject.PlaceOnDock(homeParent);
             transform.SetLocalPositionAndRotation(homeLocalPosition, homeLocalRotation);
             transform.localScale = homeLocalScale;
-
-            if (body != null)
-            {
-                body.velocity = Vector3.zero;
-                body.angularVelocity = Vector3.zero;
-                body.useGravity = false;
-                body.isKinematic = true;
-                body.detectCollisions = true;
-            }
-
             return true;
         }
 
-        public bool TryAttachTo(Transform anchor)
+        public bool TryPlateInto(Plate plate)
         {
-            if (anchor == null)
-                return false;
-
             CacheReferences();
-            transform.SetParent(anchor);
-            transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            return station != null && station.TryPlateInto(plate);
+        }
 
-            if (body != null)
+        public bool TryInsertObject(HoldableObject item, PlayerInteractor player)
+        {
+            CacheReferences();
+            return station != null && station.TryInsertObject(item, player);
+        }
+
+        public bool TryTakeLastObject(PlayerInteractor player)
+        {
+            CacheReferences();
+            return station != null && station.TryTakeLastObject(player);
+        }
+
+        public bool TryMoveLastObjectTo(IObjectContainer target, PlayerInteractor player)
+        {
+            CacheReferences();
+            return station != null && station.TryMoveLastObjectTo(target, player);
+        }
+
+        private void SetAttachedPhysics()
+        {
+            if (body == null)
+                return;
+
+            if (!body.isKinematic)
             {
                 body.velocity = Vector3.zero;
                 body.angularVelocity = Vector3.zero;
-                body.useGravity = false;
-                body.isKinematic = true;
-                body.detectCollisions = true;
             }
 
-            return true;
-        }
-
-        public bool TryPickUpWith(Holder holder)
-        {
-            CacheReferences();
-
-            if (holder == null || holdableObject == null || !holder.IsEmpty)
-                return false;
-
-            transform.SetParent(null);
-            return holder.TryPickUp(holdableObject);
+            body.useGravity = false;
+            body.isKinematic = true;
+            body.detectCollisions = true;
         }
 
         private void CacheReferences()
@@ -106,18 +97,15 @@ namespace Abigobaldo.Game
 
             if (body == null)
                 body = GetComponent<Rigidbody>();
-        }
 
-        private void RefreshVisual()
-        {
-            if (crushedCornVisual != null)
-                crushedCornVisual.SetActive(hasCrushedCorn);
+            if (station == null)
+                station = GetComponentInParent<BlenderStation>();
         }
 
         private void OnValidate()
         {
-            if (contentRoot == null)
-                contentRoot = transform;
+            if (contentAnchor == null)
+                contentAnchor = transform;
         }
     }
 }

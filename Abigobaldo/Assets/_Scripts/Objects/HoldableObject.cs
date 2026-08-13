@@ -31,6 +31,7 @@ namespace Abigobaldo.Game
 
         public void PickUp(Vector3 holderPosition, Quaternion holderRotation)
         {
+            NotifyPickedUp();
             transform.SetParent(null);
             isHeld = true;
             pickupLocked = false;
@@ -55,6 +56,7 @@ namespace Abigobaldo.Game
             body.angularVelocity = Vector3.zero;
             body.useGravity = true;
             body.detectCollisions = true;
+            NotifyDropped();
         }
 
         public void Throw(Vector3 direction, float force)
@@ -78,6 +80,19 @@ namespace Abigobaldo.Game
 
             isHeld = false;
             pickupLocked = true;
+            SetAttachedPhysics();
+        }
+
+        public void PlaceOnDock(Transform anchor)
+        {
+            if (anchor != null)
+            {
+                transform.SetParent(anchor);
+                transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            }
+
+            isHeld = false;
+            pickupLocked = false;
             SetAttachedPhysics();
         }
 
@@ -124,6 +139,24 @@ namespace Abigobaldo.Game
             {
                 if (meshCollider != null && !meshCollider.convex)
                     meshCollider.convex = true;
+            }
+        }
+
+        private void NotifyPickedUp()
+        {
+            foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
+            {
+                if (behaviour is IHoldableLifecycle listener)
+                    listener.OnPickedUp();
+            }
+        }
+
+        private void NotifyDropped()
+        {
+            foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
+            {
+                if (behaviour is IHoldableLifecycle listener)
+                    listener.OnDropped();
             }
         }
     }

@@ -5,10 +5,13 @@ namespace Abigobaldo.Game
     public class ObjectSpawner : MonoBehaviour, IInteractable, IPickupInteractable
     {
         [SerializeField] private HoldableObject prefab;
-        [SerializeField] private Transform spawnPoint;
+        [UnityEngine.Serialization.FormerlySerializedAs("spawnPoint")]
+        [SerializeField] private Transform spawnAnchor;
         [SerializeField] private bool giveDirectlyToHolder = true;
         [SerializeField] private bool replaceHeldObject = true;
         [SerializeField] private bool alignToSpawnPoint = true;
+
+        public HoldableObject Prefab => prefab;
 
         public void Interact(PlayerInteractor player)
         {
@@ -28,9 +31,13 @@ namespace Abigobaldo.Game
                 return;
             }
 
-            Transform targetSpawnPoint = spawnPoint != null ? spawnPoint : transform;
-            HoldableObject instance = Instantiate(prefab, targetSpawnPoint.position, targetSpawnPoint.rotation);
-            instance.name = prefab.name;
+            if (TrySpawnIntoHeldContainer(player))
+                return;
+
+            HoldableObject instance = CreateInstance();
+
+            if (TrySpawnContainerWithHeldObject(player, instance))
+                return;
 
             if (!giveDirectlyToHolder || player == null || player.Holder == null)
             {
@@ -56,10 +63,64 @@ namespace Abigobaldo.Game
                 instance.Drop();
         }
 
+        public HoldableObject CreateInstance()
+        {
+            Transform targetSpawnPoint = spawnAnchor != null ? spawnAnchor : transform;
+            HoldableObject instance = Instantiate(prefab, targetSpawnPoint.position, targetSpawnPoint.rotation);
+            instance.name = prefab.name;
+            return instance;
+        }
+
+        private bool TrySpawnIntoHeldContainer(PlayerInteractor player)
+        {
+            if (player == null || player.Holder == null || player.Holder.IsEmpty)
+                return false;
+
+            IObjectContainer heldContainer = player.Holder.CurrentObject.GetComponent<IObjectContainer>();
+
+            if (heldContainer == null)
+                return false;
+
+            HoldableObject spawnedObject = CreateInstance();
+
+            if (heldContainer.TryInsertObject(spawnedObject, player))
+                return true;
+
+            Destroy(spawnedObject.gameObject);
+            return true;
+        }
+
+        private bool TrySpawnContainerWithHeldObject(PlayerInteractor player, HoldableObject spawnedObject)
+        {
+            if (player == null || player.Holder == null || player.Holder.IsEmpty || spawnedObject == null)
+                return false;
+
+            IObjectContainer spawnedContainer = spawnedObject.GetComponent<IObjectContainer>();
+
+            if (spawnedContainer == null)
+                spawnedContainer = spawnedObject.GetComponentInChildren<IObjectContainer>(true);
+
+            if (spawnedContainer == null)
+                return false;
+
+            HoldableObject heldObject = player.Holder.CurrentObject;
+
+            if (!spawnedContainer.TryInsertObject(heldObject, player))
+            {
+                Destroy(spawnedObject.gameObject);
+                return true;
+            }
+
+            if (!giveDirectlyToHolder || !player.Holder.TryPickUp(spawnedObject))
+                spawnedObject.Drop();
+
+            return true;
+        }
+
         private void OnValidate()
         {
-            if (spawnPoint == null)
-                spawnPoint = transform;
+            if (spawnAnchor == null)
+                spawnAnchor = transform;
         }
     }
 }

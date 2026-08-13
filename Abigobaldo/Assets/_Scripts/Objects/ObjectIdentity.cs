@@ -4,10 +4,11 @@ namespace Abigobaldo.Game
 {
     public class ObjectIdentity : MonoBehaviour
     {
-        [SerializeField] private ObjectKind kind;
-        [SerializeField] private string displayName;
+        [SerializeField] private ObjectDefinition definition;
+        [HideInInspector] [SerializeField] private bool canBePlated;
 
-        public ObjectKind Kind => kind;
-        public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? kind.ToString() : displayName;
+        public ObjectDefinition Definition => definition;
+        public bool LegacyCanBePlated => canBePlated;
+        public string DisplayName => definition != null ? definition.DisplayName : name;
     }
 }

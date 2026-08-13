@@ -1,12 +1,9 @@
 namespace Abigobaldo.Game
 {
-    public class CuscuzeiraStation : ContainerStation
+    public class CuscuzeiraStation : HeatedContainerStation
     {
+        protected override RecipeStationType StationType => RecipeStationType.Cuscuzeira;
         protected override ObjectVisualTarget VisualTarget => ObjectVisualTarget.Cuscuzeira;
-
-        protected override RecipeData FindRecipe(DemoRecipeBook book, ObjectKind inputKind)
-        {
-            return book.FindCuscuzeiraRecipe(inputKind);
-        }
+        protected override bool ShouldShowContents => false;
     }
 }

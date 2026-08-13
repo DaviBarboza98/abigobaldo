@@ -52,16 +52,81 @@ namespace Abigobaldo.Game
             if (!TryGetHit(out RaycastHit hit))
                 return;
 
-            ContainerStation container = hit.collider.GetComponentInParent<ContainerStation>();
-
-            if (container != null)
-            {
-                container.Interact(this);
+            if (TryHandleContainerInteraction(hit.collider))
                 return;
+
+            IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
+            interactable?.Interact(this);
+        }
+
+        private bool TryHandleContainerInteraction(Collider hitCollider)
+        {
+            if (holder == null || holder.IsEmpty || hitCollider == null)
+                return false;
+
+            HoldableObject heldObject = holder.CurrentObject;
+            IObjectContainer heldContainer = heldObject.GetComponent<IObjectContainer>();
+            IObjectContainer hitContainer = GetContainer(hitCollider);
+            HoldableObject hitObject = hitCollider.GetComponentInParent<HoldableObject>();
+
+            if (!IsPlate(heldContainer) && !IsPlate(hitContainer))
+                return false;
+
+            if (heldContainer != null && hitContainer != null)
+            {
+                if (heldContainer.HasContent && heldContainer.TryMoveLastObjectTo(hitContainer, this))
+                {
+                    TrySwitchHeldContainerToTarget(hitContainer);
+                    return true;
+                }
+
+                if (hitContainer.HasContent && hitContainer.TryMoveLastObjectTo(heldContainer, this))
+                    return true;
+
+                return false;
             }
 
-            Plate plate = hit.collider.GetComponentInParent<Plate>();
-            plate?.Interact(this);
+            if (hitContainer != null && hitObject != heldObject)
+            {
+                if (hitContainer.TryInsertObject(heldObject, this))
+                {
+                    TryPickUpContainerAfterInsert(hitContainer);
+                    return true;
+                }
+            }
+
+            if (heldContainer != null && hitObject != null && hitObject != heldObject)
+                return heldContainer.TryInsertObject(hitObject, this);
+
+            return false;
+        }
+
+        private static IObjectContainer GetContainer(Collider hitCollider)
+        {
+            return hitCollider != null ? hitCollider.GetComponentInParent<IObjectContainer>() : null;
+        }
+
+        private static bool IsPlate(IObjectContainer container)
+        {
+            return container is Plate;
+        }
+
+        private void TryPickUpContainerAfterInsert(IObjectContainer container)
+        {
+            if (container == null || holder == null || !holder.IsEmpty || container.Holdable == null)
+                return;
+
+            if (container.Holdable.CanBeHeld)
+                holder.TryPickUp(container.Holdable);
+        }
+
+        private void TrySwitchHeldContainerToTarget(IObjectContainer targetContainer)
+        {
+            if (targetContainer == null || holder == null || targetContainer.Holdable == null || !targetContainer.Holdable.CanBeHeld)
+                return;
+
+            holder.Drop();
+            holder.TryPickUp(targetContainer.Holdable);
         }
 
         private void TryPick()
