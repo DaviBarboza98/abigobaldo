@@ -169,7 +169,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6329627782559715192}
   m_Father: {fileID: 0}
@@ -230,7 +230,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   definition: {fileID: 11400000, guid: e57519ad59f34f1db2654541af232742, type: 2}
-  visualPrefab: {fileID: 8243645093671475888, guid: 94bd5c75f4cf23c479ced73bc5df272d, type: 3}
   canBePlated: 1
 --- !u!114 &8546797128537883052
 MonoBehaviour:
@@ -246,7 +245,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   placements:
   - target: 1
-    localPosition: {x: 0, y: -0.08, z: 0}
+    localPosition: {x: 0, y: -0.038, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
     localScale: {x: 0.9, y: 0.9, z: 0.9}
   - target: 2
@@ -257,3 +256,7 @@ MonoBehaviour:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
     localScale: {x: 1, y: 1, z: 1}
+  - target: 3
+    localPosition: {x: 0, y: 0, z: -0.00164}
+    localEulerAngles: {x: 90, y: 0, z: 0}
+    localScale: {x: 0.003, y: 0.01060345, z: 0.003}

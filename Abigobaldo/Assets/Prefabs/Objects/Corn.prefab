@@ -231,7 +231,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   definition: {fileID: 11400000, guid: ddce042763b24c71802b24cdf622df7f, type: 2}
-  visualPrefab: {fileID: 920100000000000001, guid: 2acb3240f1774557aead64b8a0e4a471, type: 3}
   canBePlated: 0
 --- !u!114 &5293063692467836533
 MonoBehaviour:
@@ -247,12 +246,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   placements:
   - target: 1
-    localPosition: {x: 0.207, y: 0.112, z: 0.381}
+    localPosition: {x: 0.207, y: 0.128, z: 0.381}
     localEulerAngles: {x: -90, y: 0, z: 27.249}
     localScale: {x: 1.2, y: 1.2, z: 1.2}
   - target: 3
     localPosition: {x: 0, y: 0, z: -0.00286}
-    localEulerAngles: {x: 90, y: 0, z: 27.249}
+    localEulerAngles: {x: 90, y: 0, z: 0}
     localScale: {x: 0.0085, y: 0.0085, z: 0.0085}
   - target: 2
     localPosition: {x: 0.00105, y: -0.00293, z: 0.00146}

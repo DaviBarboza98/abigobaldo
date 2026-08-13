@@ -18,7 +18,7 @@ namespace Abigobaldo.Game
             public Vector3 localScale;
         }
 
-        [Tooltip("Per-container visual placement. Put this component on the real object prefab root.")]
+        [Tooltip("Per-container visual placement. An object can only enter containers listed here.")]
         [SerializeField] private Placement[] placements;
 
         public bool HasPlacement(ObjectVisualTarget target)
@@ -53,14 +53,7 @@ namespace Abigobaldo.Game
             instance.name = $"Visual_{source.name}";
             ApplyPlacement(instance.transform, source.gameObject, target);
             StripRuntimeComponents(instance);
-            SetRenderersVisible(instance, true);
             return instance;
-        }
-
-        private static void SetRenderersVisible(GameObject target, bool visible)
-        {
-            foreach (Renderer targetRenderer in target.GetComponentsInChildren<Renderer>(true))
-                targetRenderer.enabled = visible;
         }
 
         private static void StripRuntimeComponents(GameObject target)
@@ -123,14 +116,6 @@ namespace Abigobaldo.Game
                     }
                 }
 
-                foreach (Placement entry in placements)
-                {
-                    if (entry.target == ObjectVisualTarget.Default)
-                    {
-                        placement = entry;
-                        return true;
-                    }
-                }
             }
 
             placement = default;

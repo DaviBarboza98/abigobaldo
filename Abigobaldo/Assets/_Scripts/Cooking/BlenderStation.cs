@@ -4,8 +4,16 @@ namespace Abigobaldo.Game
 {
     public class BlenderStation : ContainerStation
     {
+        private enum SpinAxis
+        {
+            X,
+            Y,
+            Z
+        }
+
         [SerializeField] private BlenderCupContent cup;
         [SerializeField] private float spinSpeed = 720f;
+        [SerializeField] private SpinAxis spinAxis = SpinAxis.Z;
 
         private bool isRunning;
 
@@ -70,7 +78,7 @@ namespace Abigobaldo.Game
         protected override void AnimateContent(float deltaTime)
         {
             if (ContentMotionTarget != null)
-                ContentMotionTarget.Rotate(0f, 0f, spinSpeed * deltaTime, Space.Self);
+                ContentMotionTarget.Rotate(GetSpinEuler(spinSpeed * deltaTime), Space.Self);
         }
 
         protected override void OnContentChanged()
@@ -136,6 +144,16 @@ namespace Abigobaldo.Game
 
             body.useGravity = false;
             body.isKinematic = true;
+        }
+
+        private Vector3 GetSpinEuler(float angle)
+        {
+            return spinAxis switch
+            {
+                SpinAxis.X => new Vector3(angle, 0f, 0f),
+                SpinAxis.Y => new Vector3(0f, angle, 0f),
+                _ => new Vector3(0f, 0f, angle)
+            };
         }
 
         private void OnValidate()

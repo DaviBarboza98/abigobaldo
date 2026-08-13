@@ -140,8 +140,8 @@ namespace Abigobaldo.Game
             if (contentObject == null)
                 return;
 
-            SetRenderersVisible(contentObject.gameObject, false);
             contentVisual = ObjectVisualPreset.InstantiateFromObject(contentObject, ObjectVisualTarget.Plate, GetContentAnchor());
+            SetRenderersVisible(contentObject.gameObject, false);
 
             RecipeProgress progress = contentObject.GetComponent<RecipeProgress>();
             progress?.ApplyVisualTo(contentVisual);

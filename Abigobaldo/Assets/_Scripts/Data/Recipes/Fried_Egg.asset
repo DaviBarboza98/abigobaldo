@@ -28,8 +28,8 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: 012b4c6f3368a1f4e9e9a1e6c5f24555, type: 2}
     modelPrefab: {fileID: 0}
   almostReadyAppearance:
-    material: {fileID: 2100000, guid: 012b4c6f3368a1f4e9e9a1e6c5f24555, type: 2}
-    modelPrefab: {fileID: 0}
+    material: {fileID: 2100000, guid: defe31165fd2dc94c9b9974c4ad35217, type: 2}
+    modelPrefab: {fileID: 920100000000000001, guid: 2acb3240f1774557aead64b8a0e4a471, type: 3}
   readyAppearance:
     material: {fileID: 2100000, guid: 692a26b8f81071441a8764fe2134afb4, type: 2}
     modelPrefab: {fileID: 0}
@@ -40,5 +40,5 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: e0a76244844b4884fab1f425dae2552a, type: 2}
     modelPrefab: {fileID: 0}
   byproducts:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1865145621737384721, guid: 72cc193fdacd55e4faca130702c795d0, type: 3}
+  - {fileID: 7378815912242922297, guid: 98379f68ae411a84c91203b653786c19, type: 3}

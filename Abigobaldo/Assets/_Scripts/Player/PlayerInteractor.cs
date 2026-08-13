@@ -69,16 +69,10 @@ namespace Abigobaldo.Game
             IObjectContainer hitContainer = GetContainer(hitCollider);
             HoldableObject hitObject = hitCollider.GetComponentInParent<HoldableObject>();
 
-            if (!IsPlate(heldContainer) && !IsPlate(hitContainer))
-                return false;
-
             if (heldContainer != null && hitContainer != null)
             {
                 if (heldContainer.HasContent && heldContainer.TryMoveLastObjectTo(hitContainer, this))
-                {
-                    TrySwitchHeldContainerToTarget(hitContainer);
                     return true;
-                }
 
                 if (hitContainer.HasContent && hitContainer.TryMoveLastObjectTo(heldContainer, this))
                     return true;
@@ -89,10 +83,7 @@ namespace Abigobaldo.Game
             if (hitContainer != null && hitObject != heldObject)
             {
                 if (hitContainer.TryInsertObject(heldObject, this))
-                {
-                    TryPickUpContainerAfterInsert(hitContainer);
                     return true;
-                }
             }
 
             if (heldContainer != null && hitObject != null && hitObject != heldObject)
@@ -104,29 +95,6 @@ namespace Abigobaldo.Game
         private static IObjectContainer GetContainer(Collider hitCollider)
         {
             return hitCollider != null ? hitCollider.GetComponentInParent<IObjectContainer>() : null;
-        }
-
-        private static bool IsPlate(IObjectContainer container)
-        {
-            return container is Plate;
-        }
-
-        private void TryPickUpContainerAfterInsert(IObjectContainer container)
-        {
-            if (container == null || holder == null || !holder.IsEmpty || container.Holdable == null)
-                return;
-
-            if (container.Holdable.CanBeHeld)
-                holder.TryPickUp(container.Holdable);
-        }
-
-        private void TrySwitchHeldContainerToTarget(IObjectContainer targetContainer)
-        {
-            if (targetContainer == null || holder == null || targetContainer.Holdable == null || !targetContainer.Holdable.CanBeHeld)
-                return;
-
-            holder.Drop();
-            holder.TryPickUp(targetContainer.Holdable);
         }
 
         private void TryPick()

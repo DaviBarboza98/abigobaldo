@@ -81,6 +81,7 @@ namespace Abigobaldo.Game
             isHeld = false;
             pickupLocked = true;
             SetAttachedPhysics();
+            body.detectCollisions = false;
         }
 
         public void PlaceOnDock(Transform anchor)

@@ -142,6 +142,18 @@ MonoBehaviour:
     localPosition: {x: 0, y: 0.236, z: 0}
     localEulerAngles: {x: 73.963, y: -60.87, z: -115.452}
     localScale: {x: 1, y: 1, z: 1}
+  - target: 2
+    localPosition: {x: 0, y: 0, z: 0.00155}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.0065, y: 0.0065, z: 0.0065}
+  - target: 3
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 0.005, y: 0.005, z: 0.005}
+  - target: 4
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
 --- !u!1 &4810563784211523688
 GameObject:
   m_ObjectHideFlags: 0

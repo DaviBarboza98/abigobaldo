@@ -76,6 +76,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &1871297294472923335
 MonoBehaviour:
@@ -90,7 +91,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   definition: {fileID: 11400000, guid: e5a8364bdf30460a96521dd25762df1e, type: 2}
-  visualPrefab: {fileID: 0}
   canBePlated: 0
 --- !u!1 &8121420609371202529
 GameObject:
@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 2196443802400178822}
   - component: {fileID: 7992571553877179639}
   - component: {fileID: 1311158227577136196}
+  - component: {fileID: 4912201574743892682}
   m_Layer: 0
   m_Name: Food_EggShellB
   m_TagString: Untagged
@@ -207,3 +208,25 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &4912201574743892682
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9068568423161165535}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -3789095676557537661, guid: 1bf6633286ca93a4b902c7626866fe4b, type: 3}

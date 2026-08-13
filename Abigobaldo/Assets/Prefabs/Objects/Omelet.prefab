@@ -215,6 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &9066315607579656249
 MonoBehaviour:
@@ -229,7 +230,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   definition: {fileID: 11400000, guid: 062951e760a24e7eae9bf5087083d65b, type: 2}
-  visualPrefab: {fileID: 5664562380880763276, guid: cd97ffa9a8ecbca418c8c0b9b098336c, type: 3}
   canBePlated: 1
 --- !u!114 &920300000000000102
 MonoBehaviour:
@@ -241,13 +241,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d4fc847a1b64644d90e4bf29a07c31d, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   placements:
   - target: 1
-    localPosition: {x: 0, y: -0.08, z: 0}
+    localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
-    localScale: {x: 0.9, y: 0.9, z: 0.9}
+    localScale: {x: 1, y: 1, z: 1}
   - target: 2
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 90, y: 0, z: 0}

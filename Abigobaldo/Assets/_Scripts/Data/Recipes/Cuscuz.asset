@@ -16,7 +16,7 @@ MonoBehaviour:
   ingredients:
   - definition: {fileID: 11400000, guid: e57519ad59f34f1db2654541af232742, type: 2}
     amount: 1
-  inProgressPrefab: {fileID: 736446545324806315, guid: 8f565c1f8193c7b46bf5f759f921cb4b, type: 3}
+  inProgressPrefab: {fileID: 0}
   resultPrefab: {fileID: 0}
   processingTime: 10
   usesHeat: 1

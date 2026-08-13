@@ -48,13 +48,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   recipeBook: {fileID: 11400000, guid: b755b1ca36cf4fc5a0c5fba1eb6017aa, type: 2}
-  sideEffectSpawnRoot: {fileID: 0}
+  sideEffectAnchor: {fileID: 0}
   sideEffectSpacing: 0.12
   showContents: 1
   multipleContentSpacing: 0.12
   logCooking: 1
   cup: {fileID: 6986466423253210322}
   spinSpeed: 720
+  spinAxis: 1
 --- !u!114 &8374376856436341919
 MonoBehaviour:
   m_ObjectHideFlags: 0

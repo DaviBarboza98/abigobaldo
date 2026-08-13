@@ -121,16 +121,16 @@ namespace Abigobaldo.Game
             AnimateContent(Time.deltaTime);
             bool stateChanged = progress.Advance(Time.deltaTime, out bool becameReady);
 
-            if (stateChanged)
-            {
-                RefreshContentVisuals();
-                LogStateIfChanged(progress);
-            }
-
             if (progress.State == FoodState.Carbonized)
             {
                 TryApplyCarbonizedOutput(progress);
                 return;
+            }
+
+            if (stateChanged)
+            {
+                RefreshContentVisuals();
+                LogStateIfChanged(progress);
             }
 
             if (becameReady || (progress.IsReady && !progress.ResultApplied))
@@ -413,11 +413,22 @@ namespace Abigobaldo.Game
             if (progress == null || progress.ResultApplied)
                 return;
 
-            progress.MarkResultApplied();
             GameObject resultPrefab = activeRecipe.ResultPrefab;
 
             if (resultPrefab != null && !HasSameDefinition(ProcessedObject, resultPrefab))
-                ReplaceProcessedObject(resultPrefab, true);
+            {
+                if (!ReplaceProcessedObject(resultPrefab, true))
+                    return;
+
+                RecipeProgress replacementProgress = ProcessedObject != null
+                    ? ProcessedObject.GetComponent<RecipeProgress>()
+                    : null;
+                replacementProgress?.MarkResultApplied();
+            }
+            else
+            {
+                progress.MarkResultApplied();
+            }
 
             OnRecipeBecameReady();
         }
@@ -431,29 +442,37 @@ namespace Abigobaldo.Game
 
             if (carbonizedPrefab == null)
             {
-                progress.MarkCarbonizedOutputApplied();
                 Debug.LogError($"{name}: RecipeBook requires a Charcoal Prefab for carbonized food.", this);
                 return;
             }
 
-            progress.MarkCarbonizedOutputApplied();
-            ReplaceProcessedObject(carbonizedPrefab, false);
-            activeRecipe = null;
+            if (ReplaceProcessedObject(carbonizedPrefab, false))
+            {
+                progress.MarkCarbonizedOutputApplied();
+                activeRecipe = null;
+            }
         }
 
-        private void ReplaceProcessedObject(GameObject prefab, bool preserveProgress)
+        private bool ReplaceProcessedObject(GameObject prefab, bool preserveProgress)
         {
             if (prefab == null || ProcessedObject == null)
-                return;
+                return false;
 
-            ClearContentVisuals();
             HoldableObject previousObject = ProcessedObject;
+            int contentIndex = contents.IndexOf(previousObject);
+
+            if (contentIndex < 0)
+                return false;
+
             RecipeProgress previousProgress = previousObject.GetComponent<RecipeProgress>();
             HoldableObject replacement = InstantiateHoldable(prefab, GetContentAnchor());
 
             if (replacement == null)
-                return;
+                return false;
 
+            ClearContentVisuals();
+            previousObject.transform.SetParent(null);
+            previousObject.gameObject.SetActive(false);
             replacement.PlaceInContainer(GetContentAnchor());
 
             if (preserveProgress && previousProgress != null)
@@ -466,11 +485,12 @@ namespace Abigobaldo.Game
                 replacementProgress.CopyFrom(previousProgress);
             }
 
-            contents[0] = replacement;
+            contents[contentIndex] = replacement;
             Destroy(previousObject.gameObject);
             RefreshContentVisuals();
             OnContentChanged();
             Log($"{name}: resultado virou {replacement.name}.", this);
+            return true;
         }
 
         private void RefreshContentVisuals()
@@ -497,11 +517,11 @@ namespace Abigobaldo.Game
 
                 RecipeProgress progress = content.GetComponent<RecipeProgress>();
                 GameObject visual = ObjectVisualPreset.InstantiateFromObject(content, VisualTarget, anchor);
+                SetRenderersVisible(content.gameObject, false);
 
                 if (visual == null)
                     continue;
 
-                SetRenderersVisible(content.gameObject, false);
                 visual.transform.position += offset;
                 progress?.ApplyVisualTo(visual);
                 contentVisuals.Add(visual);
