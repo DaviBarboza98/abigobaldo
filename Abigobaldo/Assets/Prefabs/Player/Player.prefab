@@ -147,6 +147,7 @@ MonoBehaviour:
   interactionLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  highlightRefreshInterval: 0.04
 --- !u!1 &3120559382449963133
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,7 +283,7 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 20.78461
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -297,18 +298,18 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 120
-  field of view: 60
+  field of view: 60.000004
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 16183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 0
+  m_HDR: 1
   m_AllowMSAA: 1
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
@@ -568,4 +569,3 @@ MonoBehaviour:
   minDistanceOffset: -0.75
   maxDistanceOffset: 1.25
   zoomSpeed: 0.0015
-  rotationSensitivity: 0.25

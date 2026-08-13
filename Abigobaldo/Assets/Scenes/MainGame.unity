@@ -878,6 +878,22 @@ PrefabInstance:
       propertyPath: m_RenderPostProcessing
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4938328625421815639, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4938328625421815639, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4938328625421815639, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4938328625421815639, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5580944110654155850, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -3517,6 +3533,10 @@ PrefabInstance:
     - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
       propertyPath: m_FocalLength
       value: 20.78461
+      objectReference: {fileID: 0}
+    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
+      propertyPath: m_TargetDisplay
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
       propertyPath: m_CullingMask.m_Bits
