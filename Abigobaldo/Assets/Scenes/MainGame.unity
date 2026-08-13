@@ -14,7 +14,7 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
-  m_Fog: 1
+  m_Fog: 0
   m_FogColor: {r: 0.65, g: 0.78, b: 0.9, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.0035
@@ -195,8 +195,20 @@ PrefabInstance:
       propertyPath: m_Name
       value: ItemAnchor
       objectReference: {fileID: 0}
+    - target: {fileID: 3677692401244482756, guid: 8b2ba7a43a5700a4b8bab9d4feef9c55, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5325060232445915903, guid: 8b2ba7a43a5700a4b8bab9d4feef9c55, type: 3}
       propertyPath: spinAxis
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6209975656018544087, guid: 8b2ba7a43a5700a4b8bab9d4feef9c55, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6285199347749584797, guid: 8b2ba7a43a5700a4b8bab9d4feef9c55, type: 3}
+      propertyPath: m_Convex
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6986466423253210322, guid: 8b2ba7a43a5700a4b8bab9d4feef9c55, type: 3}
