@@ -174,7 +174,10 @@ namespace Abigobaldo.Game
         private void TryRotateHeldObject()
         {
             if (!input.RotateHeld || playerCamera == null)
+            {
+                holder?.StopRotating();
                 return;
+            }
 
             holder?.Rotate(input.Look, playerCamera.transform);
         }

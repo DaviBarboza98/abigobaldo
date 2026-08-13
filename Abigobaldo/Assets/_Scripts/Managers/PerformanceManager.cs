@@ -2,7 +2,9 @@ using UnityEngine;
 
 namespace Abigobaldo.Game
 {
-    public class PerformanceBootstrap : MonoBehaviour
+    [AddComponentMenu("Abigobaldo/Managers/Performance Manager")]
+    [DisallowMultipleComponent]
+    public sealed class PerformanceManager : MonoBehaviour
     {
         [SerializeField] private int targetFrameRate = 60;
         [SerializeField] private float fixedDeltaTime = 0.02f;

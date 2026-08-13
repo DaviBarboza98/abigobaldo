@@ -268,4 +268,4 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   outputPrefab: {fileID: 3716004642490695564, guid: 61a9b4b6ce337c94faf57ae167cc7325, type: 3}
   requiredState: 1
-  requiredRotationDegrees: 720
+  requiredMixDuration: 5

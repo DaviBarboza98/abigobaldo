@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Abigobaldo.Game
 {
-    public sealed class RecipeProgress : MonoBehaviour
+    public sealed class RecipeProgress : MonoBehaviour, IHoldableLifecycle
     {
         [SerializeField] private RecipeData recipe;
         [SerializeField] private float elapsedTime;
@@ -23,6 +23,11 @@ namespace Abigobaldo.Game
         public bool CarbonizedOutputApplied => carbonizedOutputApplied;
         public GameObject ActiveModelPrefab => activeModelPrefab;
 
+        private void OnEnable()
+        {
+            RefreshOwnVisual();
+        }
+
         public void Configure(RecipeData newRecipe, bool resetProgress)
         {
             if (newRecipe == null)
@@ -39,7 +44,7 @@ namespace Abigobaldo.Game
 
             recipe = newRecipe;
             state = recipe.EvaluateState(elapsedTime);
-            ApplyOwnVisual();
+            RefreshOwnVisual();
         }
 
         public bool Advance(float deltaTime, out bool becameReady)
@@ -57,7 +62,7 @@ namespace Abigobaldo.Game
             if (state == previousState)
                 return false;
 
-            ApplyOwnVisual();
+            RefreshOwnVisual();
             return true;
         }
 
@@ -72,7 +77,7 @@ namespace Abigobaldo.Game
             resultApplied = source.resultApplied;
             carbonizedOutputApplied = source.carbonizedOutputApplied;
             ResetModelOverride();
-            ApplyOwnVisual();
+            RefreshOwnVisual();
         }
 
         public void MarkResultApplied()
@@ -83,6 +88,21 @@ namespace Abigobaldo.Game
         public void MarkCarbonizedOutputApplied()
         {
             carbonizedOutputApplied = true;
+        }
+
+        public void OnPickedUp()
+        {
+            RefreshOwnVisual();
+        }
+
+        public void OnDropped()
+        {
+            RefreshOwnVisual();
+        }
+
+        public void RefreshOwnVisual()
+        {
+            ApplyOwnVisual();
         }
 
         public void ApplyVisualTo(GameObject target)

@@ -12,11 +12,12 @@ namespace Abigobaldo.Game
         [SerializeField] private float minDistanceOffset = -0.75f;
         [SerializeField] private float maxDistanceOffset = 1.25f;
         [SerializeField] private float zoomSpeed = 0.0015f;
-        [SerializeField] private float rotationSensitivity = 0.25f;
 
         private HoldableObject currentObject;
         private Vector3 defaultLocalPosition;
         private Quaternion localTargetRotation = Quaternion.identity;
+        private Vector2 smoothedRotationInput;
+        private Vector2 rotationInputVelocity;
         private float distanceOffset;
         private Collider[] playerColliders;
         private Collider[] heldColliders;
@@ -42,6 +43,7 @@ namespace Abigobaldo.Game
             currentObject = target;
             distanceOffset = 0f;
             localTargetRotation = Quaternion.identity;
+            ResetRotationInput();
             transform.localPosition = defaultLocalPosition;
             heldColliders = currentObject.GetComponentsInChildren<Collider>();
 
@@ -127,21 +129,48 @@ namespace Abigobaldo.Game
             if (currentObject == null || cameraTransform == null)
                 return false;
 
+            GameplayManager settings = GameplayManager.Instance;
+            float sensitivity = settings != null ? settings.HeldRotationSensitivity : 0.18f;
+            float smoothTime = settings != null ? settings.HeldRotationSmoothTime : 0.045f;
+            float maximumMouseDelta = settings != null ? settings.HeldRotationMaximumMouseDelta : 24f;
+            float movementDeadZone = settings != null ? settings.HeldRotationMovementDeadZone : 0.35f;
+            float maximumDegreesPerSecond = settings != null ? settings.HeldRotationMaximumDegreesPerSecond : 360f;
+            float deltaTime = Mathf.Max(Time.unscaledDeltaTime, 0.0001f);
+
+            Vector2 limitedInput = Vector2.ClampMagnitude(mouseDelta, maximumMouseDelta);
+            smoothedRotationInput = Vector2.SmoothDamp(
+                smoothedRotationInput,
+                limitedInput,
+                ref rotationInputVelocity,
+                smoothTime,
+                Mathf.Infinity,
+                deltaTime);
+
+            Vector2 rotationDegrees = new Vector2(
+                smoothedRotationInput.x * sensitivity,
+                -smoothedRotationInput.y * sensitivity);
+            rotationDegrees = Vector2.ClampMagnitude(rotationDegrees, maximumDegreesPerSecond * deltaTime);
+
             Quaternion targetRotation = GetTargetRotation();
-            float yawDegrees = mouseDelta.x * rotationSensitivity;
-            float pitchDegrees = -mouseDelta.y * rotationSensitivity;
-            Quaternion yaw = Quaternion.AngleAxis(yawDegrees, cameraTransform.up);
-            Quaternion pitch = Quaternion.AngleAxis(pitchDegrees, cameraTransform.right);
+            Quaternion yaw = Quaternion.AngleAxis(rotationDegrees.x, cameraTransform.up);
+            Quaternion pitch = Quaternion.AngleAxis(rotationDegrees.y, cameraTransform.right);
             localTargetRotation = Quaternion.Inverse(transform.rotation) * (yaw * pitch * targetRotation);
 
-            float rotationAmount = Mathf.Abs(yawDegrees) + Mathf.Abs(pitchDegrees);
+            bool activelyMoving = limitedInput.sqrMagnitude >= movementDeadZone * movementDeadZone;
             IHeldRotationReceiver rotationReceiver = currentObject.GetComponent<IHeldRotationReceiver>();
-            HoldableObject mixedPrefab = rotationReceiver?.AddRotation(rotationAmount);
+            HoldableObject mixedPrefab = activelyMoving
+                ? rotationReceiver?.AddRotationTime(Time.deltaTime)
+                : null;
 
             if (mixedPrefab != null)
                 TransformHeldInto(mixedPrefab);
 
             return true;
+        }
+
+        public void StopRotating()
+        {
+            ResetRotationInput();
         }
 
         public bool TransformHeldInto(HoldableObject prefab)
@@ -170,7 +199,14 @@ namespace Abigobaldo.Game
             HoldableObject target = currentObject;
             currentObject = null;
             heldColliders = null;
+            ResetRotationInput();
             return target;
+        }
+
+        private void ResetRotationInput()
+        {
+            smoothedRotationInput = Vector2.zero;
+            rotationInputVelocity = Vector2.zero;
         }
 
         private void FollowHeldObject()
@@ -242,7 +278,6 @@ namespace Abigobaldo.Game
             minDistanceOffset = Mathf.Min(minDistanceOffset, 0f);
             maxDistanceOffset = Mathf.Max(maxDistanceOffset, 0f);
             zoomSpeed = Mathf.Max(0f, zoomSpeed);
-            rotationSensitivity = Mathf.Max(0f, rotationSensitivity);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -22,6 +23,7 @@ namespace Abigobaldo.Game
         private PlayerInput input;
         private PlayerMovement movement;
         private float pitch;
+        private readonly List<Renderer> hiddenRenderers = new List<Renderer>();
 
         private void Awake()
         {
@@ -37,13 +39,75 @@ namespace Abigobaldo.Game
             if (modelRoot == null)
                 modelRoot = FindDeepChild(transform, "Model");
 
-            HideFirstPersonParts();
+            CacheHiddenRenderers();
+        }
+
+        private void OnEnable()
+        {
+            RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
+            RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
+        }
+
+        private void OnDisable()
+        {
+            RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
+            RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
         }
 
         private void Update()
         {
             Look();
             UpdateFov();
+        }
+
+        private void CacheHiddenRenderers()
+        {
+            hiddenRenderers.Clear();
+
+            if (modelRoot == null || hiddenFirstPersonParts == null)
+                return;
+
+            foreach (string partName in hiddenFirstPersonParts)
+            {
+                Transform part = FindDeepChild(modelRoot, partName);
+
+                if (part == null)
+                    continue;
+
+                foreach (Renderer targetRenderer in part.GetComponentsInChildren<Renderer>())
+                {
+                    if (targetRenderer != null)
+                        hiddenRenderers.Add(targetRenderer);
+                }
+            }
+        }
+
+        private void OnBeginCameraRendering(ScriptableRenderContext context, Camera renderingCamera)
+        {
+            if (hiddenRenderers.Count == 0)
+                return;
+
+            // Oculta a cabeça (ShadowsOnly) apenas para a câmera do jogador (Game View).
+            // Na câmera da janela Scene (SceneView), a cabeça permanece 100% visível!
+            bool isPlayerCamera = renderingCamera == playerCamera;
+
+            foreach (Renderer r in hiddenRenderers)
+            {
+                if (r != null)
+                    r.shadowCastingMode = isPlayerCamera ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+            }
+        }
+
+        private void OnEndCameraRendering(ScriptableRenderContext context, Camera renderingCamera)
+        {
+            if (hiddenRenderers.Count == 0)
+                return;
+
+            foreach (Renderer r in hiddenRenderers)
+            {
+                if (r != null)
+                    r.shadowCastingMode = ShadowCastingMode.On;
+            }
         }
 
         private void Look()
@@ -65,23 +129,6 @@ namespace Abigobaldo.Game
 
             float targetFov = movement.IsRunning ? runningFov : defaultFov;
             playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFov, fovSmoothSpeed * Time.deltaTime);
-        }
-
-        private void HideFirstPersonParts()
-        {
-            if (modelRoot == null || hiddenFirstPersonParts == null)
-                return;
-
-            foreach (string partName in hiddenFirstPersonParts)
-            {
-                Transform part = FindDeepChild(modelRoot, partName);
-
-                if (part == null)
-                    continue;
-
-                foreach (Renderer targetRenderer in part.GetComponentsInChildren<Renderer>())
-                    targetRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-            }
         }
 
         private static Transform FindDeepChild(Transform root, string childName)

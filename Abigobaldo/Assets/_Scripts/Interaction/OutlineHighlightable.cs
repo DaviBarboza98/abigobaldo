@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Abigobaldo.Game
@@ -13,7 +12,6 @@ namespace Abigobaldo.Game
         [SerializeField] private float outlineWidth = 0.025f;
         [SerializeField] private Renderer[] targetRenderers;
 
-        private readonly Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
         private Material outlineMaterialInstance;
         private bool highlighted;
 
@@ -48,10 +46,11 @@ namespace Abigobaldo.Game
                 if (targetRenderer == null || !BelongsToThisHighlight(targetRenderer))
                     continue;
 
-                if (!originalMaterials.ContainsKey(targetRenderer))
-                    originalMaterials[targetRenderer] = targetRenderer.sharedMaterials;
+                Material[] sourceMaterials = targetRenderer.sharedMaterials;
 
-                Material[] sourceMaterials = originalMaterials[targetRenderer];
+                if (ContainsMaterial(sourceMaterials, outlineMaterial))
+                    continue;
+
                 Material[] outlinedMaterials = new Material[sourceMaterials.Length + 1];
 
                 for (int i = 0; i < sourceMaterials.Length; i++)
@@ -64,13 +63,51 @@ namespace Abigobaldo.Game
 
         private void RemoveOutline()
         {
-            foreach (KeyValuePair<Renderer, Material[]> pair in originalMaterials)
+            if (targetRenderers == null || outlineMaterialInstance == null)
+                return;
+
+            foreach (Renderer targetRenderer in targetRenderers)
             {
-                if (pair.Key != null)
-                    pair.Key.sharedMaterials = pair.Value;
+                if (targetRenderer == null)
+                    continue;
+
+                Material[] currentMaterials = targetRenderer.sharedMaterials;
+                int outlineCount = 0;
+
+                foreach (Material material in currentMaterials)
+                {
+                    if (material == outlineMaterialInstance)
+                        outlineCount++;
+                }
+
+                if (outlineCount == 0)
+                    continue;
+
+                Material[] restoredMaterials = new Material[currentMaterials.Length - outlineCount];
+                int destinationIndex = 0;
+
+                foreach (Material material in currentMaterials)
+                {
+                    if (material != outlineMaterialInstance)
+                        restoredMaterials[destinationIndex++] = material;
+                }
+
+                targetRenderer.sharedMaterials = restoredMaterials;
+            }
+        }
+
+        private static bool ContainsMaterial(Material[] materials, Material target)
+        {
+            if (materials == null || target == null)
+                return false;
+
+            foreach (Material material in materials)
+            {
+                if (material == target)
+                    return true;
             }
 
-            originalMaterials.Clear();
+            return false;
         }
 
         private Material GetOutlineMaterial()
