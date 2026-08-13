@@ -909,20 +909,16 @@ PrefabInstance:
     - target: {fileID: 7655270875376172262, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
       propertyPath: targetCamera
       value: 
-      objectReference: {fileID: 1107741874}
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8041199091185714005, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
 --- !u!4 &1107741873 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1342172430078857493, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
-  m_PrefabInstance: {fileID: 1107741872}
-  m_PrefabAsset: {fileID: 0}
---- !u!20 &1107741874 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 4938328625421815639, guid: 14da70a878e81504f86ac5c92dcccc11, type: 3}
   m_PrefabInstance: {fileID: 1107741872}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1187411871 stripped
@@ -3518,34 +3514,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 451197296}
     m_Modifications:
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: m_HDR
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: orthographic
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: field of view
-      value: 60.000004
-      objectReference: {fileID: 0}
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: m_FocalLength
-      value: 20.78461
-      objectReference: {fileID: 0}
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: m_TargetDisplay
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: m_CullingMask.m_Bits
-      value: 16183
-      objectReference: {fileID: 0}
-    - target: {fileID: 585990073292230809, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
-      propertyPath: m_projectionMatrixMode
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1804561136378978857, guid: 2445e75aa945bfb4892f64c2ee94be96, type: 3}
       propertyPath: m_Name
       value: Player
