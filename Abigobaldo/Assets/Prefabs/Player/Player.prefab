@@ -109,8 +109,7 @@ MonoBehaviour:
   cameraPivot: {fileID: 7057214513069332800}
   playerCamera: {fileID: 585990073292230809}
   modelRoot: {fileID: 0}
-  hiddenFirstPersonParts:
-  - Head
+  hiddenFirstPersonParts: []
   sensitivity: 0.2
   minPitch: -80
   maxPitch: 80
@@ -561,7 +560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c0d1fa3493ac2343be11cc84d9bfdb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwForce: 100
+  throwForce: 8
   positionFollowStrength: 18
   maxFollowSpeed: 9
   rotationFollowStrength: 18

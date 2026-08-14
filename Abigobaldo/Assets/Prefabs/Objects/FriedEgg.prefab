@@ -217,6 +217,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canBeHeld: 1
   canBeThrown: 1
+  startAttached: 0
   gripPoint: {fileID: 0}
 --- !u!114 &2207476009357285141
 MonoBehaviour:
@@ -231,7 +232,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   definition: {fileID: 11400000, guid: 4ad0196e1abc4af5b0ca2ccff833f0d9, type: 2}
-  visualPrefab: {fileID: 1233837207503327123, guid: 98f4b77d51b344940a6cecb54f2fdd65, type: 3}
   canBePlated: 1
 --- !u!114 &920300000000000101
 MonoBehaviour:
@@ -243,11 +243,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d4fc847a1b64644d90e4bf29a07c31d, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   placements:
   - target: 1
-    localPosition: {x: 0, y: -0.08, z: 0}
+    localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
     localScale: {x: 0.9, y: 0.9, z: 0.9}
   - target: 2
@@ -264,8 +264,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3875a23217294f5f8a2495ef1668f9fc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   outputPrefab: {fileID: 3716004642490695564, guid: 61a9b4b6ce337c94faf57ae167cc7325, type: 3}
   requiredState: 1
   requiredMixDuration: 5

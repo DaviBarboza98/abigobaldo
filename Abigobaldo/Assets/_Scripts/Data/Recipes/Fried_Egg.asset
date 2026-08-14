@@ -29,7 +29,7 @@ MonoBehaviour:
     modelPrefab: {fileID: 0}
   almostReadyAppearance:
     material: {fileID: 2100000, guid: defe31165fd2dc94c9b9974c4ad35217, type: 2}
-    modelPrefab: {fileID: 920100000000000001, guid: 2acb3240f1774557aead64b8a0e4a471, type: 3}
+    modelPrefab: {fileID: 0}
   readyAppearance:
     material: {fileID: 2100000, guid: 692a26b8f81071441a8764fe2134afb4, type: 2}
     modelPrefab: {fileID: 0}
