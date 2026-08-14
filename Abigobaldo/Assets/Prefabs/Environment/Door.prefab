@@ -55,6 +55,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!1 &940100000000000004
 GameObject:
   m_ObjectHideFlags: 0

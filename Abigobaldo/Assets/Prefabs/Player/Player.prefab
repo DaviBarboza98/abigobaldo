@@ -128,6 +128,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c494ba8737af6344945f54afae879d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showCrosshair: 1
+  crosshairSprite: {fileID: 0}
+  crosshairSize: 8
+  crosshairColor: {r: 1, g: 1, b: 1, a: 1}
+  crosshairSortingOrder: 1000
 --- !u!114 &4933086418569781607
 MonoBehaviour:
   m_ObjectHideFlags: 0

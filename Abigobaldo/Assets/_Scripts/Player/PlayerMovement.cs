@@ -51,6 +51,20 @@ namespace Abigobaldo.Game
             controller.Move(verticalVelocity * Time.deltaTime);
         }
 
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            if (hit == null || hit.collider == null || hit.moveLength <= 0f)
+                return;
+
+            Vector3 planarPush = Vector3.ProjectOnPlane(hit.moveDirection, transform.up);
+
+            if (planarPush.sqrMagnitude <= 0.0001f)
+                return;
+
+            IBodyPushable pushable = hit.collider.GetComponentInParent<IBodyPushable>();
+            pushable?.PushFromBody(hit.point, planarPush.normalized, hit.moveLength);
+        }
+
         private void OnValidate()
         {
             moveSpeed = Mathf.Max(0f, moveSpeed);

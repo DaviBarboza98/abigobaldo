@@ -42,7 +42,9 @@ namespace Abigobaldo.Game
 
             currentObject = target;
             distanceOffset = 0f;
-            localTargetRotation = Quaternion.identity;
+            localTargetRotation = target.TryGetSavedHeldRotation(out Quaternion savedRotation)
+                ? savedRotation
+                : Quaternion.identity;
             ResetRotationInput();
             transform.localPosition = defaultLocalPosition;
             heldColliders = currentObject.GetComponentsInChildren<Collider>();
@@ -180,6 +182,7 @@ namespace Abigobaldo.Game
 
             Vector3 position = currentObject.transform.position;
             Quaternion rotation = currentObject.transform.rotation;
+            Quaternion heldRotation = localTargetRotation;
             SetPlayerCollisionIgnored(false);
             Destroy(currentObject.gameObject);
             currentObject = null;
@@ -187,6 +190,7 @@ namespace Abigobaldo.Game
 
             HoldableObject instance = Instantiate(prefab, position, rotation);
             instance.name = prefab.name;
+            instance.SaveHeldRotation(heldRotation);
             return TryPickUp(instance);
         }
 
@@ -197,6 +201,7 @@ namespace Abigobaldo.Game
 
             SetPlayerCollisionIgnored(false);
             HoldableObject target = currentObject;
+            target.SaveHeldRotation(localTargetRotation);
             currentObject = null;
             heldColliders = null;
             ResetRotationInput();

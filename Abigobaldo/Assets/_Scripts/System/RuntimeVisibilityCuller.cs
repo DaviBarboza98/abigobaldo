@@ -6,17 +6,33 @@ namespace Abigobaldo.Game
 {
     public class RuntimeVisibilityCuller : MonoBehaviour
     {
+        private readonly struct RendererEntry
+        {
+            public readonly Renderer Renderer;
+            public readonly float ExtraBoundsPadding;
+            public readonly float AlwaysVisibleDistanceOverride;
+
+            public RendererEntry(Renderer renderer, VisibilityCullable marker)
+            {
+                Renderer = renderer;
+                ExtraBoundsPadding = marker != null ? marker.ExtraBoundsPadding : 0f;
+                AlwaysVisibleDistanceOverride = marker != null
+                    ? marker.AlwaysVisibleDistanceOverride
+                    : -1f;
+            }
+        }
+
         [SerializeField] private Camera targetCamera;
         [SerializeField] private LayerMask cullingLayers = ~0;
         [SerializeField] private float checkInterval = 0.12f;
-        [SerializeField] private float rendererRefreshInterval = 1.5f;
+        [SerializeField] private float rendererRefreshInterval = 5f;
         [SerializeField] private float boundsPadding = 0.35f;
         [SerializeField] private float alwaysVisibleDistance = 4f;
         [SerializeField] private float maxVisibleDistance = 120f;
         [SerializeField] private bool skipHoldableObjects = true;
         [SerializeField] private bool disableMotionVectors = true;
 
-        private readonly List<Renderer> renderers = new List<Renderer>(256);
+        private readonly List<RendererEntry> rendererEntries = new List<RendererEntry>(256);
         private readonly HashSet<Renderer> managedRenderers = new HashSet<Renderer>();
         private readonly HashSet<Renderer> disabledByCuller = new HashSet<Renderer>();
         private readonly Plane[] frustumPlanes = new Plane[6];
@@ -91,23 +107,27 @@ namespace Abigobaldo.Game
             CleanupDeadReferences();
             ResolveCamera();
 
-            Renderer[] sceneRenderers = FindObjectsOfType<Renderer>(true);
+            Renderer[] sceneRenderers = FindObjectsByType<Renderer>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None);
 
             foreach (Renderer targetRenderer in sceneRenderers)
             {
-                if (!CanManage(targetRenderer) || !managedRenderers.Add(targetRenderer))
+                if (!TryGetMarker(targetRenderer, out VisibilityCullable marker) || !managedRenderers.Add(targetRenderer))
                     continue;
 
                 if (disableMotionVectors)
                     targetRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
 
                 targetRenderer.allowOcclusionWhenDynamic = true;
-                renderers.Add(targetRenderer);
+                rendererEntries.Add(new RendererEntry(targetRenderer, marker));
             }
         }
 
-        private bool CanManage(Renderer targetRenderer)
+        private bool TryGetMarker(Renderer targetRenderer, out VisibilityCullable marker)
         {
+            marker = null;
+
             if (targetRenderer == null || !targetRenderer.gameObject.activeInHierarchy)
                 return false;
 
@@ -117,7 +137,7 @@ namespace Abigobaldo.Game
             if (targetRenderer.shadowCastingMode == ShadowCastingMode.ShadowsOnly)
                 return false;
 
-            VisibilityCullable marker = targetRenderer.GetComponentInParent<VisibilityCullable>();
+            marker = targetRenderer.GetComponentInParent<VisibilityCullable>();
 
             if (marker != null && marker.NeverCull)
                 return false;
@@ -145,15 +165,17 @@ namespace Abigobaldo.Game
             GeometryUtility.CalculateFrustumPlanes(targetCamera, frustumPlanes);
             Vector3 cameraPosition = targetCamera.transform.position;
 
-            foreach (Renderer targetRenderer in renderers)
+            foreach (RendererEntry entry in rendererEntries)
             {
+                Renderer targetRenderer = entry.Renderer;
+
                 if (targetRenderer == null)
                     continue;
 
                 if (!targetRenderer.gameObject.activeInHierarchy)
                     continue;
 
-                bool shouldBeVisible = ShouldBeVisible(targetRenderer, cameraPosition);
+                bool shouldBeVisible = ShouldBeVisible(entry, cameraPosition);
 
                 if (shouldBeVisible)
                 {
@@ -171,17 +193,17 @@ namespace Abigobaldo.Game
             }
         }
 
-        private bool ShouldBeVisible(Renderer targetRenderer, Vector3 cameraPosition)
+        private bool ShouldBeVisible(RendererEntry entry, Vector3 cameraPosition)
         {
+            Renderer targetRenderer = entry.Renderer;
             Bounds bounds = targetRenderer.bounds;
-            VisibilityCullable marker = targetRenderer.GetComponentInParent<VisibilityCullable>();
-            float padding = boundsPadding + (marker != null ? marker.ExtraBoundsPadding : 0f);
+            float padding = boundsPadding + entry.ExtraBoundsPadding;
 
             if (padding > 0f)
                 bounds.Expand(padding);
 
-            float alwaysDistance = marker != null && marker.AlwaysVisibleDistanceOverride >= 0f
-                ? marker.AlwaysVisibleDistanceOverride
+            float alwaysDistance = entry.AlwaysVisibleDistanceOverride >= 0f
+                ? entry.AlwaysVisibleDistanceOverride
                 : alwaysVisibleDistance;
 
             float sqrDistance = bounds.SqrDistance(cameraPosition);
@@ -197,17 +219,17 @@ namespace Abigobaldo.Game
 
         private void CleanupDeadReferences()
         {
-            for (int i = renderers.Count - 1; i >= 0; i--)
+            for (int i = rendererEntries.Count - 1; i >= 0; i--)
             {
-                Renderer targetRenderer = renderers[i];
+                Renderer targetRenderer = rendererEntries[i].Renderer;
 
                 if (targetRenderer != null)
                     continue;
 
-                renderers.RemoveAt(i);
-                managedRenderers.Remove(targetRenderer);
+                rendererEntries.RemoveAt(i);
             }
 
+            managedRenderers.RemoveWhere(targetRenderer => targetRenderer == null);
             disabledByCuller.RemoveWhere(targetRenderer => targetRenderer == null);
         }
 

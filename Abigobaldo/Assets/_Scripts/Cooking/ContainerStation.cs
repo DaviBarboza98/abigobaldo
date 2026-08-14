@@ -365,7 +365,7 @@ namespace Abigobaldo.Game
 
         public bool TryMoveLastObjectTo(IObjectContainer target, PlayerInteractor player)
         {
-            if (target == null || target == this || contents.Count == 0)
+            if (target == null || ReferenceEquals(target, this) || contents.Count == 0)
                 return false;
 
             ClearContentVisuals();

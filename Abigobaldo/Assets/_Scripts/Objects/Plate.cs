@@ -84,7 +84,7 @@ namespace Abigobaldo.Game
 
         public bool TryMoveLastObjectTo(IObjectContainer target, PlayerInteractor player)
         {
-            if (target == null || target == this || contentObject == null)
+            if (target == null || ReferenceEquals(target, this) || contentObject == null)
                 return false;
 
             HoldableObject item = ExtractContent();

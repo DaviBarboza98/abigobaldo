@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Abigobaldo.Game
 {
-    public class OpenableDoor : MonoBehaviour, IHoldInteractable
+    public class OpenableDoor : MonoBehaviour, IHoldInteractable, IBodyPushable
     {
         public enum RotationAxis
         {
@@ -21,6 +21,11 @@ namespace Abigobaldo.Game
         [SerializeField] private bool useMouseDelta = true;
         [SerializeField] private bool logAngleOnRelease;
         [SerializeField] private bool logHoldEvents;
+
+        [Header("Body Push")]
+        [SerializeField] private bool bodyPushEnabled = true;
+        [SerializeField] private float bodyPushDegreesPerMeter = 45f;
+        [SerializeField] private float minimumBodyPushTorque = 0.08f;
 
         private Quaternion closedLocalRotation;
         private float currentAngle;
@@ -85,6 +90,36 @@ namespace Abigobaldo.Game
                 Debug.Log($"{name}: {currentAngle:0} degrees open.", this);
         }
 
+        public void PushFromBody(Vector3 contactPoint, Vector3 pushDirection, float moveDistance)
+        {
+            if (!bodyPushEnabled || holding || moveDistance <= 0f || pushDirection.sqrMagnitude <= 0.0001f)
+                return;
+
+            Vector3 worldAxis = GetWorldRotationAxis();
+            Vector3 radialDirection = Vector3.ProjectOnPlane(contactPoint - Pivot.position, worldAxis);
+            Vector3 planarPush = Vector3.ProjectOnPlane(pushDirection, worldAxis);
+
+            if (radialDirection.sqrMagnitude <= 0.0001f || planarPush.sqrMagnitude <= 0.0001f)
+                return;
+
+            float torque = Vector3.Dot(
+                Vector3.Cross(radialDirection.normalized, planarPush.normalized),
+                worldAxis);
+
+            if (Mathf.Abs(torque) < minimumBodyPushTorque)
+                return;
+
+            float configuredDirection = invertDirection ? -1f : 1f;
+            float angleDelta = torque * configuredDirection * bodyPushDegreesPerMeter * Mathf.Min(moveDistance, 0.25f);
+            float nextAngle = Mathf.Clamp(currentAngle + angleDelta, 0f, maxOpenAngle);
+
+            if (Mathf.Approximately(nextAngle, currentAngle))
+                return;
+
+            currentAngle = nextAngle;
+            ApplyAngle(currentAngle);
+        }
+
         private void ApplyAngle(float angle)
         {
             float signedAngle = invertDirection ? -angle : angle;
@@ -101,11 +136,25 @@ namespace Abigobaldo.Game
             };
         }
 
+        private Vector3 GetWorldRotationAxis()
+        {
+            Vector3 localAxis = rotationAxis switch
+            {
+                RotationAxis.X => Vector3.right,
+                RotationAxis.Y => Vector3.up,
+                _ => Vector3.forward
+            };
+
+            return Pivot.TransformDirection(localAxis).normalized;
+        }
+
         private void OnValidate()
         {
             maxOpenAngle = Mathf.Clamp(maxOpenAngle, 0f, 180f);
             followSpeed = Mathf.Max(0.01f, followSpeed);
             mouseSensitivity = Mathf.Max(0f, mouseSensitivity);
+            bodyPushDegreesPerMeter = Mathf.Max(0f, bodyPushDegreesPerMeter);
+            minimumBodyPushTorque = Mathf.Clamp01(minimumBodyPushTorque);
         }
     }
 }

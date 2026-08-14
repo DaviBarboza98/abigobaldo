@@ -13,6 +13,7 @@ namespace Abigobaldo.Game
 
         private readonly RaycastHit[] hits = new RaycastHit[16];
         private PlayerInput input;
+        private PlayerCursor playerCursor;
         private IHoldInteractable currentHoldInteractable;
         private OutlineHighlightable currentHighlight;
         private float nextHighlightRefreshTime;
@@ -23,6 +24,7 @@ namespace Abigobaldo.Game
         private void Awake()
         {
             input = GetComponent<PlayerInput>();
+            playerCursor = GetComponent<PlayerCursor>();
 
             if (playerCamera == null)
                 playerCamera = GetComponentInChildren<Camera>();
@@ -184,7 +186,9 @@ namespace Abigobaldo.Game
 
         private bool TryGetHit(out RaycastHit bestHit)
         {
-            Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+            Ray ray = playerCursor != null
+                ? playerCamera.ScreenPointToRay(playerCursor.AimScreenPosition)
+                : new Ray(playerCamera.transform.position, playerCamera.transform.forward);
             int hitCount = Physics.RaycastNonAlloc(ray, hits, interactionDistance, interactionLayers, QueryTriggerInteraction.Collide);
 
             bestHit = default;

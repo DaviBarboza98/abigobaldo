@@ -1510,10 +1510,19 @@ MonoBehaviour:
   disableCameraHdr: 1
   enableVisibilityCulling: 1
   visibilityCheckInterval: 0.12
-  rendererRefreshInterval: 1.5
+  rendererRefreshInterval: 5
   cullingBoundsPadding: 0.35
   alwaysVisibleDistance: 4
   maxVisibleDistance: 120
+  applyWebGlProfile: 1
+  webGlTargetFrameRate: 60
+  webGlShadowDistance: 18
+  webGlCameraFarClip: 90
+  webGlRenderScale: 0.9
+  webGlMsaaSamples: 1
+  webGlVisibilityCheckInterval: 0.18
+  webGlRendererRefreshInterval: 6
+  webGlMaxVisibleDistance: 90
 --- !u!1001 &1894555179
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2940,6 +2949,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!33 &4564592615333090647
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -3630,6 +3642,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!33 &6208242503177820744
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -3696,6 +3711,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!1 &6347640674426832877
 GameObject:
   m_ObjectHideFlags: 0
@@ -4220,6 +4238,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!65 &7507943868564935063
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4278,6 +4299,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!65 &7542697122445947488
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4917,6 +4941,9 @@ MonoBehaviour:
   useMouseDelta: 1
   logAngleOnRelease: 0
   logHoldEvents: 0
+  bodyPushEnabled: 1
+  bodyPushDegreesPerMeter: 45
+  minimumBodyPushTorque: 0.08
 --- !u!23 &8904836226988294806
 MeshRenderer:
   m_ObjectHideFlags: 0
