@@ -32,6 +32,7 @@ namespace Abigobaldo.Game
         public bool HasActiveRecipe => activeRecipe != null;
         public bool IsHeld => stationHoldable != null && stationHoldable.IsHeld;
         public HoldableObject Holdable => stationHoldable;
+        public virtual bool IsDirectInteractionTarget => true;
         protected HoldableObject ProcessedObject => contents.Count == 1 ? contents[0] : null;
         protected Transform ContentMotionTarget => contentVisuals.Count > 0 && contentVisuals[0] != null
             ? contentVisuals[0].transform

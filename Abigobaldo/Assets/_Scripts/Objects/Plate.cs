@@ -16,6 +16,7 @@ namespace Abigobaldo.Game
         public bool IsEmpty => contentObject == null;
         public bool HasContent => contentObject != null;
         public HoldableObject Holdable => holdableObject;
+        public bool IsDirectInteractionTarget => true;
         public ObjectDefinition ContentDefinition => contentDefinition;
 
         private void Awake()

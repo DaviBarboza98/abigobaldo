@@ -19,6 +19,7 @@ namespace Abigobaldo.Game
 
         protected override RecipeStationType StationType => RecipeStationType.Blender;
         protected override ObjectVisualTarget VisualTarget => ObjectVisualTarget.Blender;
+        public override bool IsDirectInteractionTarget => false;
 
         private void OnEnable()
         {
@@ -43,9 +44,6 @@ namespace Abigobaldo.Game
         public override void PickInteract(PlayerInteractor player)
         {
             CacheCup();
-
-            if (TryAttachHeldCup(player))
-                return;
 
             if (!HasActiveRecipe || !HasContent || cup == null || !cup.IsAttached)
             {

@@ -1,0 +1,357 @@
+{
+  "blender_version": "5.2.0 LTS",
+  "file": "C:\\Users\\caaab\\OneDrive\\Documentos\\Models\\farmacia.blend",
+  "active_scene": "Scene",
+  "scenes": [
+    "Scene"
+  ],
+  "collections": [
+    {
+      "name": "Collection",
+      "objects": [
+        "Cube",
+        "Light",
+        "Camera",
+        "Cube.010",
+        "Cube.001"
+      ],
+      "hide_render": false,
+      "hide_viewport": false
+    }
+  ],
+  "world": "World",
+  "engine": "BLENDER_EEVEE",
+  "resolution": [
+    1920,
+    1080,
+    100
+  ],
+  "camera": "Camera",
+  "view_transform": "None",
+  "overall_renderable_mesh_bounds": {
+    "min": [
+      -5.4,
+      -15.4,
+      0.0
+    ],
+    "max": [
+      26.99788,
+      17.0,
+      15.148
+    ],
+    "size": [
+      32.39788,
+      32.4,
+      15.148
+    ],
+    "center": [
+      10.79894,
+      0.8,
+      7.574
+    ]
+  },
+  "materials": [
+    {
+      "name": "Material",
+      "use_nodes": true,
+      "diffuse_color": [
+        0.8,
+        0.8,
+        0.8,
+        1.0
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "name": "Cube",
+      "type": "MESH",
+      "collections": [
+        "Collection"
+      ],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_degrees": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        4.0,
+        4.0,
+        4.0
+      ],
+      "dimensions": [
+        32.39788,
+        27.4,
+        8.4
+      ],
+      "visible_render": true,
+      "visible_viewport": true,
+      "parent": null,
+      "bounds_world": {
+        "min": [
+          -5.4,
+          -15.4,
+          0.0
+        ],
+        "max": [
+          26.99788,
+          12.0,
+          8.4
+        ],
+        "size": [
+          32.39788,
+          27.4,
+          8.4
+        ],
+        "center": [
+          10.79894,
+          -1.7,
+          4.2
+        ]
+      },
+      "vertices": 154,
+      "edges": 298,
+      "polygons": 144,
+      "materials": [
+        "Material"
+      ],
+      "modifiers": []
+    },
+    {
+      "name": "Light",
+      "type": "LIGHT",
+      "collections": [
+        "Collection"
+      ],
+      "location": [
+        5.07625,
+        2.00545,
+        5.90386
+      ],
+      "rotation_degrees": [
+        37.261,
+        3.164,
+        106.936
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "visible_render": true,
+      "visible_viewport": true,
+      "parent": null,
+      "bounds_world": {
+        "min": [
+          5.07625,
+          2.00545,
+          5.90386
+        ],
+        "max": [
+          5.07625,
+          2.00545,
+          5.90386
+        ],
+        "size": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "center": [
+          5.07625,
+          2.00545,
+          5.90386
+        ]
+      },
+      "light_type": "POINT",
+      "energy": 1000.0,
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "size": null
+    },
+    {
+      "name": "Camera",
+      "type": "CAMERA",
+      "collections": [
+        "Collection"
+      ],
+      "location": [
+        7.35889,
+        -6.92579,
+        4.95831
+      ],
+      "rotation_degrees": [
+        63.559,
+        0.0,
+        46.692
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "visible_render": true,
+      "visible_viewport": true,
+      "parent": null,
+      "bounds_world": {
+        "min": [
+          7.35889,
+          -6.92579,
+          4.95831
+        ],
+        "max": [
+          7.35889,
+          -6.92579,
+          4.95831
+        ],
+        "size": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "center": [
+          7.35889,
+          -6.92579,
+          4.95831
+        ]
+      },
+      "camera_type": "PERSP",
+      "lens": 50.0,
+      "sensor_width": 36.0,
+      "clip_start": 0.10000000149011612,
+      "clip_end": 100.0
+    },
+    {
+      "name": "Cube.010",
+      "type": "MESH",
+      "collections": [
+        "Collection"
+      ],
+      "location": [
+        7.0,
+        14.0,
+        10.0
+      ],
+      "rotation_degrees": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.5,
+        1.716
+      ],
+      "dimensions": [
+        2.0,
+        6.0,
+        5.148
+      ],
+      "visible_render": true,
+      "visible_viewport": true,
+      "parent": null,
+      "bounds_world": {
+        "min": [
+          6.0,
+          11.0,
+          10.0
+        ],
+        "max": [
+          8.0,
+          17.0,
+          15.148
+        ],
+        "size": [
+          2.0,
+          6.0,
+          5.148
+        ],
+        "center": [
+          7.0,
+          14.0,
+          12.574
+        ]
+      },
+      "vertices": 130,
+      "edges": 256,
+      "polygons": 128,
+      "materials": [],
+      "modifiers": []
+    },
+    {
+      "name": "Cube.001",
+      "type": "MESH",
+      "collections": [
+        "Collection"
+      ],
+      "location": [
+        8.0,
+        9.0,
+        11.0
+      ],
+      "rotation_degrees": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        3.0,
+        12.0,
+        3.25
+      ],
+      "visible_render": true,
+      "visible_viewport": true,
+      "parent": null,
+      "bounds_world": {
+        "min": [
+          6.0,
+          -2.0,
+          10.0
+        ],
+        "max": [
+          9.0,
+          10.0,
+          13.25
+        ],
+        "size": [
+          3.0,
+          12.0,
+          3.25
+        ],
+        "center": [
+          7.5,
+          4.0,
+          11.625
+        ]
+      },
+      "vertices": 184,
+      "edges": 344,
+      "polygons": 162,
+      "materials": [],
+      "modifiers": []
+    }
+  ]
+}

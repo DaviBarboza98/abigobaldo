@@ -1,0 +1,14 @@
+00:07.953  blend            | Read blend: "C:\Users\caaab\OneDrive\Documentos\Models\farmacia.blend"
+00:07.969  render           | Rendering single frame
+00:07.969  render           | Rendering frame 1
+00:07.969  render           | Start rendering: Scene, ViewLayer
+00:07.985  render           | Engine: EEVEE
+00:28.110  render           | Fra: 1 | Rendering 1 / 64 samples
+Blender 5.2.0 LTS (hash fbe6228777e7 built 2026-07-14 01:35:40)
+00:33.407  render           | Fra: 1 | Rendering 25 / 64 samples
+00:34.422  render           | Fra: 1 | Rendering 50 / 64 samples
+00:35.266  render           | Fra: 1 | Rendering 64 / 64 samples
+00:42.469  render           | Saved: 'C:\Users\caaab\OneDrive\Documentos\Projects\abigobaldo\Abigobaldo\render_output\existing_camera_0001.png'
+00:42.485  render           | Time: 00:34.50 (Saving: 00:01.62)
+
+Blender quit

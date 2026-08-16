@@ -13,26 +13,12 @@ namespace Abigobaldo.Game
         private Rigidbody body;
         private bool pickupLocked;
         private bool isHeld;
-        private Quaternion savedHeldRotation = Quaternion.identity;
-        private bool hasSavedHeldRotation;
 
         public Rigidbody Rigidbody => body;
         public bool CanBeHeld => canBeHeld && !pickupLocked;
         public bool CanBeThrown => canBeThrown;
         public Transform GripPoint => gripPoint;
         public bool IsHeld => isHeld;
-
-        public bool TryGetSavedHeldRotation(out Quaternion rotation)
-        {
-            rotation = savedHeldRotation;
-            return hasSavedHeldRotation;
-        }
-
-        public void SaveHeldRotation(Quaternion rotation)
-        {
-            savedHeldRotation = rotation;
-            hasSavedHeldRotation = true;
-        }
 
         private void Awake()
         {
@@ -122,14 +108,14 @@ namespace Abigobaldo.Game
 
         private void AlignToHolder(Vector3 holderPosition, Quaternion holderRotation)
         {
+            transform.rotation = holderRotation;
+
             if (gripPoint == null)
             {
-                transform.SetPositionAndRotation(holderPosition, holderRotation);
+                transform.position = holderPosition;
                 return;
             }
 
-            Quaternion targetRotation = holderRotation * Quaternion.Inverse(gripPoint.localRotation);
-            transform.rotation = targetRotation;
             transform.position = holderPosition - (gripPoint.position - transform.position);
         }
 

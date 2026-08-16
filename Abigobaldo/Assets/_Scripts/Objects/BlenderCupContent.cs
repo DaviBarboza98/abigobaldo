@@ -22,6 +22,7 @@ namespace Abigobaldo.Game
         public Transform ContentRoot => ContentAnchor;
         public bool IsAttached => homeParent != null && transform.parent == homeParent;
         public bool HasContent => station != null && station.HasContent;
+        public bool IsDirectInteractionTarget => true;
 
         private void Awake()
         {

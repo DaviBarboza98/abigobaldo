@@ -88,7 +88,10 @@ namespace Abigobaldo.Game
                     return true;
             }
 
-            if (heldContainer != null && hitObject != null && hitObject != heldObject)
+            if (heldContainer != null
+                && hitObject != null
+                && hitObject != heldObject
+                && hitObject.CanBeHeld)
                 return heldContainer.TryInsertObject(hitObject, this);
 
             return false;
@@ -96,7 +99,10 @@ namespace Abigobaldo.Game
 
         private static IObjectContainer GetContainer(Collider hitCollider)
         {
-            return hitCollider != null ? hitCollider.GetComponentInParent<IObjectContainer>() : null;
+            IObjectContainer container = hitCollider != null
+                ? hitCollider.GetComponentInParent<IObjectContainer>()
+                : null;
+            return container != null && container.IsDirectInteractionTarget ? container : null;
         }
 
         private void TryPick()
@@ -125,15 +131,6 @@ namespace Abigobaldo.Game
                 {
                     BeginHeldInteraction(holdInteractable);
                     return;
-                }
-
-                IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
-
-                if (interactable != null
-                    && interactable is not ContainerStation
-                    && interactable is not Plate)
-                {
-                    interactable.Interact(this);
                 }
 
                 return;

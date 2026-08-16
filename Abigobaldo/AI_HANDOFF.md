@@ -1,273 +1,210 @@
 # Handoff do projeto Abigobaldo
 
-Leia isto primeiro e depois inspecione o projeto Unity. O projeto esta em desenvolvimento ativo, portanto o codigo, os prefabs e a cena atual sempre vencem este texto se algo tiver mudado.
+Atualizado em 2026-08-16. Leia este arquivo e depois confira o projeto Unity. Cena, prefabs e codigo vencem este texto caso algo tenha mudado.
+
+## Leia primeiro
+
+- Projeto Unity: `C:\Users\caaab\OneDrive\Documentos\Projects\abigobaldo\Abigobaldo`.
+- Unity `2022.3.62f3`, URP `14.0.12`, namespace principal `Abigobaldo.Game`.
+- HEAD atual: `d20affbe` (`main`). Existem mudancas locais posteriores; nao descarte nem reverta.
+- Nao altere `global.json`: ele usa o SDK escolar `6.0.428`.
+- Fale com o usuario em portugues. Codigo, variaveis, nomes tecnicos e assets devem ficar em ingles.
+- `Cuscuz` e `Cuscuzeira` sao as grafias corretas e devem permanecer assim.
+- O usuario prefere uma solucao simples, funcional e orientada por dados a arquiteturas grandes ou campos repetidos no Inspector.
+- O usuario monta e ajusta os prefabs visuais; o agente deve conectar scripts, referencias e dados sempre que for seguro.
+- Nao atualize este Handoff durante o trabalho normal. Atualize somente quando o usuario pedir.
 
 ## O jogo
 
-Abigobaldo e um jogo de culinaria em primeira pessoa, cartoon/low poly, dentro de um food truck brasileiro.
+Abigobaldo e um jogo de culinaria cartoon/low poly em primeira pessoa dentro de um food truck brasileiro. Abigobaldo cozinha comida regional para pessoas em situacao de vulnerabilidade. O tratamento deve ser humano, com conversa, acolhimento e felicidade, alinhado a ODS 2, Fome Zero, e saude/bem-estar.
 
-Abigobaldo e um cozinheiro alegre que prepara comida regional para pessoas em situacao de vulnerabilidade. O foco nao deve ser tratar essas pessoas como "pontuacao", mas mostrar acolhimento, conversa, comida e felicidade. O projeto se relaciona com a ODS 2, Fome Zero, e com saude/bem-estar.
+Loop desejado:
 
-O loop desejado para a primeira versao completa e:
+1. receber um cliente;
+2. conversar ou descobrir seu pedido;
+3. pegar ingredientes;
+4. cozinhar;
+5. empratar;
+6. entregar;
+7. ver a reacao;
+8. encerrar a noite com resultados focados na felicidade das pessoas.
 
-1. abrir o food truck;
-2. receber um cliente;
-3. conversar ou anotar seu pedido;
-4. pegar ingredientes;
-5. cozinhar;
-6. empratar;
-7. entregar;
-8. ver a reacao;
-9. terminar a noite em uma tela de resultados focada na felicidade das pessoas.
+O primeiro slice tem tres clientes: dois fazem pedidos e um demonstra dialogo. O foco de receitas e `Cuscuz`, `FriedEgg` e `Omelet`. `RoastedCorn` ainda existe no sistema como receita extra.
 
-O primeiro slice planejado tem tres clientes: dois fazem pedidos e um demonstra o sistema de dialogo. Os pratos principais sao cuscuz, ovo frito e omelete. Milho assado tambem existe atualmente como receita extra.
+O core de pegar, cozinhar, queimar e empratar existe. NPCs, dialogos, pedidos, entrega e UI ainda sao a proxima grande etapa. O jogo precisa rodar em WebGL no itch.io.
 
-## Direcao do projeto
+## Nao reintroduzir
 
-- Codigo, variaveis, nomes tecnicos e assets devem ficar em ingles.
-- `Cuscuz` e `Cuscuzeira` sao nomes corretos e devem permanecer assim.
-- "Item" foi substituido por "Object": use `HoldableObject` e `Holder`.
-- O usuario prefere uma solucao simples e funcional a uma arquitetura enorme.
-- Nao crie campos redundantes no Inspector. Um `FryingPanStation` ja e uma frigideira; ele nao precisa de `ContainerKind = FryingPan`.
-- O usuario cria/ajusta modelos e prefabs visuais. O agente deve cuidar da logica, componentes, referencias e dados sempre que puder.
-- Antes de editar, analise a cena, os prefabs e os scripts reais.
-- Nao altere `global.json`: ele usa o SDK escolar `6.0.428`.
-- Nao reverta mudancas locais do usuario.
-
-## Ideias que foram abandonadas
-
-Nao reintroduza sem conversar:
+Estas ideias foram abandonadas ou adiadas:
 
 - zoom estilo Cooking Mama;
-- `RecipeContainer` ou `ItemContainer` antigos;
+- `RecipeContainer`/`ItemContainer` antigos;
 - `OutputSpawnPoint` para comida pronta;
-- fantasma do objeto mostrando seu lugar original;
-- `HomeSlot` generico;
-- script antigo de fogao;
-- recipes com campos hardcoded como "Hand Mixing";
-- BlenderCup com campos especificos de milho/flocao;
-- agua e simulacao fisica de varios graos no liquidificador;
-- particulas controladas por um sistema de codigo. O usuario vai configurar VFX depois.
+- fantasma de reposicionamento e `HomeSlot` generico;
+- `ContainerKind`/`StationKind` redundante;
+- receitas com campos universais hardcoded, como `HandMixing`;
+- BlenderCup com campos especificos para milho/flocao;
+- simulacao fisica de varios graos no liquidificador;
+- particulas controladas por um sistema geral de codigo.
 
-## Controles definidos
+## Controles atuais
 
 | Controle | Acao |
 |---|---|
 | WASD | Andar |
 | Shift | Correr |
-| Clique esquerdo | Pegar objetos, usar spawners, mexer portas, operar controles e encaixar containers |
-| E | Interagir com conteudo: inserir, retirar ou transferir |
+| Clique esquerdo | Pegar objeto, usar acao fisica/especifica e segurar porta |
+| E | Interagir, inserir, retirar, transferir ou encaixar |
 | G curto | Soltar |
 | G segurado | Arremessar para onde a camera olha |
-| R + mouse | Rotacionar o objeto na mao |
-| Scroll | Aproximar ou afastar o objeto |
+| R + mouse | Rotacionar objeto na mao |
+| Scroll | Aproximar ou afastar objeto segurado |
 | V | Liberar/travar cursor |
 | P | Pausar |
 
-## Logica principal que deve ser preservada
+Regra mental: clique esquerdo e acao fisica (`IPickupInteractable`/`IHoldInteractable`); `E` e interacao (`IInteractable`) e conteudo.
 
-### Objetos
+- Spawner com clique esquerdo entrega o objeto para a mao.
+- Spawner com `E` serve apenas para combinacoes com o objeto/container ja segurado.
+- Cooktop usa `E` para encaixar frigideira/cuscuzeira segurada.
+- Base do Blender usa clique para ligar/desligar e `E` para encaixar o copo segurado.
+- Copo do Blender usa `E` para inserir/retirar conteudo.
+- O objeto e pego na rotacao mundial exata em que se encontra naquele momento.
 
-- Objetos pegaveis usam `HoldableObject`, Rigidbody e collider.
-- Enquanto segurados, continuam com colisao contra o mundo.
-- Dentro de um container ficam parentados ao `Content Anchor`, kinematic e sem colisao.
+## Core que deve ser preservado
+
+### Objetos e containers
+
+- Objetos pegaveis usam `HoldableObject`, `Rigidbody` e collider. `Item` foi substituido por `Object`; o antigo `ItemHolder` agora e `Holder`.
+- O arremesso usa o `forward` da camera, nunca o eixo local do Holder.
+- Enquanto segurados, objetos continuam colidindo com o mundo.
+- Dentro de um container, o objeto real fica parentado ao `Content Anchor`, kinematic e invisivel. Um clone puramente visual e exibido.
 - Containers pegaveis preservam o objeto real dentro deles.
 - Frigideira e cuscuzeira nao devem ser arremessaveis.
-- O arremesso usa o forward da camera, nunca o eixo local do Holder.
+- `Plate` e um container de capacidade 1. Containers nunca podem ser empratados.
+- `E` entre containers transfere o ultimo conteudo. Inserir em container pegavel nao troca automaticamente a mao pelo container.
 
-### Containers
+### Visuais
 
-- `E` com objeto na mao mirando no container insere o objeto.
-- `E` com container na mao mirando em objeto insere o objeto no container segurado.
-- `E` entre dois containers transfere o ultimo conteudo.
-- `E` com mao vazia retira o ultimo conteudo.
-- Inserir algo em um container pegavel nao troca automaticamente o que esta na mao pelo container.
-- `Plate` e um container de capacidade 1.
-- Containers nunca podem ser empratados.
-
-### Visual dentro de containers
-
-- Cada prefab real possui um unico `ObjectVisualPreset`.
-- Nele sao configurados position, rotation e scale locais para Plate, FryingPan, Blender e Cuscuzeira.
-- A referencia e o `Content Anchor` do container.
-- Um objeto so entra se possuir o target daquele container em seu `ObjectVisualPreset`.
-- O sistema guarda o objeto real invisivel e mostra um clone visual sem Rigidbody/collider/gameplay.
-- Cuscuzeira nao mostra conteudo. Ela so guarda a informacao.
-- Nao use a pasta de visual prefabs como sistema principal; ela e em grande parte legado.
+- Cada prefab real usa um `ObjectVisualPreset`.
+- O preset lista placements locais para `Plate`, `FryingPan`, `Blender` e `Cuscuzeira`, relativos ao `Content Anchor`.
+- Um objeto so entra se possuir o target daquele container no preset.
+- Cuscuzeira guarda a informacao, mas nao mostra o conteudo.
+- A pasta de visual prefabs e em grande parte legado; o prefab real e a fonte do visual atual.
 
 ### Receitas
 
 - `RecipeData` define ingredientes, station, tempos, aparencias, prefabs de transformacao e byproducts.
-- Todas as stations apontam para o mesmo asset `RecipeBook.asset`.
-- `ObjectDefinition` serve apenas como identidade estavel para receitas e futuros pedidos. Mantenha-o pequeno.
-- O progresso fica no proprio alimento por meio de `RecipeProgress`.
-- Tirar e recolocar comida nao pode reiniciar seu estado.
-- Receitas comuns novas em stations existentes devem ser adicionadas por dados, sem alterar C#.
-- Mecanicas especiais pertencem a componentes especificos, nao a campos universais de RecipeData.
-
-Estados de comida aquecida:
-
-| Estado | Tempo atual |
-|---|---:|
-| Raw | 0 s |
-| AlmostReady | 5 s |
-| Ready | 10 s |
-| Overdone | 15 s |
-| Burned | 20 s |
-| Carbonized | 25 s |
-
-Todo alimento carbonizado obrigatoriamente vira o prefab global `Charcoal`, substituindo objeto, identidade e visual anteriores.
-
-### Receitas atuais
-
-- Egg + FryingPan -> FriedEgg cru; duas cascas surgem imediatamente.
-- Corn + Blender por 5 s -> CornFlakes; o Blender desliga sozinho.
-- CornFlakes + Cuscuzeira -> Cuscuz.
-- FriedEgg em AlmostReady + cinco segundos mexendo com `R` -> Omelet cru.
-- Omelet + FryingPan -> Omelet cozido.
-- Corn + FryingPan -> RoastedCorn.
-
-Omelete e baseado em cinco segundos de movimento ativo, nao em velocidade nem graus acumulados.
+- Todas as stations usam `Assets/_Scripts/Data/RecipeBooks/RecipeBook.asset`.
+- `ObjectDefinition` e apenas identidade estavel para receitas/pedidos.
+- `RecipeProgress` fica no alimento; retirar e recolocar nao pode reiniciar o tempo.
+- Receitas comuns devem ser adicionadas por dados. Mecanicas especiais ficam em componentes especificos.
+- Estados aquecidos: `Raw` 0 s, `AlmostReady` 5 s, `Ready` 10 s, `Overdone` 15 s, `Burned` 20 s e `Carbonized` 25 s.
+- Todo alimento `Carbonized` obrigatoriamente vira o prefab global `Charcoal`, substituindo objeto, identidade e visual.
+- Egg + FryingPan cria FriedEgg cru e duas cascas imediatamente.
+- Corn + Blender por 5 s cria CornFlakes e desliga o motor.
+- CornFlakes + Cuscuzeira cria Cuscuz.
+- FriedEgg em `AlmostReady` + cinco segundos de movimento ativo com `R` cria Omelet cru.
+- Omelet cozinha na frigideira. RoastedCorn tambem existe atualmente.
 
 ### Stations
 
 - `FryingPanStation` e `CuscuzeiraStation` herdam de `HeatedContainerStation`.
-- Elas so cozinham encaixadas em `CooktopSlot`.
-- Ao pega-las, saem do cooktop e pausam.
-- Ao encaixar novamente, retomam.
-- `CooktopSlot` deve aceitar futuras panelas que tambem herdem de `HeatedContainerStation`.
+- So cozinham encaixadas em `CooktopSlot`; pegar pausa e reencaixar retoma.
+- O Cooktop deve continuar aceitando futuras subclasses de `HeatedContainerStation`.
+- Blender e base fixa; BlenderCup e prefab separado, pegavel, removivel e com conteudo persistente.
+- Motor e copo possuem collider/highlight independentes.
+- Somente o copo e alvo direto de conteudo. A base nunca deve retirar ingrediente por engano.
 
-### Liquidificador
+### Portas e highlight
 
-- `Blender` e a base fixa.
-- `BlenderCup` e outro prefab, pegavel e removivel.
-- O cup comeca como prefab aninhado dentro de `Blender/CupAnchor`.
-- Motor e copo precisam de collider/highlight independentes.
-- Clique no copo pega o copo.
-- `E` no copo insere/retira ingrediente.
-- Clique no motor liga/desliga.
-- Segurando o copo, clique no motor para encaixar.
-- O conteudo viaja com o copo.
-- O processamento pausa sem o copo encaixado.
-- O visual deve girar no eixo Z.
+- Highlight e contorno URP via `OutlineHighlightable` e `Outline.shader`, com cor opcional por objeto.
+- Portas usam `OpenableDoor`, pivot configuravel, eixo configuravel e limite normalmente de 90 graus.
+- O corpo do player empurra a porta por colisao (`IBodyPushable`).
+- O movimento do mouse agora considera de qual lado da porta o player esta, para o gesto continuar natural nos dois lados.
 
-### Highlights e portas
+## Mudancas locais sem commit
 
-- O highlight atual e um contorno URP por `OutlineHighlightable` e `Outline.shader`.
-- Cada objeto pode definir sua propria cor; nao precisa de manager global.
-- Copo e motor do Blender devem destacar separadamente.
-- Portas usam `OpenableDoor`, clique esquerdo segurado, pivot configuravel, eixo Z e limite de 90 graus.
+Preserve os arquivos mostrados por `git status`. As mudancas atuais incluem:
 
-## Arquitetura atual
+- porta com direcao de arraste dependente do lado do player;
+- pickup mantendo a rotacao mundial atual, sem salvar uma pose antiga;
+- separacao mais clara entre clique esquerdo e `E`;
+- `IsDirectInteractionTarget` para impedir que a base do Blender se comporte como copo;
+- Cooktop movido para interacao com `E`;
+- spawner: clique pega; `E` so combina com a mao/container.
 
-Scripts centrais:
+Arquivos modificados: `BlenderStation.cs`, `ContainerStation.cs`, `CooktopSlot.cs`, `OpenableDoor.cs`, `BlenderCupContent.cs`, `HoldableObject.cs`, `Holder.cs`, `IObjectContainer.cs`, `ObjectSpawner.cs`, `Plate.cs` e `PlayerInteractor.cs`.
 
-- `PlayerInput`: entrada direta pelo Input System.
-- `PlayerInteractor`: raycast, highlight e regras de interacao.
-- `Holder`: follow fisico, zoom, drop, throw e rotacao.
-- `HoldableObject`: estados fisicos do objeto.
-- `ContainerStation`: conteudo, receitas, visuais, byproducts e resultados.
-- `HeatedContainerStation`: exige cooktop.
-- `BlenderStation`, `FryingPanStation` e `CuscuzeiraStation`: comportamentos concretos.
-- `BlenderCupContent`: copo removivel que delega conteudo para o Blender.
-- `Plate`: container de uma porcao.
-- `ObjectSpawner`: entrega objetos e consegue preencher um container segurado.
-- `RecipeData`, `RecipeBook` e `RecipeProgress`: sistema de receitas.
-- `ObjectVisualPreset`: placement visual por container.
-- `PerformanceManager` e `RuntimeVisibilityCuller`: configuracao de performance.
+Estas alteracoes ainda precisam de compilacao e teste completo em Play Mode. Tambem existem `.codex/`, `blender_tools/` e `render_output/` nao rastreados; nao apague automaticamente.
 
-O namespace principal e `Abigobaldo.Game`.
+## Arte nova no Blender
 
-## Estado atual importante
+O usuario remodelou o foodtruck, toda a cozinha e o Abigobaldo. Tambem criou campainha, placa do balcao, espelho, livros, lapis, duas pilhas de pratos separados, bandejas com ovos, garrafas, pote de sorvete, bilhete de geladeira e modelos de agua para copo, torneira e pia.
 
-O ultimo commit observado foi `7813d615`, mas existem mudancas locais posteriores. Preserve-as.
+Esses modelos ainda nao substituem os modelos/prefabs da Unity. O arquivo pronto para exportar e:
 
-Mudancas locais que apareceram enquanto este handoff era escrito:
+`C:\Users\caaab\Downloads\Abigobaldo_Blender_Work\abigobaldoGame_FBX_READY.blend`
 
-- o `CornVisual` incorreto foi removido de `Fried_Egg.asset`;
-- a pose de Plate do `FriedEgg.prefab` foi ajustada;
-- throw force do Player voltou de 100 para 8;
-- fog da MainGame foi ligado;
-- a instancia aninhada do BlenderCup foi ativada;
-- `hiddenFirstPersonParts` do Player ficou vazio. Se a cabeca ainda deve ficar oculta em primeira pessoa, coloque `Head` de volta.
+- Original intacto: `C:\Users\caaab\Downloads\abigobaldoGame.blend`.
+- Backup antes das correcoes: `abigobaldoGame_FBX_READY_PRE_SOLIDIFY_BACKUP.blend`.
+- Auditoria: `C:\Users\caaab\Downloads\Abigobaldo_Blender_Work\SOLIDIFY_AUDIT.md`.
+- Colecoes: `00_REFERENCE`, `10_ENVIRONMENT`, `20_STATIONS`, `30_OBJECTS`, `40_CHARACTERS`, `50_EFFECTS`.
+- 123 objetos foram organizados; malhas repetidas seguras foram compartilhadas, reduzindo 122 meshes para 73 sem alterar transforms/pivots.
+- Solidify minimo ja foi aplicado e convertido em geometria apenas na estante, armario do cooktop, armario da pia, geladeira, corpo/anel da cuscuzeira e placa do balcao.
+- O corpo complexo do foodtruck recebeu faces internas invertidas porque Solidify deformava a malha.
+- Nao aplique Solidify global novamente.
+- Exporte para Unity com `Forward: -Z Forward` e `Up: Y Up`, preferencialmente por Collection/objetos selecionados.
+- O exportador Blender 5.2 pode avisar sobre materiais de instancias compartilhadas de rodas, garrafas e ovos. O FBX foi reimportado e os materiais ficaram corretos.
 
-Pendencias tecnicas mais importantes:
+Ao integrar a arte nova, preserve a logica dos prefabs atuais e troque principalmente os filhos visuais, colliders e anchors. Nao refaca o core apenas por causa dos modelos.
 
-1. `Cuscuz.asset` atualmente nao substitui CornFlakes por identidade Cuscuz.
-2. `RoastedCorn.asset` atualmente continua usando Corn como resultado.
-3. Empratamento direto aceita qualquer objeto com target Plate; decidir/enforcar se apenas comida Ready pode entrar.
-4. O `Blender.prefab` observado estava serializado para girar no eixo Y; conferir e mudar para Z.
-5. `RecipeProgress` nao limpa um model override antigo quando o estado seguinte deixa modelPrefab vazio.
-6. Uma transferencia invalida entre containers pode limpar `activeRecipe` da station.
-7. O core precisa de teste completo de retirar/reinserir, materiais e carbonizacao.
+## Estado da Unity
 
-## Sistemas ainda faltando
+- Cenas principais: `Assets/Scenes/menu.unity` e `Assets/Scenes/MainGame.unity`.
+- Build Settings ja esta correto com menu seguido de MainGame.
+- Ainda existem `Assets/menu.unity` e uma cena `Kbum...` de alteracoes fora do build; nao delete sem conferir referencias.
+- O menu visual existe, mas nao foi encontrado codigo para os botoes carregarem MainGame.
+- `PerformanceManager` esta na MainGame e possui perfil WebGL: render scale 0.9, MSAA 1x, sombras menores e culling por frustum/distancia.
+- `Lightning`/`LightingManager` esta presente na MainGame sob Managers. A iluminacao ainda precisa de ajuste visual e bake real.
+- `GameplayManager` existe, mas nao esta instalado na MainGame.
+- Crosshair esta preparada em `PlayerCursor`, segue o mouse destravado e fica centralizada travada. `crosshairSprite` ainda esta vazio; o usuario vai fornecer um PNG.
+- `Player.prefab` esta com `hiddenFirstPersonParts` vazio e `modelRoot` vazio. O novo Abigobaldo ainda precisa ser integrado e a cabeca deve ser ocultada em primeira pessoa.
+- O Blender prefab ainda esta serializado com `spinAxis: Y`; o desejado e Z.
 
-- clientes funcionando;
-- dialogos;
-- pedidos;
-- entrega;
-- HUD;
-- ticket;
-- tela de resultados;
+## Problemas conhecidos
+
+1. `Cuscuz.asset` esta sem `resultPrefab`, entao pode manter identidade CornFlakes.
+2. `RoastedCorn.asset` usa Corn como resultado; deve apontar para RoastedCorn.
+3. `RecipeProgress` nao limpa um model override antigo quando o estado seguinte nao possui `modelPrefab`.
+4. Transferencia invalida entre containers pode limpar `activeRecipe` da origem antes de restaurar o objeto.
+5. Empratamento direto ainda pode aceitar comida nao pronta; de station para Plate existe verificacao de Ready.
+6. Eixo do Blender precisa ser Z no prefab.
+7. Head e crosshair precisam de referencias no Player novo.
+8. O core precisa de teste completo de retirar/reinserir, materiais, pausa, retomada, Plate e Charcoal.
+
+## Sistemas faltando
+
+- NPCs/clientes funcionais;
+- dialogos, pedidos e convencimento;
+- entrega e reacao;
+- HUD, ticket e tela de resultados;
 - fim de turno;
-- audio de gameplay;
-- radio funcional;
-- VFX;
-- lixeira/limpeza;
-- objetos quebraveis.
-
-Os prefabs de clientes e UI existentes sao principalmente estruturas vazias.
-
-## Menu e build
-
-O menu visual existe, mas os botoes apenas animam. Nao ha codigo carregando `MainGame`.
-
-Ha duas cenas:
-
-- `Assets/Scenes/menu.unity`, a mais nova;
-- `Assets/menu.unity`, duplicata.
-
-`EditorBuildSettings.asset` esta inconsistente:
-
-- referencia MainGame com GUID antigo;
-- referencia `Tutorials.unity`, que nao existe.
-
-Antes de gerar build, refaca a lista com apenas `Assets/Scenes/menu.unity` e `Assets/Scenes/MainGame.unity`.
-
-## URP, iluminacao e performance
-
-- Unity `2022.3.62f3`.
-- URP `14.0.12`.
-- SRP Batcher ligado, MSAA 2x.
-- `PerformanceManager` esta na MainGame.
-- O Directional Light esta Mixed, mas MainGame ainda nao possui bake.
-- Existe um sistema `LightingManager` inspirado no Roblox, com Sky, Atmosphere, Bloom, Color Correction, Depth of Field e luzes locais.
-- O prefab se chama `Lightning.prefab` e esta incorretamente dentro da pasta de scripts.
-- `LightingManager` e `GameplayManager` ainda nao estao instalados na MainGame.
-- Nao torne tudo Baked antes de criar lightmaps.
-- Otimize com o Unity Profiler; nao dependa apenas de desligar tudo fora da camera.
+- agua da pia enchendo o BlenderCup;
+- pilhas reais substituindo o PlateSpawner;
+- radio, campainha e audio de gameplay;
+- VFX, lixeira/limpeza e objetos quebraveis.
 
 ## Proxima ordem recomendada
 
-1. Ler `git status` e preservar todas as mudancas locais.
-2. Abrir MainGame e eliminar erros de Console.
-3. Corrigir Cuscuz, RoastedCorn, eixo Z do Blender e ocultacao da Head.
-4. Testar todas as receitas, materiais, pausa, retomada, prato e Charcoal.
-5. Corrigir menu e Build Settings.
-6. Implementar o loop minimo dos tres clientes.
-7. Adicionar HUD, dialogo, ticket, entrega e resultados.
-8. Adicionar audio/VFX.
-9. Fazer bake e otimizar com Profiler.
+1. Ler `git status` e preservar as mudancas locais.
+2. Abrir MainGame, compilar e eliminar erros de Console.
+3. Testar e corrigir a nova distribuicao clique/E, portas nos dois lados e pickup na rotacao atual.
+4. Corrigir Cuscuz, RoastedCorn, eixo Z, transferencia invalida e model override.
+5. Exportar/importar a nova arte e substituir somente os visuais dos prefabs existentes.
+6. Configurar Head e PNG da crosshair.
+7. Testar todas as receitas ate Plate/Charcoal.
+8. Implementar o loop minimo dos tres clientes, dialogos, pedidos, entrega e resultados.
+9. Fazer audio/VFX, bake e medir WebGL com Unity Profiler.
 
-## Como trabalhar com o usuario
-
-- Fale em portugues e seja direto.
-- Mostre o que foi feito, nao apenas um plano abstrato.
-- Nao obrigue o usuario a preencher dezenas de campos repetidos.
-- Explique campos do Inspector de forma simples quando necessario.
-- Automatize referencias e dados quando for seguro.
-- O usuario cuida do acabamento visual dos prefabs, mas espera que o agente conecte o sistema.
-- Nao apague assets "inuteis" sem verificar referencias e sem um commit de seguranca.
-- Nao mude a versao escolar do projeto.
-- Sempre informe o que nao foi testado em Play Mode.
+Sempre informe o que nao foi testado em Play Mode. Nao apague assets supostamente inuteis sem conferir referencias e criar um ponto de seguranca.

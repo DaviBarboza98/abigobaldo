@@ -1,0 +1,2 @@
+C:\Users\caaab\OneDrive\Documentos\Projects\abigobaldo\Abigobaldo\blender_tools\inspect_scene.py:123: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  "use_nodes": material.use_nodes,

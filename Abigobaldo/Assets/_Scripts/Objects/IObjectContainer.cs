@@ -4,6 +4,7 @@ namespace Abigobaldo.Game
     {
         bool HasContent { get; }
         HoldableObject Holdable { get; }
+        bool IsDirectInteractionTarget { get; }
         bool TryInsertObject(HoldableObject item, PlayerInteractor player);
         bool TryTakeLastObject(PlayerInteractor player);
         bool TryMoveLastObjectTo(IObjectContainer target, PlayerInteractor player);

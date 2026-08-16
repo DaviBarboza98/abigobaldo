@@ -15,15 +15,30 @@ namespace Abigobaldo.Game
 
         public void Interact(PlayerInteractor player)
         {
-            Spawn(player);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{name} has no object prefab configured.", this);
+                return;
+            }
+
+            if (player == null || player.Holder == null || player.Holder.IsEmpty)
+                return;
+
+            if (TrySpawnIntoHeldContainer(player))
+                return;
+
+            HoldableObject spawnedContainer = CreateInstance();
+
+            if (!TrySpawnContainerWithHeldObject(player, spawnedContainer))
+                Destroy(spawnedContainer.gameObject);
         }
 
         public void PickInteract(PlayerInteractor player)
         {
-            Spawn(player);
+            SpawnForPickup(player);
         }
 
-        private void Spawn(PlayerInteractor player)
+        private void SpawnForPickup(PlayerInteractor player)
         {
             if (prefab == null)
             {
@@ -31,13 +46,7 @@ namespace Abigobaldo.Game
                 return;
             }
 
-            if (TrySpawnIntoHeldContainer(player))
-                return;
-
             HoldableObject instance = CreateInstance();
-
-            if (TrySpawnContainerWithHeldObject(player, instance))
-                return;
 
             if (!giveDirectlyToHolder || player == null || player.Holder == null)
             {

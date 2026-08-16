@@ -31,6 +31,7 @@ namespace Abigobaldo.Game
         private float currentAngle;
         private float holdStartYaw;
         private float holdStartAngle;
+        private float holdInputDirection;
         private bool holding;
 
         private Transform Pivot => pivot != null ? pivot : transform;
@@ -53,6 +54,7 @@ namespace Abigobaldo.Game
             holdStartYaw = player != null && player.PlayerCamera != null
                 ? player.PlayerCamera.transform.eulerAngles.y
                 : transform.eulerAngles.y;
+            holdInputDirection = GetHoldInputDirection(player);
 
             if (logHoldEvents)
                 Debug.Log($"{name}: began door hold.", this);
@@ -63,19 +65,21 @@ namespace Abigobaldo.Game
             if (!holding || player == null || player.PlayerCamera == null)
                 return;
 
-            float direction = invertDirection ? 1f : -1f;
             float targetAngle;
 
             if (useMouseDelta)
             {
                 PlayerInput input = player.GetComponent<PlayerInput>();
                 float mouseDelta = input != null ? input.Look.x : 0f;
-                targetAngle = Mathf.Clamp(currentAngle + mouseDelta * mouseSensitivity * direction, 0f, maxOpenAngle);
+                targetAngle = Mathf.Clamp(
+                    currentAngle + mouseDelta * mouseSensitivity * holdInputDirection,
+                    0f,
+                    maxOpenAngle);
             }
             else
             {
                 float yawDelta = Mathf.DeltaAngle(holdStartYaw, player.PlayerCamera.transform.eulerAngles.y);
-                targetAngle = Mathf.Clamp(holdStartAngle + yawDelta * direction, 0f, maxOpenAngle);
+                targetAngle = Mathf.Clamp(holdStartAngle + yawDelta * holdInputDirection, 0f, maxOpenAngle);
             }
 
             currentAngle = Mathf.Lerp(currentAngle, targetAngle, followSpeed * Time.deltaTime);
@@ -146,6 +150,69 @@ namespace Abigobaldo.Game
             };
 
             return Pivot.TransformDirection(localAxis).normalized;
+        }
+
+        private float GetHoldInputDirection(PlayerInteractor player)
+        {
+            float configuredDirection = invertDirection ? 1f : -1f;
+
+            if (player == null || player.PlayerCamera == null)
+                return configuredDirection;
+
+            Vector3 worldAxis = GetWorldRotationAxis();
+            Vector3 closedRadial = GetClosedRadialDirection(worldAxis);
+            Vector3 playerOffset = Vector3.ProjectOnPlane(
+                player.PlayerCamera.transform.position - Pivot.position,
+                worldAxis);
+
+            if (closedRadial.sqrMagnitude <= 0.0001f || playerOffset.sqrMagnitude <= 0.0001f)
+                return configuredDirection;
+
+            float physicalRotationSign = invertDirection ? -1f : 1f;
+            Vector3 openingDirection = Vector3.Cross(worldAxis, closedRadial.normalized) * physicalRotationSign;
+            float side = Vector3.Dot(playerOffset.normalized, openingDirection.normalized);
+
+            if (Mathf.Abs(side) <= 0.001f)
+                return configuredDirection;
+
+            return configuredDirection * -Mathf.Sign(side);
+        }
+
+        private Vector3 GetClosedRadialDirection(Vector3 worldAxis)
+        {
+            Vector3 currentRadial = Vector3.zero;
+            float greatestDistance = 0f;
+
+            foreach (Collider targetCollider in GetComponentsInChildren<Collider>(true))
+            {
+                if (targetCollider == null)
+                    continue;
+
+                Vector3 candidate = Vector3.ProjectOnPlane(
+                    targetCollider.bounds.center - Pivot.position,
+                    worldAxis);
+                float distance = candidate.sqrMagnitude;
+
+                if (distance <= greatestDistance)
+                    continue;
+
+                currentRadial = candidate;
+                greatestDistance = distance;
+            }
+
+            if (currentRadial.sqrMagnitude <= 0.0001f)
+            {
+                currentRadial = Vector3.ProjectOnPlane(Pivot.right, worldAxis);
+
+                if (currentRadial.sqrMagnitude <= 0.0001f)
+                    currentRadial = Vector3.ProjectOnPlane(Pivot.up, worldAxis);
+
+                if (currentRadial.sqrMagnitude <= 0.0001f)
+                    currentRadial = Vector3.ProjectOnPlane(Pivot.forward, worldAxis);
+            }
+
+            float signedAngle = invertDirection ? -currentAngle : currentAngle;
+            return Quaternion.AngleAxis(-signedAngle, worldAxis) * currentRadial.normalized;
         }
 
         private void OnValidate()

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Abigobaldo.Game
 {
-    public sealed class CooktopSlot : MonoBehaviour, IPickupInteractable
+    public sealed class CooktopSlot : MonoBehaviour, IInteractable
     {
         [SerializeField] private Transform containerAnchor;
         [SerializeField] private HeatedContainerStation startingContainer;
@@ -19,7 +19,7 @@ namespace Abigobaldo.Game
                 startingContainer.TryDock(this);
         }
 
-        public void PickInteract(PlayerInteractor player)
+        public void Interact(PlayerInteractor player)
         {
             if (player == null || player.Holder == null)
                 return;
