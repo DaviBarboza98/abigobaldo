@@ -35,11 +35,16 @@ namespace Abigobaldo.Game
             targetLight.color = color;
             targetLight.intensity = brightness;
             targetLight.range = range;
+#if UNITY_WEBGL
+            // WebGL has no Light.lightmapBakeType API. Keep shadow behavior
+            // deterministic and let the target platform decide the backend.
+            bool bakedShadow = shadows;
+#else
             targetLight.lightmapBakeType = useMixedLighting && SupportsMixedLighting
                 ? LightmapBakeType.Mixed
                 : LightmapBakeType.Baked;
-
             bool bakedShadow = targetLight.lightmapBakeType == LightmapBakeType.Baked && shadows;
+#endif
             bool realtimeShadow = technology == LightingManager.LightingTechnology.Future && shadows;
             targetLight.shadows = technology != LightingManager.LightingTechnology.Voxel && (bakedShadow || realtimeShadow)
                 ? LightShadows.Soft

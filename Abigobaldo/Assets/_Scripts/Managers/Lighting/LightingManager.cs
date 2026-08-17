@@ -177,7 +177,9 @@ namespace Abigobaldo.Game
             sun.type = LightType.Directional;
             sun.color = sunColor;
             sun.intensity = brightness;
+#if !UNITY_WEBGL
             sun.lightmapBakeType = sunUsesMixedLighting ? LightmapBakeType.Mixed : LightmapBakeType.Baked;
+#endif
             sun.shadows = technology == LightingTechnology.Voxel ? LightShadows.None : sunShadows;
             sun.shadowStrength = sunShadowStrength;
             RenderSettings.sun = sun;
