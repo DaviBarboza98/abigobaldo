@@ -596,6 +596,7 @@ MonoBehaviour:
   escalaHover: 1.1
   escalaClique: 0.9
   velocidade: 8
+  cenaParaCarregar: MainGame
 --- !u!114 &824271000
 MonoBehaviour:
   m_ObjectHideFlags: 0

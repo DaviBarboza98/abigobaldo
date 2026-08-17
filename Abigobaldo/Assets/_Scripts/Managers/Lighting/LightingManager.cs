@@ -143,7 +143,15 @@ namespace Abigobaldo.Game
                 sun = RenderSettings.sun;
 
             if (targetCamera == null)
-                targetCamera = Camera.main != null ? Camera.main : FindObjectOfType<Camera>();
+            {
+                // The player camera is intentionally not tagged MainCamera. In a
+                // build, FindObjectOfType could therefore select DialogueCamera,
+                // leaving post-processing disabled on the actual game camera.
+                PlayerInteractor player = FindObjectOfType<PlayerInteractor>();
+                targetCamera = player != null && player.PlayerCamera != null
+                    ? player.PlayerCamera
+                    : Camera.main != null ? Camera.main : FindObjectOfType<Camera>();
+            }
 
             if (globalVolume == null)
                 globalVolume = GetComponent<Volume>();

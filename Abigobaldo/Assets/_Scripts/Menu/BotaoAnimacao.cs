@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using System.Collections;
 
 public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
@@ -8,15 +10,31 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public float escalaClique = 0.9f;
     public float velocidade = 10f;
 
+    [Tooltip("Nome da cena que sera aberta depois da animacao. Deixe vazio para este botao nao trocar de cena.")]
+    public string cenaParaCarregar;
+
     private Vector3 escalaOriginal;
     private Vector3 escalaAlvo;
 
     private bool mouseEmCima = false;
     private bool clicando = false;
+    private Button botao;
 
-    void Start()
+    private void Awake()
     {
         escalaOriginal = transform.localScale;
+        escalaAlvo = escalaOriginal;
+
+        // O Button e o canal confiavel de clique da UI. IPointerClick fica apenas
+        // como apoio para objetos que nao usam o componente Button.
+        if (!string.IsNullOrWhiteSpace(cenaParaCarregar) && TryGetComponent(out botao))
+        {
+            botao.onClick.AddListener(CarregarCena);
+        }
+    }
+
+    private void Start()
+    {
         escalaAlvo = escalaOriginal;
     }
 
@@ -83,5 +101,17 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         {
             escalaAlvo = escalaOriginal;
         }
+
+        // Um Button chama CarregarCena pelo onClick. Para elementos sem Button,
+        // o clique por ponteiro continua funcionando normalmente.
+        if (botao == null && !string.IsNullOrWhiteSpace(cenaParaCarregar))
+        {
+            CarregarCena();
+        }
+    }
+
+    public void CarregarCena()
+    {
+        SceneManager.LoadScene(cenaParaCarregar);
     }
 }

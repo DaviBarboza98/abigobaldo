@@ -84,10 +84,16 @@ namespace Abigobaldo.Game
                 dayNightManager = managerObject.AddComponent<DayNightManager>();
             }
             ConfigureCinematicBars();
-            playerCamera = Camera.main != null ? Camera.main : FindObjectOfType<Camera>();
+            PlayerInteractor playerInteractor = FindObjectOfType<PlayerInteractor>();
+            playerCamera = playerInteractor != null && playerInteractor.PlayerCamera != null
+                ? playerInteractor.PlayerCamera
+                : Camera.main != null ? Camera.main : FindObjectOfType<Camera>();
             if (playerCamera != null) playerAudioListener = playerCamera.GetComponent<AudioListener>();
             if (dialogueCamera != null)
             {
+                // WebGL has one actual game display. The dialogue camera replaces
+                // the player camera on that same display; it is never a second view.
+                dialogueCamera.targetDisplay = 0;
                 dialogueShotPosition = dialogueCamera.transform.position;
                 dialogueShotRotation = dialogueCamera.transform.rotation;
                 dialogueShotFov = dialogueCamera.fieldOfView;

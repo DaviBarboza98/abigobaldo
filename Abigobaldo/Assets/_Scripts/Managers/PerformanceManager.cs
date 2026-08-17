@@ -108,7 +108,9 @@ namespace Abigobaldo.Game
                 if (forceOcclusionCulling)
                     targetCamera.useOcclusionCulling = true;
 
-                if (disableCameraHdr)
+                // Bloom and the color volume are part of the game's look. HDR is
+                // kept in WebGL so the browser build matches the Editor.
+                if (disableCameraHdr && Application.platform != RuntimePlatform.WebGLPlayer)
                     targetCamera.allowHDR = false;
             }
         }

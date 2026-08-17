@@ -35,6 +35,16 @@ namespace Abigobaldo.Game
 
         private void Update()
         {
+            // Browsers only allow pointer-lock as a consequence of a user gesture.
+            // The automatic request in Start is therefore ignored on itch.io; the
+            // first left click inside the game now reliably captures the cursor.
+            if (Cursor.lockState != CursorLockMode.Locked
+                && Mouse.current != null
+                && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                LockCursor();
+            }
+
             UpdateCrosshairPosition();
 
             if (input.ToggleCursorPressed)

@@ -25,6 +25,14 @@ namespace Abigobaldo.Game
             body = GetComponent<Rigidbody>();
             EnsureDynamicMeshCollidersAreConvex();
 
+            // Discrete collision lets small loose objects tunnel through thin
+            // counters/floors, especially at WebGL frame rates.
+            if (body != null && !body.isKinematic)
+            {
+                body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+            }
+
             if (startAttached)
                 SetAttachedPhysics();
         }
@@ -56,6 +64,8 @@ namespace Abigobaldo.Game
             body.angularVelocity = Vector3.zero;
             body.useGravity = true;
             body.detectCollisions = true;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
             NotifyDropped();
         }
 
