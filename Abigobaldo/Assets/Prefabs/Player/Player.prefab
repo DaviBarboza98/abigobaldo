@@ -129,8 +129,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showCrosshair: 1
-  crosshairSprite: {fileID: 0}
-  crosshairSize: 8
+  crosshairSprite: {fileID: 21300000, guid: 7767bc6ad9ee2a649b772d50f30d6616, type: 3}
+  crosshairSize: 32
   crosshairColor: {r: 1, g: 1, b: 1, a: 1}
   crosshairSortingOrder: 1000
 --- !u!114 &4933086418569781607

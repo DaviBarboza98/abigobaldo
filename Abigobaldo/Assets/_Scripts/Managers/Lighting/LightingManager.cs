@@ -62,6 +62,13 @@ namespace Abigobaldo.Game
 
         public LightingTechnology Technology => technology;
 
+        /// <summary>Lets gameplay advance the same lighting setup through the day.</summary>
+        public void SetClockTime(float value)
+        {
+            clockTime = Mathf.Repeat(value, 24f);
+            ApplyLighting();
+        }
+
         private void OnEnable()
         {
             ApplyLighting();

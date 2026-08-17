@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c36fd57d73a48a5b0628ddc146fb1a4, type: 3}
+  m_Name: CustomerDialogueData
+  m_EditorClassIdentifier: 
+  ninoFirstIntro: '...Oi. Desculpa chegar assim. Eu fiquei olhando de longe porque o cheiro parece bom.'
+  ninoNameIntro: 'Nino. Eu... não sei pedir comida direito.'
+  ninoAnyOrder: 'Eu confio em você. Só não deixa queimar, por favor.'
+  ninoCuscuzOrder: 'Cuscuz parece bom... obrigado por perguntar.'
+  seuZeIntro: 'Nino falou do Abigobaldo. Disse que você escuta antes de cozinhar. Não espalha que eu gostei disso.'
+  seuZeNinoAnswer: 'Tá com fome, mas agora tá menos assustado. Faz minha omelete bem passada. Bem passada, não carvão.'
+  marciaIntro: 'Eu sou Marcia. O Seu Zé diz que eu falo demais, mas hoje eu tive uma ideia: comida boa faz as pessoas voltarem.'
+  ninoReturnAfterCuscuz: 'Aquele cuscuz ficou na minha cabeça... hoje eu consegui pedir sozinho.'
+  ninoReturnAfterAnyFood: 'Eu ainda lembro do que você escolheu para mim. Hoje eu consigo pedir sozinho.'
+  finalMarcia: 'Eu guardei um lugar na minha ideia para você. Mas primeiro: meu último prato da noite.'
+  finalSeuZe: 'A Marcia me contou sua ideia. Não entendi metade, mas vim ouvir a outra metade. E comer.'

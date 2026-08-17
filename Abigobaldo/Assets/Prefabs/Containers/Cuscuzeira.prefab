@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2864886582092507705}
   - component: {fileID: 4421442879217619097}
   - component: {fileID: 7027628946132246858}
+  - component: {fileID: 163409158919726369}
   m_Layer: 10
   m_Name: Cuscuzeira
   m_TagString: Untagged
@@ -35,6 +36,7 @@ Transform:
   m_Children:
   - {fileID: 4509978460696920144}
   - {fileID: 3420880655034301500}
+  - {fileID: 1277652960132059170}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2276761809130553541
@@ -50,7 +52,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   recipeBook: {fileID: 11400000, guid: b755b1ca36cf4fc5a0c5fba1eb6017aa, type: 2}
-  sideEffectSpawnRoot: {fileID: 3420880655034301500}
+  sideEffectAnchor: {fileID: 3420880655034301500}
   sideEffectSpacing: 0.12
   showContents: 0
   multipleContentSpacing: 0.12
@@ -113,6 +115,23 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 0.78, b: 0.1, a: 1}
   outlineWidth: 0.025
   targetRenderers: []
+--- !u!114 &163409158919726369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3975214606007218881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31ddecef944c3c4e895debe24d61457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barPivot: {fileID: 1277652960132059170}
+  localOffset: {x: 0, y: 0.35, z: 0}
+  size: {x: 150, y: 16}
+  worldScale: 0.01
+  followPlayerCamera: 1
 --- !u!1 &5007486783498353094
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,6 +372,37 @@ Transform:
   m_LocalPosition: {x: 0, y: -0.00000011920929, z: 1.2499999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5049341019057281968}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7968932772754996521
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1277652960132059170}
+  m_Layer: 10
+  m_Name: ProgressBar
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1277652960132059170
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7968932772754996521}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 1.368}
+  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5049341019057281968}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

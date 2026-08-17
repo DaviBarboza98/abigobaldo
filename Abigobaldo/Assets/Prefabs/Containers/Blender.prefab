@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1119887732090033545}
   - component: {fileID: 5325060232445915903}
   - component: {fileID: 8374376856436341919}
+  - component: {fileID: 3549545710344508084}
   m_Layer: 9
   m_Name: Blender
   m_TagString: Untagged
@@ -33,6 +34,7 @@ Transform:
   m_Children:
   - {fileID: 7780684179062387715}
   - {fileID: 1007339705156328048}
+  - {fileID: 5253620480145501542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5325060232445915903
@@ -71,6 +73,54 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 0.78, b: 0.1, a: 1}
   outlineWidth: 0.025
   targetRenderers: []
+--- !u!114 &3549545710344508084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 875913871702193129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31ddecef944c3c4e895debe24d61457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barPivot: {fileID: 5253620480145501542}
+  localOffset: {x: 0, y: 0.35, z: 0}
+  size: {x: 150, y: 16}
+  worldScale: 0.01
+  followPlayerCamera: 1
+--- !u!1 &3005320714865039848
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5253620480145501542}
+  m_Layer: 10
+  m_Name: ProgressBar
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5253620480145501542
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3005320714865039848}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 1119887732090033545}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3508551835142512076
 GameObject:
   m_ObjectHideFlags: 0

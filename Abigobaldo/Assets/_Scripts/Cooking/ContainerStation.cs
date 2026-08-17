@@ -27,11 +27,13 @@ namespace Abigobaldo.Game
         protected RecipeData activeRecipe;
         private FoodState lastLoggedState;
         private HoldableObject stationHoldable;
+        private CookingProgressBar cookingProgressBar;
 
         public bool HasContent => contents.Count > 0;
         public bool HasActiveRecipe => activeRecipe != null;
         public bool IsHeld => stationHoldable != null && stationHoldable.IsHeld;
         public HoldableObject Holdable => stationHoldable;
+        public RecipeProgress CurrentRecipeProgress => ProcessedObject != null ? ProcessedObject.GetComponent<RecipeProgress>() : null;
         public virtual bool IsDirectInteractionTarget => true;
         protected HoldableObject ProcessedObject => contents.Count == 1 ? contents[0] : null;
         protected Transform ContentMotionTarget => contentVisuals.Count > 0 && contentVisuals[0] != null
@@ -44,6 +46,7 @@ namespace Abigobaldo.Game
         protected virtual void Awake()
         {
             stationHoldable = GetComponent<HoldableObject>();
+            cookingProgressBar = GetComponent<CookingProgressBar>();
         }
 
         private void Update()
@@ -337,11 +340,21 @@ namespace Abigobaldo.Game
                 progress = processObject.gameObject.AddComponent<RecipeProgress>();
 
             progress.Configure(recipe, true);
+            EnsureCookingProgressBar();
             activeRecipe = recipe;
             lastLoggedState = progress.State;
             SpawnByproducts(recipe);
             RefreshContentVisuals();
             Log($"{name}: iniciou {recipe.name} com {recipe.RequiredIngredientCount} ingrediente(s).", this);
+        }
+
+        private void EnsureCookingProgressBar()
+        {
+            if (cookingProgressBar == null)
+                cookingProgressBar = GetComponent<CookingProgressBar>();
+
+            if (cookingProgressBar == null)
+                cookingProgressBar = gameObject.AddComponent<CookingProgressBar>();
         }
 
         public bool TryTakeLastObject(PlayerInteractor player)

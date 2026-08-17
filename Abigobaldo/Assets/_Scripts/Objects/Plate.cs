@@ -18,6 +18,19 @@ namespace Abigobaldo.Game
         public HoldableObject Holdable => holdableObject;
         public bool IsDirectInteractionTarget => true;
         public ObjectDefinition ContentDefinition => contentDefinition;
+        public HoldableObject ContentObject => contentObject;
+
+        /// <summary>Removes the served food while keeping the reusable plate in the world.</summary>
+        public bool ConsumeContent()
+        {
+            if (contentObject == null)
+                return false;
+
+            HoldableObject servedObject = contentObject;
+            Clear();
+            Destroy(servedObject.gameObject);
+            return true;
+        }
 
         private void Awake()
         {

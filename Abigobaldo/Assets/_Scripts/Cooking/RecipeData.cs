@@ -62,6 +62,10 @@ namespace Abigobaldo.Game
         public GameObject InProgressPrefab => inProgressPrefab;
         public GameObject ResultPrefab => resultPrefab;
         public float ProcessingTime => processingTime;
+        public float AlmostReadyTime => almostReadyTime;
+        public float OverdoneTime => overdoneTime;
+        public float BurnedTime => burnedTime;
+        public float CarbonizedTime => carbonizedTime;
         public bool UsesHeat => usesHeat;
         public IReadOnlyList<GameObject> Byproducts => byproducts;
         public int RequiredIngredientCount => GetRequiredIngredientCount();

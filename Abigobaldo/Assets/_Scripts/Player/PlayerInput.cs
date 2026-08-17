@@ -147,7 +147,7 @@ namespace Abigobaldo.Game
             paused = !paused;
             Time.timeScale = paused ? 0f : 1f;
             Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = paused;
+            Cursor.visible = false;
         }
 
         private void ClearInput()

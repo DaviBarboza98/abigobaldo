@@ -55,7 +55,8 @@ namespace Abigobaldo.Game
         public void UnlockCursor()
         {
             Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            // The crosshair is the game's only pointer, including when it follows the mouse.
+            Cursor.visible = false;
         }
 
         private void CreateCrosshair()
