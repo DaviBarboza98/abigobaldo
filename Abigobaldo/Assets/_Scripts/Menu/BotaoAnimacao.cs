@@ -19,11 +19,15 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     private bool mouseEmCima = false;
     private bool clicando = false;
     private Button botao;
+    
+    AudioManager audioManager;
 
     private void Awake()
     {
         escalaOriginal = transform.localScale;
         escalaAlvo = escalaOriginal;
+
+        audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
 
         // O Button e o canal confiavel de clique da UI. IPointerClick fica apenas
         // como apoio para objetos que nao usam o componente Button.
@@ -54,6 +58,7 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (!clicando)
         {
             escalaAlvo = escalaOriginal * escalaHover;
+            audioManager.PlaySFX(audioManager.houverSound);
         }
     }
 
@@ -78,6 +83,7 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     IEnumerator AnimacaoClique()
     {
         clicando = true;
+        audioManager.PlaySFX(audioManager.clickSound);
 
         // Diminui ao clicar
         escalaAlvo = escalaOriginal * escalaClique;
@@ -96,6 +102,7 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (mouseEmCima)
         {
             escalaAlvo = escalaOriginal * escalaHover;
+            
         }
         else
         {

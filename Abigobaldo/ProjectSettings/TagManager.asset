@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - DepositCube
+  - Audio
   layers:
   - Default
   - TransparentFX
