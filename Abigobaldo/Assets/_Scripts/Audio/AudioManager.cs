@@ -8,6 +8,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] AudioSource musicSource;
     [SerializeField] AudioSource SFXSource;
 
+    public AudioClip backgroundCookMusic;
+
     [SerializeField] AudioMixer audioMixer;
 
     public AudioClip backgroundMusic;
@@ -17,7 +19,7 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {
-        musicSource.clip = backgroundMusic;
+        musicSource.clip = backgroundCookMusic;
         musicSource.Play();
         SetMusicMuted(PlayerPrefs.GetInt(MusicMutedKey, 0) == 1);
         SetSFXMuted(PlayerPrefs.GetInt(SfxMutedKey, 0) == 1);

@@ -439,6 +439,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   altura: 15
   velocidade: 3
+  audioManager: {fileID: 0}
 --- !u!1 &474539870
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,11 +607,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSource: {fileID: 1744067800}
   SFXSource: {fileID: 1910238758}
+  backgroundCookMusic: {fileID: 8300000, guid: 5a02dcd10f205c748a7537a7e3146337, type: 3}
   audioMixer: {fileID: 24100000, guid: 80d8b11826e786a49990e5694f582407, type: 2}
   backgroundMusic: {fileID: 8300000, guid: 5a02dcd10f205c748a7537a7e3146337, type: 3}
   houverSound: {fileID: 8300000, guid: b2d809cecaea1c44c8cac99b445dc704, type: 3}
   clickSound: {fileID: 8300000, guid: 84b91acd789a31c4aa20e1e136d4be80, type: 3}
-  cookSound: {fileID: 0}
+  cookSound: {fileID: 8300000, guid: 17345d7c95c18964d8f8269c806a55d3, type: 3}
 --- !u!4 &794427053
 Transform:
   m_ObjectHideFlags: 0

@@ -141,7 +141,7 @@ namespace Abigobaldo.Game
 
         private void HandlePause()
         {
-            if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (Keyboard.current == null || !Keyboard.current.pKey.wasPressedThisFrame)
                 return;
 
             paused = !paused;
