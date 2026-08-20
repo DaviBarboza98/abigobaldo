@@ -200,9 +200,7 @@ namespace Abigobaldo.Game
             sun.type = LightType.Directional;
             sun.color = sunColor;
             sun.intensity = brightness;
-            // The level has no baked lightmaps. A mixed/baked sun therefore leaves
-            // white materials black in builds; keep the key light realtime.
-            sun.lightmapBakeType = LightmapBakeType.Realtime;
+            // Keep direct lighting independent from any baked-lightmap setup.
             sun.shadows = technology == LightingTechnology.Voxel ? LightShadows.None : sunShadows;
             sun.shadowStrength = sunShadowStrength;
             RenderSettings.sun = sun;
