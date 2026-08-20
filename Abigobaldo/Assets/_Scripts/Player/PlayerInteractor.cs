@@ -215,8 +215,11 @@ namespace Abigobaldo.Game
             if (playerCamera == null || !TryGetHit(out RaycastHit hit))
             {
                 ClearHighlight();
+                GameplayHud.SetPrompts(string.Empty, string.Empty);
                 return;
             }
+
+            UpdatePrompts(hit.collider);
 
             OutlineHighlightable nextHighlight = GetHighlightable(hit.collider);
 
@@ -228,6 +231,17 @@ namespace Abigobaldo.Game
 
             if (currentHighlight != null)
                 currentHighlight.SetHighlighted(true);
+        }
+
+        private void UpdatePrompts(Collider hitCollider)
+        {
+            if (hitCollider == null) { GameplayHud.SetPrompts(string.Empty, string.Empty); return; }
+            bool holding = holder != null && !holder.IsEmpty;
+            if (hitCollider.GetComponentInParent<CustomerNpc>() != null) { GameplayHud.SetPrompts("Clique E para conversar", string.Empty); return; }
+            if (hitCollider.GetComponentInParent<ObjectSpawner>() != null) { GameplayHud.SetPrompts(holding ? "Clique E para usar o item" : string.Empty, "Clique Mouse Esquerdo para pegar"); return; }
+            if (hitCollider.GetComponentInParent<IObjectContainer>() != null) { GameplayHud.SetPrompts(holding ? "Clique E para depositar" : "Clique E para retirar", string.Empty); return; }
+            if (hitCollider.GetComponentInParent<HoldableObject>() != null) { GameplayHud.SetPrompts(string.Empty, "Clique Mouse Esquerdo para pegar"); return; }
+            GameplayHud.SetPrompts(string.Empty, string.Empty);
         }
 
         private OutlineHighlightable GetHighlightable(Collider hitCollider)

@@ -19,6 +19,21 @@ namespace Abigobaldo.Game
         [SerializeField, Range(0f, 2f)] private float morningIntensity = 0.9f;
         [SerializeField, Range(0f, 2f)] private float afternoonIntensity = 0.75f;
         [SerializeField, Range(0f, 2f)] private float nightIntensity = 0.28f;
+        [Header("Runtime clock")]
+        [SerializeField, Min(1f)] private float dayDurationSeconds = 600f;
+        [SerializeField, Min(1f)] private float nightDurationSeconds = 300f;
+        [SerializeField, Range(0f, 24f)] private float initialClockTime = 10.8f;
+        private float elapsed;
+
+        private void Update()
+        {
+            elapsed = Mathf.Repeat(elapsed + Time.deltaTime, dayDurationSeconds + nightDurationSeconds);
+            float t = elapsed / dayDurationSeconds;
+            if (elapsed <= dayDurationSeconds)
+                lightingManager?.SetClockTime(Mathf.Lerp(initialClockTime, 18.5f, t));
+            else
+                lightingManager?.SetClockTime(Mathf.Lerp(18.5f, 6f, (elapsed - dayDurationSeconds) / nightDurationSeconds));
+        }
 
         public void SetPeriod(Period period)
         {

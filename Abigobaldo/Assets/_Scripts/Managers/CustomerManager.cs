@@ -35,6 +35,7 @@ namespace Abigobaldo.Game
         [Header("Required")]
         [SerializeField] private NpcSpawner npcSpawner;
         [SerializeField] private DayNightManager dayNightManager;
+        [SerializeField] private CustomerDialogueData dialogueData;
         [Tooltip("Create a Camera in MainGame, put it where you want the cinematic shot, and assign it here.")]
         [SerializeField] private Camera dialogueCamera;
         [Header("Optional black bars already created in your UICanvas")]
@@ -70,6 +71,8 @@ namespace Abigobaldo.Game
         private bool dialogueOpen;
         private bool endingDialogue;
         private bool waitingForFood;
+        private float foodDeadline;
+        private int failedOrders;
         private string fourthCustomer;
         private string finalCustomer;
 
@@ -103,11 +106,12 @@ namespace Abigobaldo.Game
             }
             if (topBlackBar != null) topBlackBar.SetActive(false);
             if (bottomBlackBar != null) bottomBlackBar.SetActive(false);
+            // Ordem fixa: nenhuma escolha de diálogo altera a fila de clientes.
             orders.Add(new Order("nino", "", "qualquer comida", true));
-            orders.Add(new Order("marcia", "Cuscuz", "cuscuz"));
             orders.Add(new Order("seuze", "FriedEgg", "ovo frito"));
-            orders.Add(null);
-            orders.Add(null);
+            orders.Add(new Order("marcia", "Cuscuz", "cuscuz"));
+            orders.Add(new Order("nino", "Omelet", "omelete"));
+            orders.Add(new Order("seuze", "RoastedCorn", "milho assado"));
         }
 
         private void Start()
@@ -124,7 +128,15 @@ namespace Abigobaldo.Game
 
         private void Update()
         {
-            if (!dialogueOpen || choices.Length == 0 || Keyboard.current == null) return;
+            if (waitingForFood && Time.time >= foodDeadline)
+            {
+                waitingForFood = false;
+                GameplayHud.SetOrder(string.Empty);
+                failedOrders++;
+                StartCoroutine(FinishVisit());
+                return;
+            }
+            if (!dialogueOpen || choices.Length == 0 || Keyboard.current == null || (cinematicBars != null && !cinematicBars.OptionsVisible)) return;
             for (int index = 0; index < choices.Length; index++)
             {
                 if (!Pressed(index + 1)) continue;
@@ -194,15 +206,8 @@ namespace Abigobaldo.Game
             cinematicBars?.SetProgress(1f);
             SetPlayerModelVisibility(1f);
             dialogueOpen = true;
-
-            switch (visit)
-            {
-                case 0: NinoFirst(); break;
-                case 1: MarciaFirst(); break;
-                case 2: SeuZeFirst(); break;
-                case 3: FourthVisit(); break;
-                case 4: FinalVisit(); break;
-            }
+            GameSoundManager.PlayQuestion();
+            StartFixedDialogue();
         }
 
         public void ReceiveFood(CustomerNpc customer, CustomerServedFood food)
@@ -211,26 +216,24 @@ namespace Abigobaldo.Game
             Order order = orders[visit];
             if (!order.anyFood && !Matches(food.FoodName, order.foodId))
             {
-                Say(customer.RealName, "Não foi isso que eu pedi. Posso esperar o pedido certo.");
-                Respect(customer.CustomerId, -1);
+                FailDelivery(customer, food, "Não foi isso que eu pedi.");
                 return;
             }
             if (food.IsCharcoal)
             {
-                Say(customer.RealName, "Isso é carvão. Estar com fome não quer dizer que eu vou comer isso.");
-                Respect(customer.CustomerId, -3); poorQuality++;
+                FailDelivery(customer, food, "Isso é carvão.");
                 return;
             }
             if (food.State == FoodState.Raw)
             {
-                Say(customer.RealName, "Isso ainda está cru. Consegue fazer de novo?");
-                Respect(customer.CustomerId, -1);
+                FailDelivery(customer, food, "Isso ainda está cru.");
                 return;
             }
 
             food.Consume();
             customer.MarkDeliveryAccepted();
             waitingForFood = false;
+            GameplayHud.SetOrder(string.Empty);
             completedOrders++;
             ReactToFood(customer, food.State);
             StartCoroutine(FinishVisit());
@@ -249,29 +252,32 @@ namespace Abigobaldo.Game
                 Debug.LogError("[DIALOGUE] NpcSpawner não encontrou o prefab de " + order.customerId + ". Configure Marcia, Nino e SeuZe nele.");
                 return;
             }
+            GameSoundManager.PlayBell();
             Debug.Log("\n<b>[APARIÇÃO " + (visit + 1) + "/5 — " + VisitTime() + "]</b> " + activeCustomer.SpeakerName + " chegou. Olhe para ele e aperte <b>E</b>.");
         }
 
         private void SetVisitOrder()
         {
-            if (visit == 3)
-            {
-                fourthCustomer = history["nino"] || respect["nino"] >= 3 ? "nino" : "marcia";
-                orders[3] = fourthCustomer == "nino" ? new Order("nino", "Omelet", "omelete") : new Order("marcia", "", "qualquer comida", true);
-            }
-            if (visit == 4)
-            {
-                finalCustomer = severeDisrespect > 0 || respect["seuze"] <= respect["marcia"] ? "seuze" : "marcia";
-                orders[4] = new Order(finalCustomer, "RoastedCorn", "milho assado");
-            }
+            // A fila já é definida em Awake e nunca se ramifica.
         }
 
         private void SetTimeOfDay()
         {
-            if (dayNightManager == null) return;
-            if (visit <= 1) dayNightManager.SetPeriod(DayNightManager.Period.Morning);
-            else if (visit <= 3) dayNightManager.SetPeriod(DayNightManager.Period.Afternoon);
-            else dayNightManager.SetPeriod(DayNightManager.Period.Night);
+            // O relógio contínuo do DayNightManager controla o horário.
+        }
+
+        private void StartFixedDialogue()
+        {
+            string speaker = activeCustomer.RealName;
+            string line = visit switch
+            {
+                0 => dialogueData != null ? dialogueData.ninoFirstIntro : "Oi. Estou com fome.",
+                1 => dialogueData != null ? dialogueData.seuZeIntro : "Quero um ovo frito.",
+                2 => dialogueData != null ? dialogueData.marciaIntro : "Quero um cuscuz.",
+                3 => dialogueData != null ? dialogueData.ninoReturnAfterAnyFood : "Voltei. Quero uma omelete.",
+                _ => dialogueData != null ? dialogueData.finalSeuZe : "Ainda tem milho assado?"
+            };
+            Show(speaker, line, C(("Pode deixar.", BeginFoodWaiting), ("Já vou preparar.", BeginFoodWaiting), ("Certo.", BeginFoodWaiting), ("Entendi.", BeginFoodWaiting)));
         }
 
         // ----- NINO / MANHÃ -----
@@ -430,7 +436,9 @@ namespace Abigobaldo.Game
             EndDialogue();
             waitingForFood = true;
             activeCustomer.SetAcceptingDelivery(true);
+            foodDeadline = Time.time + 180f;
             Order order = orders[visit];
+            GameplayHud.SetOrder(order.anyFood ? "qualquer comida" : order.foodLabel);
             Debug.Log("<b>[PEDIDO " + (visit + 1) + "/5]</b> " + activeCustomer.RealName + " espera: <b>" + (order.anyFood ? "qualquer comida" : order.foodLabel) + "</b>. Entregue/jogue o prato nele.");
         }
 
@@ -453,10 +461,23 @@ namespace Abigobaldo.Game
 
         private void ReactToFood(CustomerNpc customer, FoodState state)
         {
-            if (state == FoodState.Ready) { Respect(customer.CustomerId, 2); perfectOrders++; Say(customer.RealName, "Tá bom de verdade. Obrigado."); }
+            if (state == FoodState.Ready) { Respect(customer.CustomerId, 2); perfectOrders++; GameSoundManager.PlayPerfect(); Say(customer.RealName, "Tá bom de verdade. Obrigado."); }
             else if (state == FoodState.AlmostReady) { Respect(customer.CustomerId, 1); Say(customer.RealName, "Faltou pouco, mas dá pra comer. Obrigado."); }
             else if (state == FoodState.Overdone) Say(customer.RealName, "Passou um pouco. Mas eu aceito.");
             else { Respect(customer.CustomerId, -2); poorQuality++; Say(customer.RealName, "Queimou. Eu estava com fome, não pedindo carvão."); }
+        }
+
+        private void FailDelivery(CustomerNpc customer, CustomerServedFood food, string line)
+        {
+            food.Consume();
+            customer.MarkDeliveryAccepted();
+            waitingForFood = false;
+            GameplayHud.SetOrder(string.Empty);
+            failedOrders++;
+            poorQuality++;
+            GameSoundManager.PlayDisappointment();
+            Say(customer.RealName, line);
+            StartCoroutine(FinishVisit());
         }
 
         private void Hear(string customerId, int respectGain)
@@ -476,6 +497,11 @@ namespace Abigobaldo.Game
         {
             Say(speaker, text);
             choices = nextChoices;
+            string optionText = choices.Length == 0 ? "Enter: continuar" : "";
+            for (int index = 0; index < choices.Length; index++) optionText += (index + 1) + ": " + choices[index].text + "\n";
+            string[] uiOptions = new string[choices.Length];
+            for (int index = 0; index < choices.Length; index++) uiOptions[index] = (index + 1) + ". " + choices[index].text;
+            cinematicBars?.ShowDialogue(speaker, text, uiOptions);
             for (int index = 0; index < choices.Length; index++) Debug.Log("<b>" + (index + 1) + ".</b> " + choices[index].text);
         }
 
@@ -498,6 +524,7 @@ namespace Abigobaldo.Game
             endingDialogue = true;
             choices = Array.Empty<Choice>();
             dialogueOpen = false;
+            cinematicBars?.HideDialogueTexts();
 
             // Match the fade-out duration to the camera's configured transition.
             float elapsed = 0f;
@@ -635,10 +662,10 @@ namespace Abigobaldo.Game
             bool worst = severeDisrespect >= 2 || completedOrders <= 2 || poorQuality >= 3 || LowRespectCount() >= 2;
             bool onlyFood = completedOrders == 5 && perfectOrders == 5 && stories == 0 && severeDisrespect == 0;
             string possibility = best ? "RESPEITO" : worst ? "PORTA FECHADA" : onlyFood ? "SÓ COMIDA" : "FOI UM DIA";
-            int score = Mathf.Clamp(perfectOrders * 10 + (completedOrders - perfectOrders) * 5 + completedOrders * 4 + Mathf.Clamp(dialoguePoints, -20, 30), 0, 100);
+            int score = Mathf.Clamp(perfectOrders * 10 + (completedOrders - perfectOrders) * 5 + completedOrders * 4 + Mathf.Clamp(dialoguePoints, -20, 30) - failedOrders * 12, 0, 100);
             string grade = score >= 90 ? "A" : score >= 75 ? "B" : score >= 60 ? "C" : score >= 40 ? "D" : "F";
             string ending = best ? "Cinco refeições. Três histórias. Ninguém precisou fingir que a fome era pouca coisa." : worst ? "Ter comida nunca foi a mesma coisa que ajudar." : onlyFood ? "Você alimentou todo mundo, mas conheceu os pedidos — não as pessoas." : "O dia terminou melhor do que começou, mas não perfeitamente.";
-            Debug.Log("\n<b>===== RESULTADO =====</b>\nPossibilidade: <b>" + possibility + "</b>\nNota: <b>" + grade + " — " + score + "/100</b>\nPedidos: " + completedOrders + "/5 | No ponto: " + perfectOrders + "/5 | Histórias: " + stories + "/3\nRespeito — Nino " + respect["nino"] + " | Márcia " + respect["marcia"] + " | SeuZe " + respect["seuze"] + "\n\n" + ending);
+            Debug.Log("\n<b>===== RESULTADO =====</b>\nPossibilidade: <b>" + possibility + "</b>\nNota: <b>" + grade + " — " + score + "/100</b>\nPedidos: " + completedOrders + "/5 | Perfeitos: " + perfectOrders + "/5 | Falhos/atrasados: " + failedOrders + "\nRespeito — Nino " + respect["nino"] + " | Márcia " + respect["marcia"] + " | SeuZe " + respect["seuze"] + "\n\n" + ending);
         }
 
         private int LowRespectCount()

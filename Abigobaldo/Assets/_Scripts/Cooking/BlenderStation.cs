@@ -53,6 +53,9 @@ namespace Abigobaldo.Game
             }
 
             isRunning = !isRunning;
+            GameSoundManager.SetBlender(isRunning);
+            if (isRunning && CurrentRecipeProgress != null && CurrentRecipeProgress.Recipe != null && CurrentRecipeProgress.Recipe.name.IndexOf("omelet", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                GameSoundManager.PlayOmeletSpin();
             Debug.Log($"{name}: liquidificador {(isRunning ? "ligado" : "desligado")}.", this);
         }
 
@@ -83,11 +86,13 @@ namespace Abigobaldo.Game
         {
             if (!HasContent)
                 isRunning = false;
+            GameSoundManager.SetBlender(isRunning);
         }
 
         protected override void OnRecipeBecameReady()
         {
             isRunning = false;
+            GameSoundManager.SetBlender(false);
             Debug.Log($"{name}: receita pronta; liquidificador desligado automaticamente.", this);
         }
 
