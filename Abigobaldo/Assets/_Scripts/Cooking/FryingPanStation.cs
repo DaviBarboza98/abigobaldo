@@ -15,5 +15,12 @@ namespace Abigobaldo.Game
         {
             return contentAnchor != null ? contentAnchor : transform;
         }
+
+        private void LateUpdate()
+        {
+            FoodState state = CurrentRecipeProgress != null ? CurrentRecipeProgress.State : FoodState.Raw;
+            float volume = state >= FoodState.Burned ? 1f : state >= FoodState.Overdone ? 0.78f : 0.48f;
+            GameSoundManager.SetFrying(HasContent && IsDocked, volume);
+        }
     }
 }

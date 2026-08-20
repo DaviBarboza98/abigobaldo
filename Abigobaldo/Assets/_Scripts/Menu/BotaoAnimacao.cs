@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -119,6 +118,6 @@ public class BotaoAnimacao : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void CarregarCena()
     {
-        SceneManager.LoadScene(cenaParaCarregar);
+        SceneTransition.Carregar(cenaParaCarregar);
     }
 }

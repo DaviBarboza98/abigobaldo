@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace Abigobaldo.Game
 {
@@ -34,19 +36,19 @@ namespace Abigobaldo.Game
         [SerializeField] private Color sunColor = new Color(1f, 0.82f, 0.52f, 1f);
         [Min(0f)]
         [SerializeField] private float brightness = 1.35f;
-        [SerializeField] private bool sunUsesMixedLighting = true;
+        [SerializeField] private bool sunUsesMixedLighting = false;
         [SerializeField] private LightShadows sunShadows = LightShadows.Hard;
         [Range(0f, 1f)]
         [SerializeField] private float sunShadowStrength = 0.58f;
 
         [Header("Ambient")]
-        [SerializeField] private Color ambient = new Color(0.16f, 0.22f, 0.38f, 1f);
-        [SerializeField] private Color outdoorAmbient = new Color(0.35f, 0.48f, 0.85f, 1f);
+        [SerializeField] private Color ambient = new Color(0.38f, 0.42f, 0.5f, 1f);
+        [SerializeField] private Color outdoorAmbient = new Color(0.62f, 0.72f, 0.9f, 1f);
         [SerializeField] private Color colorShiftTop = Color.black;
         [SerializeField] private Color colorShiftBottom = new Color(0.18f, 0.08f, 0f, 1f);
         [SerializeField] private Color shadowColor = new Color(0.42f, 0.478f, 0.627f, 1f);
         [Range(0f, 2f)]
-        [SerializeField] private float environmentDiffuseScale = 0.62f;
+        [SerializeField] private float environmentDiffuseScale = 1f;
         [Range(0f, 2f)]
         [SerializeField] private float environmentSpecularScale = 0.55f;
 
@@ -71,6 +73,18 @@ namespace Abigobaldo.Game
 
         private void OnEnable()
         {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            ApplyLighting();
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            StartCoroutine(ApplyAfterSceneSettings());
+        }
+
+        private IEnumerator ApplyAfterSceneSettings()
+        {
+            yield return null;
             ApplyLighting();
         }
 
@@ -81,6 +95,7 @@ namespace Abigobaldo.Game
 
         private void OnDisable()
         {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
             if (globalVolume != null && globalVolume.sharedProfile == runtimeProfile)
             {
                 globalVolume.sharedProfile = null;
@@ -185,9 +200,9 @@ namespace Abigobaldo.Game
             sun.type = LightType.Directional;
             sun.color = sunColor;
             sun.intensity = brightness;
-#if !UNITY_WEBGL
-            sun.lightmapBakeType = sunUsesMixedLighting ? LightmapBakeType.Mixed : LightmapBakeType.Baked;
-#endif
+            // The level has no baked lightmaps. A mixed/baked sun therefore leaves
+            // white materials black in builds; keep the key light realtime.
+            sun.lightmapBakeType = LightmapBakeType.Realtime;
             sun.shadows = technology == LightingTechnology.Voxel ? LightShadows.None : sunShadows;
             sun.shadowStrength = sunShadowStrength;
             RenderSettings.sun = sun;
@@ -256,14 +271,19 @@ namespace Abigobaldo.Game
             globalVolume.sharedProfile = runtimeProfile;
             globalVolume.enabled = hasActiveEffect;
 
-            if (targetCamera == null || !hasActiveEffect)
+            if (!hasActiveEffect)
                 return;
 
-            UniversalAdditionalCameraData cameraData = targetCamera.GetUniversalAdditionalCameraData();
-            cameraData.renderPostProcessing = true;
-
-            if (requiresHdr)
-                targetCamera.allowHDR = true;
+            // The menu transition can change camera discovery order. Apply the
+            // MainGame volume to every active gameplay camera so the player view
+            // never loses its color correction when it was opened from the menu.
+            foreach (Camera camera in FindObjectsOfType<Camera>(true))
+            {
+                if (camera == null || !camera.gameObject.scene.IsValid()) continue;
+                UniversalAdditionalCameraData cameraData = camera.GetUniversalAdditionalCameraData();
+                cameraData.renderPostProcessing = true;
+                if (requiresHdr) camera.allowHDR = true;
+            }
         }
 
         private void ApplyPipelineSettings()

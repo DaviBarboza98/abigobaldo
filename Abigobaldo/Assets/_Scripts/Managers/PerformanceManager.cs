@@ -32,13 +32,13 @@ namespace Abigobaldo.Game
         [Header("WebGL Profile")]
         [SerializeField] private bool applyWebGlProfile = true;
         [SerializeField] private int webGlTargetFrameRate = 60;
-        [SerializeField] private float webGlShadowDistance = 18f;
-        [SerializeField] private float webGlCameraFarClip = 90f;
-        [SerializeField, Range(0.5f, 1f)] private float webGlRenderScale = 0.9f;
+        [SerializeField] private float webGlShadowDistance = 12f;
+        [SerializeField] private float webGlCameraFarClip = 75f;
+        [SerializeField, Range(0.5f, 1f)] private float webGlRenderScale = 0.8f;
         [SerializeField] private int webGlMsaaSamples = 1;
-        [SerializeField] private float webGlVisibilityCheckInterval = 0.18f;
-        [SerializeField] private float webGlRendererRefreshInterval = 6f;
-        [SerializeField] private float webGlMaxVisibleDistance = 90f;
+        [SerializeField] private float webGlVisibilityCheckInterval = 0.22f;
+        [SerializeField] private float webGlRendererRefreshInterval = 8f;
+        [SerializeField] private float webGlMaxVisibleDistance = 75f;
 
         private UniversalRenderPipelineAsset runtimePipelineAsset;
         private RenderPipelineAsset originalQualityPipelineAsset;

@@ -141,13 +141,14 @@ namespace Abigobaldo.Game
 
         private void HandlePause()
         {
-            if (Keyboard.current == null || !Keyboard.current.pKey.wasPressedThisFrame)
+            if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame)
                 return;
 
             paused = !paused;
             Time.timeScale = paused ? 0f : 1f;
             Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = false;
+            PauseMenu.SetVisible(paused);
         }
 
         private void ClearInput()
