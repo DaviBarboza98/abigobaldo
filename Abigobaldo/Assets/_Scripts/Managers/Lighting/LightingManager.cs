@@ -58,6 +58,13 @@ namespace Abigobaldo.Game
         [SerializeField] private Camera targetCamera;
         [SerializeField] private float postProcessingPriority = 100f;
 
+        [Header("Kitchen warmth")]
+        [Tooltip("Adds a cheap warm fill light to each LightBulb prop in the active scene.")]
+        [SerializeField] private bool lightKitchenBulbs = true;
+        [SerializeField] private Color kitchenBulbColor = new Color(1f, 0.62f, 0.28f, 1f);
+        [Min(0f)] [SerializeField] private float kitchenBulbIntensity = 1.8f;
+        [Min(0f)] [SerializeField] private float kitchenBulbRange = 8f;
+
         private Volume globalVolume;
         private VolumeProfile runtimeProfile;
         private bool isApplying;
@@ -125,6 +132,7 @@ namespace Abigobaldo.Game
                 ApplySunLighting();
                 ApplySkyAndAtmosphere();
                 ApplyLocalLights();
+                ApplyKitchenBulbLights();
                 ApplyPostProcessing();
                 ApplyPipelineSettings();
             }
@@ -242,6 +250,36 @@ namespace Abigobaldo.Game
             {
                 if (localLight != null)
                     localLight.Apply(technology);
+            }
+        }
+
+        // The light-bulb meshes were only decorative before. Using them as anchors
+        // gives the kitchen the warm practical-light highlights from the reference
+        // without adding costly realtime shadows to the WebGL build.
+        private void ApplyKitchenBulbLights()
+        {
+            if (!lightKitchenBulbs || !gameObject.scene.IsValid())
+                return;
+
+            foreach (Transform transform in FindObjectsOfType<Transform>(true))
+            {
+                if (transform == null || transform.gameObject.scene != gameObject.scene || transform.name != "LightBulb")
+                    continue;
+
+                Light bulbLight = transform.GetComponent<Light>();
+                if (bulbLight == null)
+                {
+                    bulbLight = transform.gameObject.AddComponent<Light>();
+                    bulbLight.name = "Kitchen Bulb Light";
+                }
+
+                bulbLight.enabled = true;
+                bulbLight.type = LightType.Point;
+                bulbLight.color = kitchenBulbColor;
+                bulbLight.intensity = kitchenBulbIntensity;
+                bulbLight.range = kitchenBulbRange;
+                bulbLight.renderMode = LightRenderMode.ForceVertex;
+                bulbLight.shadows = LightShadows.None;
             }
         }
 

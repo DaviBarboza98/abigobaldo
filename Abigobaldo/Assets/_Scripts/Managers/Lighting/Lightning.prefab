@@ -95,9 +95,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settingsEnabled: 1
-  intensity: 0.35
-  threshold: 0.9
-  size: 0.65
+  intensity: 0.22
+  threshold: 1.1
+  size: 0.55
   tint: {r: 1, g: 1, b: 1, a: 1}
   quarterResolution: 1
 --- !u!1 &2965021833837303674
@@ -174,18 +174,18 @@ MonoBehaviour:
   geographicLatitude: -15
   sunAzimuth: -135
   rotateSunFromClock: 1
-  sunColor: {r: 1, g: 0.94, b: 0.82, a: 1}
-  brightness: 1.4
+  sunColor: {r: 1, g: 0.87, b: 0.65, a: 1}
+  brightness: 1.25
   sunUsesMixedLighting: 1
   sunShadows: 1
   sunShadowStrength: 0.6
-  ambient: {r: 0.18, g: 0.22, b: 0.35, a: 1}
-  outdoorAmbient: {r: 0.42, g: 0.58, b: 0.9, a: 1}
+  ambient: {r: 0.32, g: 0.27, b: 0.21, a: 1}
+  outdoorAmbient: {r: 0.54, g: 0.65, b: 0.83, a: 1}
   colorShiftTop: {r: 0, g: 0, b: 0, a: 1}
-  colorShiftBottom: {r: 0.18, g: 0.08, b: 0, a: 1}
-  shadowColor: {r: 0.42, g: 0.48, b: 0.63, a: 1}
-  environmentDiffuseScale: 0.8
-  environmentSpecularScale: 0.7
+  colorShiftBottom: {r: 0.05, g: 0.015, b: 0, a: 1}
+  shadowColor: {r: 0.31, g: 0.28, b: 0.3, a: 1}
+  environmentDiffuseScale: 0.9
+  environmentSpecularScale: 0.8
   shadowDistance: 50
   targetCamera: {fileID: 0}
   postProcessingPriority: 103.5
@@ -283,9 +283,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settingsEnabled: 1
-  brightness: 0.05
-  contrast: 12
-  saturation: 15
+  brightness: 0.03
+  contrast: 6
+  saturation: 7
   hueShift: 0
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &7924286858416096270
